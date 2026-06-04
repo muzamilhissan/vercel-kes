@@ -1,0 +1,148 @@
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  /* More visible professional indigo background */
+  background: linear-gradient(180deg, #f1f4ff 0%, #e5eaff 100%);
+  border-right: 1px solid #dbeafe;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 20px;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 48px;
+  padding: 0 12px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+}
+
+.status-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #eef2ff;
+  border-top-color: #70309f;
+  border-right-color: #70309f;
+  transform: rotate(45deg);
+}
+
+.profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f1f5f9;
+  border: 2px solid #fff;
+  z-index: 1;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.profile-info p {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #70309f;
+  transform: translateX(6px);
+}
+
+.nav-item.active {
+  background-color: #ffffff;
+  color: #70309f;
+  box-shadow: 0 10px 25px -5px rgba(112, 48, 159, 0.15);
+  border: 1px solid #ffffff;
+}
+
+.nav-item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.nav-count {
+  font-size: 11px;
+  font-weight: 800;
+  background-color: #70309f;
+  color: #ffffff;
+  padding: 3px 12px;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(112, 48, 159, 0.2);
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(112, 48, 159, 0.1);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

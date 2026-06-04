@@ -1,0 +1,43 @@
+.report-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.report-card-header {
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.report-card-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.export-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: #70309f;
+  background: #f5f0fa;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.export-btn:hover {
+  background: #ede4f5;
+  color: #5b2484;
+}
+
+.report-card-body {
+  padding: 32px;
+  flex: 1;
+}
