@@ -17,6 +17,11 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
     'Content-Type': 'application/json',
   };
 
+  const token = localStorage.getItem('token');
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`;
+  }
+
   const config: RequestInit = {
     method: customConfig.method || 'GET',
     headers: {

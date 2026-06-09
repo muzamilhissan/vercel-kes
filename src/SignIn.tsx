@@ -9,8 +9,8 @@ interface SignInProps {
 
 const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
   const bgImage = '/bg-image.png';
-  const [email, setEmail] = useState<string>('admin@kudon.com');
-  const [password, setPassword] = useState<string>('admin123');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
