@@ -27,7 +27,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
           <div className="modal-body">
             <div className="form-group"><label>Deal Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
             <div className="form-group"><label>Linked Account</label><input type="text" value={formData.account} onChange={e => setFormData({...formData, account: e.target.value})} required /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+            <div className="form-grid">
               <div className="form-group"><label>Value ($)</label><input type="number" value={formData.value} onChange={e => setFormData({...formData, value: Number(e.target.value)})} required /></div>
               <div className="form-group"><label>Close Date</label><input type="text" value={formData.closeDate} onChange={e => setFormData({...formData, closeDate: e.target.value})} required /></div>
             </div>

@@ -26,7 +26,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
         <form onSubmit={(e) => { e.preventDefault(); onSave({...formData, id: initialData?.id || Math.random().toString(36).substr(2, 9)} as Account); onClose(); }}>
           <div className="modal-body">
             <div className="form-group"><label>Company Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+            <div className="form-grid">
               <div className="form-group"><label>Industry</label><input type="text" value={formData.industry} onChange={e => setFormData({...formData, industry: e.target.value})} required /></div>
               <div className="form-group"><label>Website</label><input type="text" value={formData.website} onChange={e => setFormData({...formData, website: e.target.value})} required /></div>
             </div>

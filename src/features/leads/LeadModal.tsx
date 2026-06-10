@@ -27,7 +27,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
           <div className="modal-body">
             <div className="form-group"><label>Lead Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
             <div className="form-group"><label>Company</label><input type="text" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} required /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+            <div className="form-grid">
               <div className="form-group"><label>Email</label><input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
               <div className="form-group"><label>Phone</label><input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required /></div>
             </div>
