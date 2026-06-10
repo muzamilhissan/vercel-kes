@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import './SignIn.css';
 
 interface SignInProps {
-  onLogin: (email: string, pass: string) => void;
+  onLogin: (email: string, pass: string) => Promise<void>;
 }
 
 const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
@@ -12,10 +12,20 @@ const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email, password);
+    setError(null);
+    setLoading(true);
+    try {
+      await onLogin(email, password);
+    } catch (err: any) {
+      setError(err.message || String(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,6 +55,12 @@ const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
           <div className="form-body">
             <h2 className="form-title">Welcome Back</h2>
             <p className="form-subtitle">Enter your email and password to access your account</p>
+
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
 
             <form className="signin-form" onSubmit={handleSubmit}>
               <div className="input-group">
@@ -92,7 +108,9 @@ const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
                 <a href="#" className="forgot-link">Forgot Password</a>
               </div>
 
-              <button type="submit" className="btn-signin">Sign In</button>
+              <button type="submit" className="btn-signin" disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
 
             </form>
           </div>

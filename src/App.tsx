@@ -19,10 +19,10 @@ function App() {
         localStorage.setItem('token', response.data.token);
         setIsAuthenticated(true);
       } else {
-        alert('Login succeeded but no token was returned.');
+        throw new Error('Login succeeded but no token was returned.');
       }
     } catch (error: any) {
-      alert(`Login failed: ${error.message || error}`);
+      throw error;
     }
   };
 
