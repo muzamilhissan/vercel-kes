@@ -7,7 +7,8 @@ import {
   Settings, 
   LogOut,
   Contact,
-  Building2
+  Building2,
+  X
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -33,11 +34,16 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, path, count, active, onC
 interface SidebarProps {
   currentPath: string;
   onNavigate: (path: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onClose }) => {
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
+        <X size={20} />
+      </button>
       <div className="sidebar-profile">
         <div className="avatar-wrapper">
           <div className="status-ring"></div>

@@ -32,10 +32,13 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
 
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div><h2 style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b' }}>Lead Management</h2><p style={{ fontSize: '14px', color: '#64748b' }}>Track and qualify your incoming sales opportunities.</p></div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="filter-chip" style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}><Download size={16} /> Export</button>
+      <div className="page-header">
+        <div className="page-header-title">
+          <h2>Lead Management</h2>
+          <p>Track and qualify your incoming sales opportunities.</p>
+        </div>
+        <div className="page-header-actions">
+          <button className="filter-chip"><Download size={16} /> Export</button>
           <button onClick={() => { setSelectedLead(null); setIsLeadModalOpen(true); }} className="btn-primary">
             <Plus size={16} /> <span>Add Lead</span>
           </button>

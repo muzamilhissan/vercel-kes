@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import './MainLayout.css';
@@ -10,11 +10,26 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, onNavigate }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleNavigate = (path: string) => {
+    onNavigate(path);
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="main-layout">
-      <Sidebar currentPath={currentPath} onNavigate={onNavigate} />
+      {isSidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />
+      )}
+      <Sidebar 
+        currentPath={currentPath} 
+        onNavigate={handleNavigate} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
       <div className="content-wrapper">
-        <Header />
+        <Header onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="main-content">
           {children}
         </main>

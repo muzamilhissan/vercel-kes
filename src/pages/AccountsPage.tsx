@@ -18,18 +18,20 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
 
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#1e293b', marginBottom: '4px' }}>Accounts</h2>
-          <p style={{ fontSize: '14px', color: '#64748b' }}>Manage company records and their related contacts and deals.</p>
+      <div className="page-header">
+        <div className="page-header-title">
+          <h2>Accounts</h2>
+          <p>Manage company records and their related contacts and deals.</p>
         </div>
-        <button 
-          onClick={() => { setSelectedAccount(null); setIsModalOpen(true); }} 
-          className="btn-primary"
-        >
-          <Building2 size={18} /> 
-          <span>New Account</span>
-        </button>
+        <div className="page-header-actions">
+          <button 
+            onClick={() => { setSelectedAccount(null); setIsModalOpen(true); }} 
+            className="btn-primary"
+          >
+            <Building2 size={18} /> 
+            <span>New Account</span>
+          </button>
+        </div>
       </div>
       <AccountTable accounts={accounts} onEdit={(a) => { setSelectedAccount(a); setIsModalOpen(true); }} onDelete={(a) => setAccounts(accounts.filter(i => i.id !== a.id))} onView={(a) => { setSelectedAccount(a); setIsDetailsOpen(true); }} />
       <AccountModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={(a) => selectedAccount ? setAccounts(accounts.map(i => i.id === a.id ? a : i)) : setAccounts([...accounts, a])} initialData={selectedAccount} />

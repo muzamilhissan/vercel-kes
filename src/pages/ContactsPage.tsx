@@ -26,18 +26,20 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
 
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#1e293b', marginBottom: '4px' }}>Contacts</h2>
-          <p style={{ fontSize: '14px', color: '#64748b' }}>Manage individual people and their business relationships.</p>
+      <div className="page-header">
+        <div className="page-header-title">
+          <h2>Contacts</h2>
+          <p>Manage individual people and their business relationships.</p>
         </div>
-        <button 
-          onClick={() => { setSelectedContact(null); setIsModalOpen(true); }} 
-          className="btn-primary"
-        >
-          <UserPlus size={18} /> 
-          <span>New Contact</span>
-        </button>
+        <div className="page-header-actions">
+          <button 
+            onClick={() => { setSelectedContact(null); setIsModalOpen(true); }} 
+            className="btn-primary"
+          >
+            <UserPlus size={18} /> 
+            <span>New Contact</span>
+          </button>
+        </div>
       </div>
       <ContactTable contacts={contacts} onEdit={(c) => { setSelectedContact(c); setIsModalOpen(true); }} onDelete={(c) => setContacts(contacts.filter(item => item.id !== c.id))} />
       <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} initialData={selectedContact} accounts={MOCK_ACCOUNTS} />
