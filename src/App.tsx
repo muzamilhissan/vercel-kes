@@ -15,8 +15,8 @@ function App() {
   const handleLogin = async (email: string, pass: string) => {
     try {
       const response = await authService.login({ email, password: pass });
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      if (response && response.token) {
+        localStorage.setItem('token', response.token);
         setIsAuthenticated(true);
       } else {
         throw new Error('Login succeeded but no token was returned.');

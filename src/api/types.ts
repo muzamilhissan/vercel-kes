@@ -26,15 +26,9 @@ export interface User {
   roles?: Role[];
 }
 
-export interface LoginData {
+export interface LoginResponse {
   token: string;
   user: User;
-}
-
-export interface LoginResponse {
-  success: boolean;
-  data: LoginData;
-  message?: string;
 }
 
 export interface Lead {
