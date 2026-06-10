@@ -104,3 +104,11 @@
   background-color: #dcfce7;
   color: #10b981;
 }
+
+.action-btn:disabled {
+  background: #f8fafc !important;
+  color: #cbd5e1 !important;
+  border-color: #e2e8f0 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}

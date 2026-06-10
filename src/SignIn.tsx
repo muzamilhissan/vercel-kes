@@ -8,7 +8,7 @@ interface SignInProps {
 }
 
 const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
-  const bgImage = '/bg-image.png';
+  const bgImage = '/bg-image.webp';
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);

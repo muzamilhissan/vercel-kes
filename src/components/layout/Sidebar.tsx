@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import './Sidebar.css';
+import { leadService } from '../../api/leadService';
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -39,6 +40,43 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onClose }) => {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const fullName = user?.name || user?.fullName || 'Jane Sparrow';
+  const designation = user?.roles?.[0]?.name || user?.designation || 'Sales Executive';
+  const avatarUrl = userStr
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=70309f&color=fff&bold=true`
+    : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop";
+
+  const [leadsCount, setLeadsCount] = useState<number | undefined>(undefined);
+
+  const fetchCount = async () => {
+    try {
+      const res = await leadService.list() as any;
+      if (res.success) {
+        const apiLeads = res.leads || res.data?.leads || res.data;
+        if (Array.isArray(apiLeads)) {
+          setLeadsCount(apiLeads.length);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching leads count in sidebar:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCount();
+
+    const handleLeadsUpdate = () => {
+      fetchCount();
+    };
+
+    window.addEventListener('leadsUpdated', handleLeadsUpdate);
+    return () => {
+      window.removeEventListener('leadsUpdated', handleLeadsUpdate);
+    };
+  }, []);
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
@@ -48,12 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
         <div className="avatar-wrapper">
           <div className="status-ring"></div>
           <div className="profile-avatar">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" alt="Jane Sparrow" />
+            <img src={avatarUrl} alt={fullName} />
           </div>
         </div>
         <div className="profile-info">
-          <h3>Jane Sparrow</h3>
-          <p>Sales Executive</p>
+          <h3>{fullName}</h3>
+          <p>{designation}</p>
         </div>
       </div>
 
@@ -71,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             icon={<Users size={20} />} 
             label="Leads" 
             path="leads"
-            count={12} 
+            count={leadsCount} 
             active={currentPath === 'leads'} 
             onClick={onNavigate}
           />
