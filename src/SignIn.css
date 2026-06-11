@@ -10,6 +10,7 @@
   background-repeat: no-repeat;
   padding: 40px;
   box-sizing: border-box;
+  transition: padding 0.3s ease;
 }
 
 .signin-card {
@@ -20,8 +21,11 @@
   border-radius: 32px;
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
-  min-height: 720px;
+  min-height: 600px;
+  height: 80vh;
+  max-height: 720px;
   position: relative;
+  transition: all 0.3s ease;
 }
 
 /* Left Side: Visual */
@@ -158,8 +162,8 @@
 .form-input:focus {
   outline: none;
   background-color: #fff;
-  border-color: #000;
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+  border-color: #70309f;
+  box-shadow: 0 0 0 4px rgba(112, 48, 159, 0.06);
 }
 
 .password-input-wrapper {
@@ -212,17 +216,21 @@
 .btn-signin {
   width: 100%;
   padding: 14px;
-  background-color: #000;
+  background: linear-gradient(135deg, #70309f 0%, #5b2484 100%);
   color: #fff;
   border-radius: 12px;
   font-weight: 600;
   font-size: 15px;
   margin-top: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 16px -4px rgba(112, 48, 159, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-signin:hover {
-  background-color: #222;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -5px rgba(112, 48, 159, 0.4);
 }
 
 .btn-google {
@@ -253,6 +261,43 @@
   }
   .signin-card {
     max-width: 500px;
+    height: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-height: 800px) {
+  .signin-card {
+    min-height: 520px;
+    height: 85vh;
+  }
+  .signin-visual {
+    padding: 32px;
+  }
+  .signin-form-container {
+    padding: 32px;
+  }
+  .form-subtitle {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-height: 620px) {
+  .signin-container {
+    padding: 16px;
+  }
+  .signin-card {
+    min-height: 440px;
+    height: 95vh;
+  }
+  .signin-visual {
+    padding: 20px;
+  }
+  .signin-form-container {
+    padding: 20px;
+  }
+  .form-subtitle {
+    margin-bottom: 12px;
   }
 }
 

@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "libphonenumber-js": "^1.13.6",
     "lucide-react": "^1.14.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "react-phone-number-input": "^3.4.17"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
