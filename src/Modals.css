@@ -91,7 +91,7 @@
   color: #475569;
   margin-bottom: 12px;
   display: block;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.05em;
 }
 

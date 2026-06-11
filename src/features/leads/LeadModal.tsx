@@ -87,7 +87,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
     <div className="modal-overlay" onClick={isSaving ? undefined : onClose}>
       <div className="modal-content lead-modal-compact" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{initialData ? 'Edit Lead' : 'Create New Lead'}</h3>
+          <h3>{initialData ? 'Edit Lead' : 'Create New'}</h3>
           <button onClick={onClose} disabled={isSaving}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit}>

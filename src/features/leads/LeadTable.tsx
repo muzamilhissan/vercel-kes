@@ -113,7 +113,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
         </table>
       </div>
 
-      {leads.length > 0 && (
+      {totalPages > 1 && (
         <div className="pagination-container">
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
@@ -122,46 +122,44 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
             </span>{' '}
             of <span className="pagination-highlight">{leads.length}</span> entries
           </div>
-          {totalPages > 1 && (
-            <div className="pagination-buttons">
-              <button
-                className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={activePage === 1}
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              
-              {getPageNumbers().map((page, idx) => {
-                if (page === '...') {
-                  return (
-                    <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
-                      ...
-                    </span>
-                  );
-                }
+          <div className="pagination-buttons">
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={activePage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            {getPageNumbers().map((page, idx) => {
+              if (page === '...') {
                 return (
-                  <button
-                    key={`page-${page}`}
-                    className={`pagination-btn ${activePage === page ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(Number(page))}
-                  >
-                    {page}
-                  </button>
+                  <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
+                    ...
+                  </span>
                 );
-              })}
+              }
+              return (
+                <button
+                  key={`page-${page}`}
+                  className={`pagination-btn ${activePage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(Number(page))}
+                >
+                  {page}
+                </button>
+              );
+            })}
 
-              <button
-                className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={activePage === totalPages}
-                aria-label="Next page"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={activePage === totalPages}
+              aria-label="Next page"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       )}
     </div>
