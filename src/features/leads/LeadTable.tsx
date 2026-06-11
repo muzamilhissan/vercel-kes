@@ -30,7 +30,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
             <th>Email</th>
             <th>Phone</th>
             <th>Status</th>
-            <th>Date Added</th>
+            <th>Date added</th>
             <th className="text-right">Actions</th>
           </tr>
         </thead>
@@ -46,11 +46,11 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
               <tr key={lead.id}>
                 <td>
                   <div className="avatar-cell">
-                    <div className="avatar-circle">{lead.name.charAt(0)}</div>
-                    <span style={{ fontWeight: 600 }}>{lead.name}</span>
+                    <div className="avatar-circle">{lead.name.charAt(0).toUpperCase()}</div>
+                    <span className="lead-name-value">{lead.name}</span>
                   </div>
                 </td>
-                <td style={{ color: '#64748b' }}>{lead.company}</td>
+                <td className="lead-company-value">{lead.company}</td>
                 <td>{lead.email}</td>
                 <td>{lead.phone}</td>
                 <td>

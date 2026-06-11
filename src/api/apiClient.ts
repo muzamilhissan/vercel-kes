@@ -37,8 +37,12 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
     let errorMessage = `HTTP error! Status: ${response.status}`;
     try {
       const errorData = await response.json();
-      if (errorData && errorData.message) {
-        errorMessage = errorData.message;
+      if (errorData) {
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        }
       }
     } catch {
       // JSON parsing failed, keep default error message

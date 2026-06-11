@@ -99,14 +99,6 @@ const SignIn: React.FC<SignInProps> = ({ onLogin }) => {
                 </div>
               </div>
 
-              <div className="form-options">
-                <label className="checkbox-container">
-                  <input type="checkbox" />
-                  <span className="checkmark"></span>
-                  Remember me
-                </label>
-                <a href="#" className="forgot-link">Forgot Password</a>
-              </div>
 
               <button type="submit" className="btn-signin" disabled={loading}>
                 {loading ? 'Signing In...' : 'Sign In'}

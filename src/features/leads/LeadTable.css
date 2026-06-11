@@ -112,3 +112,20 @@
   cursor: not-allowed !important;
   transform: none !important;
 }
+
+/* Override global uppercase transform on headers to allow sentence case */
+.premium-table thead th {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 13px !important;
+}
+
+.lead-name-value {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.lead-company-value {
+  color: #64748b;
+  text-transform: capitalize;
+}

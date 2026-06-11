@@ -97,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
 
       <nav className="sidebar-nav">
         <div className="nav-section">
-          <p className="section-title">DASHBOARDS</p>
+          <p className="section-title">MENU</p>
           {/* <NavItem 
             icon={<LayoutDashboard size={20} />} 
             label="Kanban View" 

@@ -6,6 +6,7 @@ import DeleteModal from '../features/leads/DeleteModal';
 import ConvertModal from '../features/leads/ConvertModal';
 import { Plus } from 'lucide-react';
 import { leadService } from '../api/leadService';
+import { useToast } from '../context/ToastContext';
 
 const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
   // Normalize status to match LeadTable status type: 'New' | 'Contacted' | 'Qualified' | 'Converted'
@@ -51,6 +52,7 @@ const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
 };
 
 const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => void}> = ({ currentPath, onNavigate }) => {
+  const { showToast } = useToast();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
@@ -58,6 +60,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeletingLead, setIsDeletingLead] = useState(false);
+  const [isConvertingLead, setIsConvertingLead] = useState(false);
 
   const fetchLeads = async () => {
     try {
@@ -103,8 +107,9 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         const res = await leadService.update(selectedLead.id, payload);
         if (res.success) {
           await fetchLeads();
+          showToast('Lead updated successfully', 'success');
         } else {
-          alert(res.message || 'Failed to update lead');
+          showToast(res.message || 'Failed to update lead', 'error');
         }
       } else {
         // Create flow
@@ -117,37 +122,43 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         const res = await leadService.store(payload);
         if (res.success) {
           await fetchLeads();
+          showToast('Lead created successfully', 'success');
         } else {
-          alert(res.message || 'Failed to create lead');
+          showToast(res.message || 'Failed to create lead', 'error');
         }
       }
       setIsLeadModalOpen(false);
     } catch (err: any) {
       console.error('Error saving lead:', err);
-      alert(err.message || 'Error saving lead');
+      showToast(err.message || 'Error saving lead', 'error');
     }
   };
 
   const handleDeleteLead = async () => {
     if (!selectedLead) return;
     try {
+      setIsDeletingLead(true);
       setError(null);
       const res = await leadService.delete(selectedLead.id);
       if (res.success) {
         await fetchLeads();
+        showToast('Lead deleted successfully', 'success');
       } else {
-        alert(res.message || 'Failed to delete lead');
+        showToast(res.message || 'Failed to delete lead', 'error');
       }
       setIsDeleteModalOpen(false);
     } catch (err: any) {
       console.error('Error deleting lead:', err);
-      alert(err.message || 'Error deleting lead');
+      showToast(err.message || 'Error deleting lead', 'error');
+    } finally {
+      setIsDeletingLead(false);
     }
   };
 
   const handleConvertLead = async () => {
     if (!selectedLead) return;
     try {
+      setIsConvertingLead(true);
       setError(null);
       const payload = {
         contact_name: selectedLead.name,
@@ -158,13 +169,16 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       const res = await leadService.convert(selectedLead.id, payload);
       if (res.success) {
         await fetchLeads();
+        showToast('Lead converted successfully', 'success');
       } else {
-        alert(res.message || 'Failed to convert lead');
+        showToast(res.message || 'Failed to convert lead', 'error');
       }
       setIsConvertModalOpen(false);
     } catch (err: any) {
       console.error('Error converting lead:', err);
-      alert(err.message || 'Error converting lead');
+      showToast(err.message || 'Error converting lead', 'error');
+    } finally {
+      setIsConvertingLead(false);
     }
   };
 
@@ -208,8 +222,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       )}
 
       <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} onSave={handleSaveLead} initialData={selectedLead} />
-      <DeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteLead} itemName={selectedLead?.name || ''} />
-      <ConvertModal isOpen={isConvertModalOpen} onClose={() => setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} />
+      <DeleteModal isOpen={isDeleteModalOpen} onClose={() => !isDeletingLead && setIsDeleteModalOpen(false)} onConfirm={handleDeleteLead} itemName={selectedLead?.name || ''} isDeleting={isDeletingLead} />
+      <ConvertModal isOpen={isConvertModalOpen} onClose={() => !isConvertingLead && setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} isConverting={isConvertingLead} />
     </MainLayout>
   );
 };

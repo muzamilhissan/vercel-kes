@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import SignIn from './SignIn'
 import Dashboard from './pages/Dashboard'
 import LeadsPage from './pages/LeadsPage'
@@ -13,6 +13,11 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [currentPath, setCurrentPath] = useState('leads');
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    document.title = isAuthenticated ? 'KudonCRM' : 'Login';
+  }, [isAuthenticated]);
 
   const handleLogin = async (email: string, pass: string) => {
     try {
@@ -35,7 +40,7 @@ function App() {
   };
 
   const handleLogoutConfirm = async () => {
-    setIsLogoutModalOpen(false);
+    setIsLoggingOut(true);
     try {
       await authService.logout();
     } catch (error) {
@@ -45,6 +50,8 @@ function App() {
       localStorage.removeItem('user');
       setIsAuthenticated(false);
       setCurrentPath('leads');
+      setIsLoggingOut(false);
+      setIsLogoutModalOpen(false);
     }
   };
 
@@ -79,8 +86,9 @@ function App() {
       {isAuthenticated ? renderPage() : <SignIn onLogin={handleLogin} />}
       <LogoutModal 
         isOpen={isLogoutModalOpen} 
-        onClose={() => setIsLogoutModalOpen(false)} 
+        onClose={() => !isLoggingOut && setIsLogoutModalOpen(false)} 
         onConfirm={handleLogoutConfirm} 
+        isLoggingOut={isLoggingOut}
       />
     </div>
   )
