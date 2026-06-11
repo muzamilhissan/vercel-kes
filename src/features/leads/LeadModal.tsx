@@ -95,7 +95,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
             {/* Row 1: Three fields (Lead Name, Company, Status) */}
             <div className="lead-form-row-3">
               <div className="form-group">
-                <label>Lead Name</label>
+                <label>Lead Name <span className="required-asterisk">*</span></label>
                 <input 
                   type="text" 
                   value={formData.name} 
@@ -106,7 +106,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 />
               </div>
               <div className="form-group">
-                <label>Company</label>
+                <label>Company <span className="required-asterisk">*</span></label>
                 <input 
                   type="text" 
                   value={formData.company} 
@@ -136,10 +136,9 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
             {/* Row 2: Two fields (Phone, Email) */}
             <div className="lead-form-row-2">
               <div className="form-group">
-                <label>Phone</label>
+                <label>Phone <span className="required-asterisk">*</span></label>
                 <PhoneInput
-                  international
-                  withCountryCallingCode
+                  international={false}
                   placeholder="Enter phone number"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
@@ -155,7 +154,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 )}
               </div>
               <div className="form-group">
-                <label>Email</label>
+                <label>Email <span className="required-asterisk">*</span></label>
                 <input 
                   type="email" 
                   value={formData.email} 
@@ -169,7 +168,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
           <div className="modal-footer">
             <button type="button" onClick={onClose} className="btn-premium-secondary" disabled={isSaving}>Cancel</button>
             <button type="submit" className="btn-premium-primary" disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Lead'}
+              {isSaving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

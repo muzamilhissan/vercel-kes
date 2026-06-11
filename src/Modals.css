@@ -225,3 +225,10 @@
     text-align: center;
   }
 }
+
+.required-asterisk {
+  color: #dc2626;
+  margin-left: 3px;
+  font-weight: bold;
+}
+

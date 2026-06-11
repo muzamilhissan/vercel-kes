@@ -26,13 +26,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
         <div className="modal-header"><h3>{initialData ? 'Edit Contact' : 'New Contact'}</h3><button onClick={onClose}><X size={20} /></button></div>
         <form onSubmit={(e) => { e.preventDefault(); onSave({...formData, id: initialData?.id || Math.random().toString(36).substr(2, 9), accountName: accounts.find(a => a.id === formData.accountId)?.name || ''} as Contact); onClose(); }}>
           <div className="modal-body">
-            <div className="form-group"><label>Full Name</label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-            <div className="form-group"><label>Job Title</label><input type="text" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} required /></div>
+            <div className="form-group"><label>Full Name <span className="required-asterisk">*</span></label><input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+            <div className="form-group"><label>Job Title <span className="required-asterisk">*</span></label><input type="text" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} required /></div>
             <div className="form-grid">
-              <div className="form-group"><label>Email</label><input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-              <div className="form-group"><label>Phone</label><input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required /></div>
+              <div className="form-group"><label>Email <span className="required-asterisk">*</span></label><input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+              <div className="form-group"><label>Phone <span className="required-asterisk">*</span></label><input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required /></div>
             </div>
-            <div className="form-group"><label>Account</label>
+            <div className="form-group"><label>Account <span className="required-asterisk">*</span></label>
               <select value={formData.accountId} onChange={e => setFormData({...formData, accountId: e.target.value})} required>
                 <option value="">Select Account</option>{accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
@@ -40,7 +40,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
           </div>
           <div className="modal-footer">
             <button type="button" onClick={onClose} className="btn-premium-secondary">Cancel</button>
-            <button type="submit" className="btn-premium-primary">Save Contact</button>
+            <button type="submit" className="btn-premium-primary">Save</button>
           </div>
         </form>
       </div>
