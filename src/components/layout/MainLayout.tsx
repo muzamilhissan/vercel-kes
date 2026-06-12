@@ -29,7 +29,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, onNaviga
         onClose={() => setIsSidebarOpen(false)} 
       />
       <div className="content-wrapper">
-        <Header onMenuClick={() => setIsSidebarOpen(true)} />
+        <Header onMenuClick={() => setIsSidebarOpen(true)} currentPath={currentPath} />
         <main className="main-content">
           {children}
         </main>

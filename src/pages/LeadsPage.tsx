@@ -4,7 +4,7 @@ import LeadTable, { Lead } from '../features/leads/LeadTable';
 import LeadModal from '../features/leads/LeadModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import ConvertModal from '../features/leads/ConvertModal';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { leadService } from '../api/leadService';
 import { useToast } from '../context/ToastContext';
 
@@ -62,6 +62,31 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [error, setError] = useState<string | null>(null);
   const [isDeletingLead, setIsDeletingLead] = useState(false);
   const [isConvertingLead, setIsConvertingLead] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('globalSearchQuery') || '');
+
+  useEffect(() => {
+    const handleGlobalSearch = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail && typeof customEvent.detail.query === 'string') {
+        setSearchQuery(customEvent.detail.query);
+      }
+    };
+
+    window.addEventListener('globalSearch', handleGlobalSearch);
+    return () => {
+      window.removeEventListener('globalSearch', handleGlobalSearch);
+    };
+  }, []);
+
+  const filteredLeads = leads.filter(lead => {
+    const query = searchQuery.toLowerCase();
+    return (
+      lead.name.toLowerCase().includes(query) ||
+      lead.company.toLowerCase().includes(query) ||
+      lead.email.toLowerCase().includes(query) ||
+      lead.phone.toLowerCase().includes(query)
+    );
+  });
 
   const fetchLeads = async () => {
     try {
@@ -214,7 +239,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         </div>
       ) : (
         <LeadTable 
-          leads={leads} 
+          leads={filteredLeads} 
           onEdit={(l) => { setSelectedLead(l); setIsLeadModalOpen(true); }} 
           onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }} 
           onConvert={(l) => { setSelectedLead(l); setIsConvertModalOpen(true); }} 
@@ -223,7 +248,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
 
       <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} onSave={handleSaveLead} initialData={selectedLead} />
       <DeleteModal isOpen={isDeleteModalOpen} onClose={() => !isDeletingLead && setIsDeleteModalOpen(false)} onConfirm={handleDeleteLead} itemName={selectedLead?.name || ''} isDeleting={isDeletingLead} />
-      <ConvertModal isOpen={isConvertModalOpen} onClose={() => !isConvertingLead && setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} isConverting={isConvertingLead} />
+      <ConvertModal isOpen={isConvertModalOpen} onClose={() => !isConvertingLead && setIsConvertingLead && setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} isConverting={isConvertingLead} />
     </MainLayout>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import SignIn from './SignIn'
 import Dashboard from './pages/Dashboard'
 import LeadsPage from './pages/LeadsPage'
+import DealsPage from './pages/DealsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import ContactsPage from './pages/ContactsPage'
 import AccountsPage from './pages/AccountsPage'
@@ -70,6 +71,8 @@ function App() {
         return <Dashboard currentPath={currentPath} onNavigate={handleNavigate} />;
       case 'leads':
         return <LeadsPage currentPath={currentPath} onNavigate={handleNavigate} />;
+      case 'deals':
+        return <DealsPage currentPath={currentPath} onNavigate={handleNavigate} />;
       case 'contacts':
         return <ContactsPage currentPath={currentPath} onNavigate={handleNavigate} />;
       case 'accounts':

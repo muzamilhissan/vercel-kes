@@ -1,36 +1,36 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import './LeadTable.css';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import './DealTable.css';
 
-export interface Lead {
+export interface FrontendDeal {
   id: string;
   name: string;
-  company: string;
-  email: string;
-  phone: string;
-  status: 'New' | 'Contacted' | 'Qualified' | 'Converted';
-  dateAdded: string;
+  accountId: string;
+  accountName: string;
+  value: number;
+  closeDate: string;
+  stage: string;
+  notes: string;
 }
 
-interface LeadTableProps {
-  leads: Lead[];
-  onEdit: (lead: Lead) => void;
-  onDelete: (lead: Lead) => void;
-  onConvert: (lead: Lead) => void;
+interface DealTableProps {
+  deals: FrontendDeal[];
+  onEdit: (deal: FrontendDeal) => void;
+  onDelete: (deal: FrontendDeal) => void;
 }
 
-const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConvert }) => {
+const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'company' | null; direction: 'asc' | 'desc' }>({
+  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'accountName' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
   });
   const itemsPerPage = 10;
 
-  const sortedLeads = useMemo(() => {
-    if (!sortConfig.key) return leads;
+  const sortedDeals = useMemo(() => {
+    if (!sortConfig.key) return deals;
 
-    return [...leads].sort((a, b) => {
+    return [...deals].sort((a, b) => {
       const field = sortConfig.key!;
       const valA = (a[field] || '').toLowerCase();
       const valB = (b[field] || '').toLowerCase();
@@ -41,14 +41,14 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
         return valB.localeCompare(valA);
       }
     });
-  }, [leads, sortConfig]);
+  }, [deals, sortConfig]);
 
-  const totalPages = Math.ceil(sortedLeads.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(sortedDeals.length / itemsPerPage) || 1;
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * itemsPerPage;
-  const displayedLeads = sortedLeads.slice(startIndex, startIndex + itemsPerPage);
+  const displayedDeals = sortedDeals.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSort = (key: 'name' | 'company') => {
+  const handleSort = (key: 'name' | 'accountName') => {
     setSortConfig(prev => {
       if (prev.key === key) {
         if (prev.direction === 'asc') {
@@ -59,7 +59,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const getPageNumbers = () => {
@@ -88,6 +88,22 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
     return pages;
   };
 
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(val);
+  };
+
+  const getStageClass = (stage: string) => {
+    const stageLower = stage.toLowerCase();
+    if (stageLower.includes('done')) return 'status-qualified';
+    if (stageLower.includes('process')) return 'status-contacted';
+    if (stageLower.includes('to do')) return 'status-new';
+    return 'status-converted';
+  };
+
   return (
     <div className="lead-table-wrapper">
       <div className="table-container">
@@ -100,7 +116,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                 style={{ cursor: 'pointer', userSelect: 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>Name</span>
+                  <span>Deal Name</span>
                   {sortConfig.key !== 'name' ? (
                     <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
                   ) : sortConfig.direction === 'asc' ? (
@@ -112,12 +128,12 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
               </th>
               <th 
                 className="sortable-header" 
-                onClick={() => handleSort('company')} 
+                onClick={() => handleSort('accountName')} 
                 style={{ cursor: 'pointer', userSelect: 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>Company</span>
-                  {sortConfig.key !== 'company' ? (
+                  <span>Linked Account</span>
+                  {sortConfig.key !== 'accountName' ? (
                     <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
                   ) : sortConfig.direction === 'asc' ? (
                     <ArrowUp size={14} style={{ color: '#ffffff' }} />
@@ -126,48 +142,37 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                   )}
                 </div>
               </th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Date added</th>
+              <th>Value</th>
+              <th>Close Date</th>
+              <th>Stage</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {displayedLeads.length === 0 ? (
+            {displayedDeals.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
-                  No leads found. Click "Add Lead" to get started!
+                <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
+                  No deals found. Click "Add Deal" to get started!
                 </td>
               </tr>
             ) : (
-              displayedLeads.map(lead => (
-                <tr key={lead.id}>
+              displayedDeals.map(deal => (
+                <tr key={deal.id}>
                   <td>
-                    <span className="lead-name-value">{lead.name}</span>
+                    <span className="lead-name-value">{deal.name}</span>
                   </td>
-                  <td className="lead-company-value">{lead.company}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
+                  <td className="lead-company-value">{deal.accountName}</td>
+                  <td style={{ fontWeight: 600, color: '#1e293b' }}>{formatCurrency(deal.value)}</td>
+                  <td style={{ color: '#64748b' }}>{deal.closeDate}</td>
                   <td>
-                    <span className={`status-badge status-${lead.status.toLowerCase()}`}>
-                      {lead.status}
+                    <span className={`status-badge ${getStageClass(deal.stage)}`}>
+                      {deal.stage}
                     </span>
                   </td>
-                  <td style={{ color: '#64748b' }}>{lead.dateAdded}</td>
                   <td className="text-center">
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button className="action-btn" title="Edit Lead" onClick={() => onEdit(lead)}><Edit2 size={16} /></button>
-                      <button className="action-btn" title="Delete Lead" style={{ color: '#ef4444' }} onClick={() => onDelete(lead)}><Trash2 size={16} /></button>
-                      <button 
-                        className="action-btn" 
-                        title={lead.status === 'Converted' ? "Already Converted to Contact" : "Convert to Contact"} 
-                        onClick={() => onConvert(lead)}
-                        disabled={lead.status === 'Converted'}
-                        style={lead.status !== 'Converted' ? { color: '#10b981' } : undefined}
-                      >
-                        <UserPlus size={16} />
-                      </button>
+                      <button className="action-btn" title="Edit Deal" onClick={() => onEdit(deal)}><Edit2 size={16} /></button>
+                      <button className="action-btn" title="Delete Deal" style={{ color: '#ef4444' }} onClick={() => onDelete(deal)}><Trash2 size={16} /></button>
                     </div>
                   </td>
                 </tr>
@@ -182,9 +187,9 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
             <span className="pagination-highlight">
-              {Math.min(startIndex + itemsPerPage, leads.length)}
+              {Math.min(startIndex + itemsPerPage, deals.length)}
             </span>{' '}
-            of <span className="pagination-highlight">{leads.length}</span> entries
+            of <span className="pagination-highlight">{deals.length}</span> entries
           </div>
           <div className="pagination-buttons">
             <button
@@ -230,5 +235,4 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
   );
 };
 
-export default LeadTable;
-
+export default DealTable;

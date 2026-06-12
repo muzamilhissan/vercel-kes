@@ -184,6 +184,7 @@
 
 @media (max-width: 768px) {
   .main-header {
+    display: flex;
     padding: 16px 20px;
     gap: 16px;
   }
@@ -204,5 +205,15 @@
 
   .search-shortcut {
     display: none;
+  }
+}
+
+.menu-toggle-spacer {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle-spacer {
+    display: block;
   }
 }
