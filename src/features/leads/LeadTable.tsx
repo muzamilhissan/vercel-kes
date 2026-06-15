@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
 import './LeadTable.css';
 
 export interface Lead {
@@ -17,9 +17,10 @@ interface LeadTableProps {
   onEdit: (lead: Lead) => void;
   onDelete: (lead: Lead) => void;
   onConvert: (lead: Lead) => void;
+  onView: (lead: Lead) => void;
 }
 
-const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConvert }) => {
+const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConvert, onView }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'company' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({
     key: null,
@@ -148,7 +149,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                 style={{ cursor: 'pointer', userSelect: 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>Phone</span>
+                  <span>Phone Number</span>
                   {sortConfig.key !== 'phone' ? (
                     <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
                   ) : sortConfig.direction === 'asc' ? (
@@ -159,14 +160,13 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                 </div>
               </th>
               <th>Status</th>
-              <th>Date added</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {displayedLeads.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
                   No leads found. Click "Add Lead" to get started!
                 </td>
               </tr>
@@ -184,9 +184,9 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                       {lead.status}
                     </span>
                   </td>
-                  <td style={{ color: '#64748b' }}>{lead.dateAdded}</td>
                   <td className="text-center">
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
+                      <button className="action-btn" title="View Lead Details" onClick={() => onView(lead)}><Eye size={16} /></button>
                       <button className="action-btn" title="Edit Lead" onClick={() => onEdit(lead)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Lead" style={{ color: '#ef4444' }} onClick={() => onDelete(lead)}><Trash2 size={16} /></button>
                       <button 
@@ -261,4 +261,5 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
 };
 
 export default LeadTable;
+
 

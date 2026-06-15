@@ -4,6 +4,7 @@ import LeadTable, { Lead } from '../features/leads/LeadTable';
 import LeadModal from '../features/leads/LeadModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import ConvertModal from '../features/leads/ConvertModal';
+import LeadDetailsModal from '../features/leads/LeadDetailsModal';
 import { Plus, Search } from 'lucide-react';
 import { leadService } from '../api/leadService';
 import { useToast } from '../context/ToastContext';
@@ -58,6 +59,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeletingLead, setIsDeletingLead] = useState(false);
@@ -243,12 +245,14 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           onEdit={(l) => { setSelectedLead(l); setIsLeadModalOpen(true); }} 
           onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }} 
           onConvert={(l) => { setSelectedLead(l); setIsConvertModalOpen(true); }} 
+          onView={(l) => { setSelectedLead(l); setIsDetailsModalOpen(true); }}
         />
       )}
 
       <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} onSave={handleSaveLead} initialData={selectedLead} />
       <DeleteModal isOpen={isDeleteModalOpen} onClose={() => !isDeletingLead && setIsDeleteModalOpen(false)} onConfirm={handleDeleteLead} itemName={selectedLead?.name || ''} isDeleting={isDeletingLead} />
       <ConvertModal isOpen={isConvertModalOpen} onClose={() => !isConvertingLead && setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} isConverting={isConvertingLead} />
+      <LeadDetailsModal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} lead={selectedLead} />
     </MainLayout>
   );
 };
