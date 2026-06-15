@@ -13,7 +13,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm, i
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={isLoggingOut ? undefined : onClose}>
+    <div className="modal-overlay">
       <div className="modal-content logout-modal-compact" onClick={e => e.stopPropagation()}>
         {isLoggingOut ? (
           <div className="logout-body loading">

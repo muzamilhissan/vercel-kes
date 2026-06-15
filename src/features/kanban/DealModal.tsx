@@ -20,7 +20,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header"><h3>{initialData ? 'Edit Deal' : 'New Deal'}</h3><button onClick={onClose}><X size={20} /></button></div>
         <form onSubmit={(e) => { e.preventDefault(); onSave({...formData, id: initialData?.id || Math.random().toString(36).substr(2, 9), tags: initialData?.tags || [], avatars: initialData?.avatars || [], notesCount: initialData?.notesCount || 0, filesCount: initialData?.filesCount || 0} as Deal); onClose(); }}>

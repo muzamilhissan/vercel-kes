@@ -76,7 +76,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-content contact-modal-compact" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{initialData ? 'Edit Contact' : 'Create New'}</h3>

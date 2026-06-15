@@ -120,7 +120,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={isSaving ? undefined : onClose}>
+    <div className="modal-overlay">
       <div className="modal-content lead-modal-compact" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{initialData ? 'Edit Deal' : 'Create New Deal'}</h3>

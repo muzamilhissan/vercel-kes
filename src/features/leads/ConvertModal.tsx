@@ -14,7 +14,7 @@ const ConvertModal: React.FC<ConvertModalProps> = ({ isOpen, onClose, onConfirm,
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={isConverting ? undefined : onClose}>
+    <div className="modal-overlay">
       <div className="convert-modal-content" onClick={e => e.stopPropagation()}>
         <button className="close-modal-btn" onClick={onClose} disabled={isConverting}><X size={20} /></button>
         

@@ -56,7 +56,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="details-modal-content large" onClick={e => e.stopPropagation()}>
         <div className="details-header">
           <div>

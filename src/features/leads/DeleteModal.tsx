@@ -14,7 +14,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, i
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={isDeleting ? undefined : onClose}>
+    <div className="modal-overlay">
       <div className="modal-content delete-modal-compact" onClick={e => e.stopPropagation()}>
         <button className="delete-close-btn" onClick={onClose} disabled={isDeleting}>
           <X size={16} />
