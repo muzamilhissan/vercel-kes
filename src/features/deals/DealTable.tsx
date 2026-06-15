@@ -21,7 +21,7 @@ interface DealTableProps {
 
 const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'accountName' | null; direction: 'asc' | 'desc' }>({
+  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'accountName' | 'value' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
   });
@@ -32,13 +32,14 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
 
     return [...deals].sort((a, b) => {
       const field = sortConfig.key!;
-      const valA = (a[field] || '').toLowerCase();
-      const valB = (b[field] || '').toLowerCase();
-
-      if (sortConfig.direction === 'asc') {
-        return valA.localeCompare(valB);
+      if (field === 'value') {
+        const valA = a.value || 0;
+        const valB = b.value || 0;
+        return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
       } else {
-        return valB.localeCompare(valA);
+        const valA = (a[field] || '').toLowerCase();
+        const valB = (b[field] || '').toLowerCase();
+        return sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
     });
   }, [deals, sortConfig]);
@@ -48,7 +49,7 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
   const startIndex = (activePage - 1) * itemsPerPage;
   const displayedDeals = sortedDeals.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSort = (key: 'name' | 'accountName') => {
+  const handleSort = (key: 'name' | 'accountName' | 'value') => {
     setSortConfig(prev => {
       if (prev.key === key) {
         if (prev.direction === 'asc') {
@@ -98,9 +99,9 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
 
   const getStageClass = (stage: string) => {
     const stageLower = stage.toLowerCase();
-    if (stageLower.includes('done')) return 'status-qualified';
-    if (stageLower.includes('process')) return 'status-contacted';
-    if (stageLower.includes('to do')) return 'status-new';
+    if (stageLower.includes('won') || stageLower.includes('done')) return 'status-qualified';
+    if (stageLower.includes('progress') || stageLower.includes('process')) return 'status-contacted';
+    if (stageLower.includes('new') || stageLower.includes('to do')) return 'status-new';
     return 'status-converted';
   };
 
@@ -142,7 +143,22 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
                   )}
                 </div>
               </th>
-              <th>Value</th>
+              <th 
+                className="sortable-header" 
+                onClick={() => handleSort('value')} 
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>Value</span>
+                  {sortConfig.key !== 'value' ? (
+                    <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ArrowUp size={14} style={{ color: '#ffffff' }} />
+                  ) : (
+                    <ArrowDown size={14} style={{ color: '#ffffff' }} />
+                  )}
+                </div>
+              </th>
               <th>Close Date</th>
               <th>Stage</th>
               <th className="text-center">Actions</th>

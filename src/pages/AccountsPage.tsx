@@ -4,10 +4,11 @@ import AccountTable from '../features/accounts/AccountTable';
 import AccountModal from '../features/accounts/AccountModal';
 import AccountDetails from '../features/accounts/AccountDetails';
 import DeleteModal from '../features/accounts/DeleteModal';
-import { Building2, Plus } from 'lucide-react';
+import { Building, Plus } from 'lucide-react';
 import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
 import { Account } from '../api/types';
+import { capitalize } from '../utils/stringUtils';
 
 const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) => void}> = ({ currentPath, onNavigate }) => {
   const { showToast } = useToast();
@@ -71,11 +72,14 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
         formattedWebsite = `https://${formattedWebsite}`;
       }
 
+      const capitalizedName = capitalize(accountData.name);
+      const capitalizedIndustry = capitalize(accountData.industry);
+
       if (selectedAccount) {
         // Edit flow
         const payload = {
-          name: accountData.name,
-          industry: accountData.industry,
+          name: capitalizedName,
+          industry: capitalizedIndustry,
           website: formattedWebsite,
           description: accountData.description,
         };
@@ -89,8 +93,8 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
       } else {
         // Create flow
         const payload = {
-          name: accountData.name,
-          industry: accountData.industry,
+          name: capitalizedName,
+          industry: capitalizedIndustry,
           website: formattedWebsite,
           description: accountData.description,
         };
@@ -151,8 +155,8 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
             onClick={() => { setSelectedAccount(null); setIsModalOpen(true); }} 
             className="btn-primary"
           >
-            <Building2 size={18} /> 
-            <span>New Account</span>
+            <Plus size={16} /> 
+            <span>Add Account</span>
           </button>
         </div>
       </div>

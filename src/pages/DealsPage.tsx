@@ -9,6 +9,21 @@ import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
 import { Account, Deal } from '../api/types';
 
+const formatDateString = (dateStr: string | undefined): string => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
 const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => void}> = ({ currentPath, onNavigate }) => {
   const { showToast } = useToast();
   const [deals, setDeals] = useState<FrontendDeal[]>([]);
@@ -27,31 +42,40 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       setError(null);
       
       // Load accounts first for lookup mapping
-      const accountsRes = await accountService.list();
+      const accountsRes = await accountService.list() as any;
       let accountsList: Account[] = [];
-      if (accountsRes.success && Array.isArray(accountsRes.data)) {
-        accountsList = accountsRes.data;
-        setAccounts(accountsList);
+      if (accountsRes.success) {
+        const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
+        if (Array.isArray(apiAccounts)) {
+          accountsList = apiAccounts;
+          setAccounts(accountsList);
+        }
       }
 
       // Load deals
-      const dealsRes = await dealService.list();
-      if (dealsRes.success && Array.isArray(dealsRes.data)) {
-        const mappedDeals: FrontendDeal[] = dealsRes.data.map(d => {
-          const acc = accountsList.find(a => String(a.id) === String(d.account_id));
-          return {
-            id: String(d.id),
-            name: d.name || '',
-            accountId: String(d.account_id || ''),
-            accountName: acc ? acc.name : 'Unknown Account',
-            value: Number(d.value || 0),
-            closeDate: d.close_date || '',
-            stage: d.stage || 'To Do Tasks',
-            notes: d.notes || ''
-          };
-        });
-        setDeals(mappedDeals);
-        window.dispatchEvent(new CustomEvent('dealsUpdated'));
+      const dealsRes = await dealService.list() as any;
+      if (dealsRes.success) {
+        const apiDeals = dealsRes.deals || dealsRes.data?.deals || dealsRes.data;
+        if (Array.isArray(apiDeals)) {
+          const mappedDeals: FrontendDeal[] = apiDeals.map(d => {
+            const acc = accountsList.find(a => String(a.id) === String(d.account_id));
+            return {
+              id: String(d.id),
+              name: d.name || '',
+              accountId: String(d.account_id || ''),
+              accountName: acc ? acc.name : 'Unknown Account',
+              value: Number(d.value || 0),
+              closeDate: formatDateString(d.close_date),
+              stage: d.stage || 'New',
+              notes: d.notes || ''
+            };
+          });
+          setDeals(mappedDeals);
+          window.dispatchEvent(new CustomEvent('dealsUpdated'));
+        } else {
+          setDeals([]);
+          window.dispatchEvent(new CustomEvent('dealsUpdated'));
+        }
       } else {
         setDeals([]);
         window.dispatchEvent(new CustomEvent('dealsUpdated'));

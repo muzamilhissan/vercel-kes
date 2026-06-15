@@ -21,8 +21,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, currentPath }) => {
     if (currentPath === 'accounts') {
       return 'Search accounts...';
     }
+    if (currentPath === 'contacts') {
+      return 'Search contacts...';
+    }
     if (currentPath === 'leads') {
       return 'Search leads...';
+    }
+    if (currentPath === 'deals') {
+      return 'Search deals...';
     }
     return 'Search leads, deals, or tasks...';
   };

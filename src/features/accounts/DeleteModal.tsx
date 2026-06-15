@@ -25,7 +25,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, i
           </div>
           <h4 className="delete-title">Confirm Deletion</h4>
           <p className="delete-desc">
-            Are you sure you want to delete <strong>{itemName}</strong>? This action is permanent and cannot be undone.
+            Are you sure you want to delete?
           </p>
           <div className="delete-footer-actions">
             <button onClick={onClose} className="btn-premium-secondary compact-btn" disabled={isDeleting}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -7,30 +7,25 @@ import {
   Settings, 
   LogOut,
   Contact,
-  Building2,
+  Building,
   X
 } from 'lucide-react';
 import './Sidebar.css';
-import { leadService } from '../../api/leadService';
-import { dealService } from '../../api/dealService';
-import { accountService } from '../../api/accountService';
 
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   path: string;
-  count?: number;
   active?: boolean;
   onClick: (path: string) => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, path, count, active, onClick }) => (
+const NavItem: React.FC<NavItemProps> = ({ icon, label, path, active, onClick }) => (
   <div className={`nav-item ${active ? 'active' : ''}`} onClick={() => onClick(path)}>
     <div className="nav-item-content">
       <span className="nav-icon">{icon}</span>
       <span className="nav-label">{label}</span>
     </div>
-    {count !== undefined && <span className="nav-count">{count}</span>}
   </div>
 );
 
@@ -50,75 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=70309f&color=fff&bold=true`
     : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop";
 
-  const [leadsCount, setLeadsCount] = useState<number | undefined>(undefined);
-  const [dealsCount, setDealsCount] = useState<number | undefined>(undefined);
-  const [accountsCount, setAccountsCount] = useState<number | undefined>(undefined);
 
-  const fetchCount = async () => {
-    try {
-      const res = await leadService.list() as any;
-      if (res.success) {
-        const apiLeads = res.leads || res.data?.leads || res.data;
-        if (Array.isArray(apiLeads)) {
-          setLeadsCount(apiLeads.length);
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching leads count in sidebar:', err);
-    }
-  };
-
-  const fetchDealsCount = async () => {
-    try {
-      const res = await dealService.list();
-      if (res.success && Array.isArray(res.data)) {
-        setDealsCount(res.data.length);
-      }
-    } catch (err) {
-      console.error('Error fetching deals count in sidebar:', err);
-    }
-  };
-
-  const fetchAccountsCount = async () => {
-    try {
-      const res = await accountService.list() as any;
-      if (res.success) {
-        const apiAccounts = res.accounts || res.data?.accounts || res.data;
-        if (Array.isArray(apiAccounts)) {
-          setAccountsCount(apiAccounts.length);
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching accounts count in sidebar:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCount();
-    fetchDealsCount();
-    fetchAccountsCount();
-
-    const handleLeadsUpdate = () => {
-      fetchCount();
-    };
-
-    const handleDealsUpdate = () => {
-      fetchDealsCount();
-    };
-
-    const handleAccountsUpdate = () => {
-      fetchAccountsCount();
-    };
-
-    window.addEventListener('leadsUpdated', handleLeadsUpdate);
-    window.addEventListener('dealsUpdated', handleDealsUpdate);
-    window.addEventListener('accountsUpdated', handleAccountsUpdate);
-    return () => {
-      window.removeEventListener('leadsUpdated', handleLeadsUpdate);
-      window.removeEventListener('dealsUpdated', handleDealsUpdate);
-      window.removeEventListener('accountsUpdated', handleAccountsUpdate);
-    };
-  }, []);
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -152,30 +79,27 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             icon={<Users size={20} />} 
             label="Leads" 
             path="leads"
-            count={leadsCount} 
             active={currentPath === 'leads'} 
             onClick={onNavigate}
           />
-          {/* <NavItem 
+          <NavItem 
             icon={<Briefcase size={20} />} 
             label="Deals" 
             path="deals"
-            count={dealsCount} 
             active={currentPath === 'deals'} 
             onClick={onNavigate}
-          /> */}
-          {/* <NavItem 
+          />
+          <NavItem 
             icon={<Contact size={20} />} 
             label="Contacts" 
             path="contacts"
             active={currentPath === 'contacts'} 
             onClick={onNavigate}
-          /> */}
+          />
           <NavItem 
-            icon={<Building2 size={20} />} 
+            icon={<Building size={20} />} 
             label="Accounts" 
             path="accounts"
-            count={accountsCount}
             active={currentPath === 'accounts'} 
             onClick={onNavigate}
           />

@@ -18,7 +18,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
     accountId: '',
     value: 0,
     closeDate: '',
-    stage: 'To Do Tasks',
+    stage: 'New',
     notes: ''
   });
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -29,9 +29,12 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
     const fetchAccounts = async () => {
       try {
         setIsLoadingAccounts(true);
-        const res = await accountService.list();
-        if (res.success && Array.isArray(res.data)) {
-          setAccounts(res.data);
+        const res = await accountService.list() as any;
+        if (res.success) {
+          const apiAccounts = res.accounts || res.data?.accounts || res.data;
+          if (Array.isArray(apiAccounts)) {
+            setAccounts(apiAccounts);
+          }
         }
       } catch (err) {
         console.error('Failed to load accounts in DealModal:', err);
@@ -63,7 +66,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
         accountId: initialData.accountId || '',
         value: initialData.value || 0,
         closeDate: formattedDate || '',
-        stage: initialData.stage || 'To Do Tasks',
+        stage: initialData.stage || 'New',
         notes: initialData.notes || ''
       });
     } else {
@@ -72,7 +75,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
         accountId: '',
         value: 0,
         closeDate: new Date().toISOString().split('T')[0],
-        stage: 'To Do Tasks',
+        stage: 'New',
         notes: ''
       });
     }
@@ -154,10 +157,10 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
                   value={formData.stage} 
                   onChange={e => setFormData({...formData, stage: e.target.value})}
                 >
-                  <option value="Backlog Tasks">Backlog Tasks</option>
-                  <option value="To Do Tasks">To Do Tasks</option>
-                  <option value="In Process">In Process</option>
-                  <option value="Done">Done</option>
+                  <option value="New">New</option>
+                  <option value="In-progress">In-progress</option>
+                  <option value="Won">Won</option>
+                  <option value="Lost">Lost</option>
                 </select>
               </div>
             </div>

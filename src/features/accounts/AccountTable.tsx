@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Globe, Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Account } from '../../api/types';
+import { capitalize } from '../../utils/stringUtils';
 import './AccountTable.css';
 
 interface AccountTableProps {
@@ -12,7 +13,7 @@ interface AccountTableProps {
 
 const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete, onView }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'industry' | null; direction: 'asc' | 'desc' }>({
+  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'industry' | 'website' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
   });
@@ -39,7 +40,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
   const startIndex = (activePage - 1) * itemsPerPage;
   const displayedAccounts = sortedAccounts.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSort = (key: 'name' | 'industry') => {
+  const handleSort = (key: 'name' | 'industry' | 'website') => {
     setSortConfig(prev => {
       if (prev.key === key) {
         if (prev.direction === 'asc') {
@@ -117,7 +118,22 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
                   )}
                 </div>
               </th>
-              <th>Website</th>
+              <th 
+                className="sortable-header" 
+                onClick={() => handleSort('website')} 
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>Website</span>
+                  {sortConfig.key !== 'website' ? (
+                    <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ArrowUp size={14} style={{ color: '#ffffff' }} />
+                  ) : (
+                    <ArrowDown size={14} style={{ color: '#ffffff' }} />
+                  )}
+                </div>
+              </th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
@@ -130,26 +146,21 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
               </tr>
             ) : (
               displayedAccounts.map(account => (
-                <tr key={account.id} onClick={() => onView(account)}>
+                <tr key={account.id} onClick={() => onView(account)} style={{ cursor: 'pointer' }} className="clickable-row">
                   <td>
-                    <div className="avatar-cell">
-                      <div className="avatar-circle" style={{ backgroundColor: '#f5f0fa', color: '#70309f' }}>
-                        <Building2 size={16} />
-                      </div>
-                      <span style={{ fontWeight: 600 }}>{account.name}</span>
-                    </div>
+                    <span style={{ fontWeight: 600 }}>{capitalize(account.name)}</span>
                   </td>
-                  <td style={{ color: '#64748b' }}>{account.industry}</td>
+                  <td style={{ color: '#64748b' }}>{capitalize(account.industry)}</td>
                   <td>
                     {account.website ? (
                       <a 
                         href={account.website.startsWith('http') ? account.website : `https://${account.website}`} 
                         target="_blank" 
                         rel="noreferrer" 
-                        style={{ color: '#70309f', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }} 
+                        style={{ color: '#70309f', textDecoration: 'none', fontWeight: 600 }} 
                         onClick={e => e.stopPropagation()}
                       >
-                        <Globe size={14} /> {account.website.replace(/^https?:\/\/(www\.)?/i, '')}
+                        {account.website.replace(/^https?:\/\/(www\.)?/i, '')}
                       </a>
                     ) : (
                       <span style={{ color: '#94a3b8' }}>-</span>
@@ -169,15 +180,15 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
       </div>
 
       {totalPages > 1 && (
-        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-          <div className="pagination-info" style={{ fontSize: '14px', color: '#64748b' }}>
-            Showing <span className="pagination-highlight" style={{ fontWeight: 600, color: '#70309f' }}>{startIndex + 1}</span> to{' '}
-            <span className="pagination-highlight" style={{ fontWeight: 600, color: '#70309f' }}>
+        <div className="pagination-container">
+          <div className="pagination-info">
+            Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
+            <span className="pagination-highlight">
               {Math.min(startIndex + itemsPerPage, accounts.length)}
             </span>{' '}
-            of <span className="pagination-highlight" style={{ fontWeight: 600, color: '#70309f' }}>{accounts.length}</span> entries
+            of <span className="pagination-highlight">{accounts.length}</span> entries
           </div>
-          <div className="pagination-buttons" style={{ display: 'flex', gap: '6px' }}>
+          <div className="pagination-buttons">
             <button
               className="pagination-btn"
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -190,7 +201,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
             {getPageNumbers().map((page, idx) => {
               if (page === '...') {
                 return (
-                  <span key={`ellipsis-${idx}`} className="pagination-ellipsis" style={{ padding: '8px 12px', color: '#64748b' }}>
+                  <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
                     ...
                   </span>
                 );

@@ -3,6 +3,7 @@ import { X, Users, Briefcase, Info } from 'lucide-react';
 import { Account, Contact, Deal } from '../../api/types';
 import { contactService } from '../../api/contactService';
 import { dealService } from '../../api/dealService';
+import { capitalize } from '../../utils/stringUtils';
 import './AccountDetails.css';
 
 interface AccountDetailsProps {
@@ -59,14 +60,26 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
       <div className="details-modal-content large" onClick={e => e.stopPropagation()}>
         <div className="details-header">
           <div>
-            <h2>{account.name}</h2>
-            <p>{account.industry} • {account.website}</p>
+            <h2>View Details</h2>
           </div>
           <button onClick={onClose}><X size={20} /></button>
         </div>
         <div className="details-body scrollable">
           <section className="details-section">
-            <div className="section-title"><Info size={18} /> <h3>About Company</h3></div>
+            <div className="section-title"><Info size={18} /> <h3>About company</h3></div>
+            <div className="company-meta-info">
+              <div className="meta-field"><strong>Company Name:</strong> {capitalize(account.name)}</div>
+              <div className="meta-field"><strong>Industry:</strong> {capitalize(account.industry)}</div>
+              <div className="meta-field"><strong>Website:</strong> {account.website ? (
+                <a 
+                  href={account.website.startsWith('http') ? account.website : `https://${account.website}`} 
+                  target="_blank" 
+                  rel="noreferrer"
+                >
+                  {account.website}
+                </a>
+              ) : '-'}</div>
+            </div>
             <p className="description">{account.description || 'No description available.'}</p>
           </section>
 
@@ -83,7 +96,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
           ) : (
             <div className="details-grid">
               <section className="details-section">
-                <div className="section-title"><Users size={18} /> <h3>Linked Contacts ({contacts.length})</h3></div>
+                <div className="section-title"><Users size={18} /> <h3>Linked contacts ({contacts.length})</h3></div>
                 <div className="linked-list">
                   {contacts.length === 0 ? (
                     <span style={{ color: '#94a3b8', fontSize: '13px' }}>No linked contacts found.</span>
@@ -98,7 +111,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
                 </div>
               </section>
               <section className="details-section">
-                <div className="section-title"><Briefcase size={18} /> <h3>Related Deals ({deals.length})</h3></div>
+                <div className="section-title"><Briefcase size={18} /> <h3>Related deals ({deals.length})</h3></div>
                 <div className="linked-list">
                   {deals.length === 0 ? (
                     <span style={{ color: '#94a3b8', fontSize: '13px' }}>No related deals found.</span>

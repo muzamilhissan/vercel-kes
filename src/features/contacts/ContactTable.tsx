@@ -1,6 +1,7 @@
-import React from 'react';
-import { MoreVertical, Edit2, Trash2, Mail, Phone } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { MoreVertical, Edit2, Trash2, Mail, Phone, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './ContactTable.css';
+import { capitalize } from '../../utils/stringUtils';
 
 export interface Contact {
   id: string;
@@ -19,44 +20,209 @@ interface ContactTableProps {
 }
 
 const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'jobTitle' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
+  const itemsPerPage = 10;
+
+  const sortedContacts = useMemo(() => {
+    if (!sortConfig.key) return contacts;
+    return [...contacts].sort((a, b) => {
+      const field = sortConfig.key!;
+      const valA = a[field] || '';
+      const valB = b[field] || '';
+      return sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+  }, [contacts, sortConfig]);
+
+  const totalPages = Math.ceil(sortedContacts.length / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const displayedContacts = sortedContacts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleSort = (key: 'name' | 'jobTitle' | 'email' | 'phone') => {
+    setSortConfig(prev => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+    setCurrentPage(1);
+  };
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (activePage > 3) {
+        pages.push('...');
+      }
+      const start = Math.max(2, activePage - 1);
+      const end = Math.min(totalPages - 1, activePage + 1);
+      for (let i = start; i <= end; i++) {
+        if (i > 1 && i < totalPages) {
+          pages.push(i);
+        }
+      }
+      if (activePage < totalPages - 2) {
+        pages.push('...');
+      }
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   return (
-    <div className="table-container">
-      <table className="premium-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Job Title</th>
-            <th>Account</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th className="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {contacts.map(contact => (
-            <tr key={contact.id}>
-              <td>
-                <div className="avatar-cell">
-                  <div className="avatar-circle">{contact.name.charAt(0)}</div>
-                  <span style={{ fontWeight: 600 }}>{contact.name}</span>
+    <div className="contact-table-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="table-container">
+        <table className="premium-table">
+          <thead>
+            <tr>
+              <th className="sortable-header" onClick={() => handleSort('name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Name
+                  {sortConfig.key !== 'name' ? (
+                    <ChevronUp size={14} className="sort-icon-inactive" />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ChevronUp size={14} className="sort-icon-active" />
+                  ) : (
+                    <ChevronDown size={14} className="sort-icon-active" />
+                  )}
                 </div>
-              </td>
-              <td style={{ color: '#64748b' }}>{contact.jobTitle}</td>
-              <td style={{ fontWeight: 600, color: '#70309f' }}>{contact.accountName}</td>
-              <td>{contact.email}</td>
-              <td>{contact.phone}</td>
-              <td className="text-right">
-                <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
-                  <button className="action-btn" onClick={() => onEdit(contact)}><Edit2 size={16} /></button>
-                  <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => onDelete(contact)}><Trash2 size={16} /></button>
+              </th>
+              <th className="sortable-header" onClick={() => handleSort('jobTitle')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Job Title
+                  {sortConfig.key !== 'jobTitle' ? (
+                    <ChevronUp size={14} className="sort-icon-inactive" />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ChevronUp size={14} className="sort-icon-active" />
+                  ) : (
+                    <ChevronDown size={14} className="sort-icon-active" />
+                  )}
                 </div>
-              </td>
+              </th>
+              <th>Account</th>
+              <th className="sortable-header" onClick={() => handleSort('email')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Email
+                  {sortConfig.key !== 'email' ? (
+                    <ChevronUp size={14} className="sort-icon-inactive" />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ChevronUp size={14} className="sort-icon-active" />
+                  ) : (
+                    <ChevronDown size={14} className="sort-icon-active" />
+                  )}
+                </div>
+              </th>
+              <th className="sortable-header" onClick={() => handleSort('phone')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Phone
+                  {sortConfig.key !== 'phone' ? (
+                    <ChevronUp size={14} className="sort-icon-inactive" />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ChevronUp size={14} className="sort-icon-active" />
+                  ) : (
+                    <ChevronDown size={14} className="sort-icon-active" />
+                  )}
+                </div>
+              </th>
+              <th className="text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {displayedContacts.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
+                  No contacts found. Click "Add Contact" to get started!
+                </td>
+              </tr>
+            ) : (
+              displayedContacts.map(contact => {
+                const displayName = capitalize(contact.name);
+                const displayJobTitle = contact.jobTitle ? capitalize(contact.jobTitle) : 'N/A';
+                
+                return (
+                  <tr key={contact.id}>
+                    <td>
+                      <div className="avatar-cell">
+                        <div className="avatar-circle">{displayName.charAt(0)}</div>
+                        <span style={{ fontWeight: 600 }}>{displayName}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: '#64748b' }}>{displayJobTitle}</td>
+                    <td style={{ fontWeight: 600, color: '#70309f' }}>{contact.accountName}</td>
+                    <td>{contact.email}</td>
+                    <td>{contact.phone}</td>
+                    <td className="text-right">
+                      <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
+                        <button className="action-btn" onClick={() => onEdit(contact)}><Edit2 size={16} /></button>
+                        <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => onDelete(contact)}><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="pagination-container">
+          <div className="pagination-info">
+            Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
+            <span className="pagination-highlight">
+              {Math.min(startIndex + itemsPerPage, contacts.length)}
+            </span>{' '}
+            of <span className="pagination-highlight">{contacts.length}</span> entries
+          </div>
+          <div className="pagination-buttons">
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={activePage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            {getPageNumbers().map((page, idx) => {
+              if (page === '...') {
+                return (
+                  <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={`page-${page}`}
+                  className={`pagination-btn ${activePage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(Number(page))}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={activePage === totalPages}
+              aria-label="Next page"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ContactTable;
+

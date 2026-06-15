@@ -13,8 +13,10 @@ interface AccountModalProps {
 const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState<Partial<Account>>({ name: '', industry: '', website: '', description: '' });
   const [isSaving, setIsSaving] = useState(false);
+  const [websiteError, setWebsiteError] = useState<string | null>(null);
 
   useEffect(() => {
+    setWebsiteError(null);
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -25,6 +27,15 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+
+    const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+    if (!formData.website || !urlPattern.test(formData.website.trim())) {
+      setWebsiteError('Please enter a valid website URL (e.g. example.com)');
+      setIsSaving(false);
+      return;
+    }
+    setWebsiteError(null);
+
     try {
       await onSave({
         ...formData,
@@ -58,6 +69,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
                   placeholder="Enter name"
                   required 
                   disabled={isSaving}
+                  maxLength={150}
                 />
               </div>
               <div className="form-group">
@@ -69,6 +81,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
                   placeholder="e.g. Technology"
                   required 
                   disabled={isSaving}
+                  maxLength={150}
                 />
               </div>
             </div>
@@ -77,11 +90,19 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
               <input 
                 type="text" 
                 value={formData.website || ''} 
-                onChange={e => setFormData({...formData, website: e.target.value})} 
+                onChange={e => {
+                  setFormData({...formData, website: e.target.value});
+                  if (websiteError) setWebsiteError(null);
+                }} 
                 placeholder="e.g. google.com"
                 required 
                 disabled={isSaving}
               />
+              {websiteError && (
+                <div style={{ color: '#dc2626', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>
+                  {websiteError}
+                </div>
+              )}
             </div>
             <div className="form-group">
               <label>Description</label>
@@ -91,7 +112,12 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
                 placeholder="Enter description..."
                 rows={3} 
                 disabled={isSaving}
+                maxLength={1000}
               />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
+                <span>Maximum 1,000 characters</span>
+                <span>{(formData.description || '').length}/1000</span>
+              </div>
             </div>
           </div>
           <div className="modal-footer">

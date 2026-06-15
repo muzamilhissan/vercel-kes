@@ -21,7 +21,7 @@ interface LeadTableProps {
 
 const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConvert }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'company' | null; direction: 'asc' | 'desc' }>({
+  const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'company' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
   });
@@ -48,7 +48,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
   const startIndex = (activePage - 1) * itemsPerPage;
   const displayedLeads = sortedLeads.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSort = (key: 'name' | 'company') => {
+  const handleSort = (key: 'name' | 'company' | 'email' | 'phone') => {
     setSortConfig(prev => {
       if (prev.key === key) {
         if (prev.direction === 'asc') {
@@ -126,8 +126,38 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                   )}
                 </div>
               </th>
-              <th>Email</th>
-              <th>Phone</th>
+              <th 
+                className="sortable-header" 
+                onClick={() => handleSort('email')} 
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>Email</span>
+                  {sortConfig.key !== 'email' ? (
+                    <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ArrowUp size={14} style={{ color: '#ffffff' }} />
+                  ) : (
+                    <ArrowDown size={14} style={{ color: '#ffffff' }} />
+                  )}
+                </div>
+              </th>
+              <th 
+                className="sortable-header" 
+                onClick={() => handleSort('phone')} 
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>Phone</span>
+                  {sortConfig.key !== 'phone' ? (
+                    <ArrowUpDown size={14} style={{ opacity: 0.6 }} />
+                  ) : sortConfig.direction === 'asc' ? (
+                    <ArrowUp size={14} style={{ color: '#ffffff' }} />
+                  ) : (
+                    <ArrowDown size={14} style={{ color: '#ffffff' }} />
+                  )}
+                </div>
+              </th>
               <th>Status</th>
               <th>Date added</th>
               <th className="text-center">Actions</th>
