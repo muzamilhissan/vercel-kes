@@ -28,6 +28,7 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<DealFile | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchFiles = async () => {
     try {
@@ -170,6 +171,11 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
     }
   };
 
+  const filteredFiles = files.filter(file => {
+    const fileName = file.file_name || (file as any).original_name || '';
+    return fileName.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -200,6 +206,77 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         onFileSelect={handleFileSelect}
       />
 
+      {/* Search Bar */}
+      {files.length > 0 && (
+        <div style={{ position: 'relative', width: '100%', marginBottom: '4px' }}>
+          <input
+            type="text"
+            placeholder="Search attachments..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 14px 10px 38px',
+              fontSize: '13px',
+              borderRadius: '10px',
+              border: '1.5px solid #e2e8f0',
+              background: '#f8fafc',
+              outline: 'none',
+              transition: 'all 0.25s ease',
+              boxSizing: 'border-box'
+            }}
+            onFocus={(e) => {
+              e.target.style.background = '#ffffff';
+              e.target.style.borderColor = '#70309f';
+              e.target.style.boxShadow = '0 0 0 4px rgba(112, 48, 159, 0.06)';
+            }}
+            onBlur={(e) => {
+              e.target.style.background = '#f8fafc';
+              e.target.style.borderColor = '#e2e8f0';
+              e.target.style.boxShadow = 'none';
+            }}
+          />
+          <svg
+            style={{
+              position: 'absolute',
+              left: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#94a3b8',
+              width: '16px',
+              height: '16px',
+              pointerEvents: 'none'
+            }}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '14px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                padding: '2px',
+                fontSize: '18px',
+                lineHeight: 1
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      )}
+
       {/* File List */}
       {loadingFiles ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px 0', gap: '10px' }}>
@@ -214,9 +291,13 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', border: '1.5px dashed #f1f5f9', borderRadius: '12px' }}>
           No attachments uploaded yet.
         </div>
+      ) : filteredFiles.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', border: '1.5px dashed #f1f5f9', borderRadius: '12px' }}>
+          No matching attachments found.
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {files.map(file => (
+          {filteredFiles.map(file => (
             <AttachmentItem
               key={file.id}
               file={file}
