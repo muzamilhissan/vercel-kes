@@ -130,16 +130,12 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   const handleOpenSignedUrl = async (file: DealFile) => {
     try {
       setLoadingSignedUrlId(file.id);
-      const res = await dealService.getSignedUrl(dealId, file.id);
-      const url = (res as any).signed_url || res.data?.url || (res.data as any)?.signed_url;
-      if (res.success && url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      } else {
-        showToast(res.message || 'Failed to get signed URL', 'error');
-      }
+      const blob = await dealService.downloadFile(dealId, file.id);
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     } catch (err: any) {
       console.error(err);
-      showToast(err.message || 'Failed to get signed URL', 'error');
+      showToast(err.message || 'Failed to open file', 'error');
     } finally {
       setLoadingSignedUrlId(null);
     }
