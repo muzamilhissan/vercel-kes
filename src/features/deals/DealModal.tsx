@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { FrontendDeal } from './DealTable';
 import { accountService } from '../../api/accountService';
 import { Account } from '../../api/types';
+import { useToast } from '../../context/ToastContext';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 import '../leads/LeadModal.css'; // Reuse LeadModal CSS class names for styling
 
 interface DealModalProps {
@@ -12,7 +14,16 @@ interface DealModalProps {
   initialData?: FrontendDeal | null;
 }
 
+const getLocalDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     accountId: '',
@@ -74,7 +85,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
         name: '',
         accountId: '',
         value: 0,
-        closeDate: new Date().toISOString().split('T')[0],
+        closeDate: getLocalDateString(),
         stage: 'New',
         notes: ''
       });
@@ -84,6 +95,17 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.accountId) return;
+
+    if (!initialData) {
+      const selected = new Date(formData.closeDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selected.setHours(0, 0, 0, 0);
+      if (selected < today) {
+        showToast('Expected Close Date cannot be in the past', 'error');
+        return;
+      }
+    }
 
     setIsSaving(true);
     try {
@@ -119,6 +141,18 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
 
   if (!isOpen) return null;
 
+  const stageOptions = [
+    { value: 'New', label: 'New' },
+    { value: 'In-progress', label: 'In-progress' },
+    { value: 'Won', label: 'Won' },
+    { value: 'Lost', label: 'Lost' }
+  ];
+
+  const accountOptions = accounts.map(acc => ({
+    value: String(acc.id),
+    label: acc.name
+  }));
+
   return (
     <div className="modal-overlay">
       <div className="modal-content lead-modal-compact" onClick={e => e.stopPropagation()}>
@@ -153,15 +187,12 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
               </div>
               <div className="form-group">
                 <label>Stage</label>
-                <select 
-                  value={formData.stage} 
-                  onChange={e => setFormData({...formData, stage: e.target.value})}
-                >
-                  <option value="New">New</option>
-                  <option value="In-progress">In-progress</option>
-                  <option value="Won">Won</option>
-                  <option value="Lost">Lost</option>
-                </select>
+                <SearchableSelect 
+                  options={stageOptions}
+                  value={formData.stage}
+                  onChange={val => setFormData({...formData, stage: val})}
+                  variant="compact"
+                />
               </div>
             </div>
             
@@ -169,19 +200,15 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
             <div className="lead-form-row-2">
               <div className="form-group">
                 <label>Linked Account <span className="required-asterisk">*</span></label>
-                <select
+                <SearchableSelect
+                  options={accountOptions}
                   value={formData.accountId}
-                  onChange={e => setFormData({...formData, accountId: e.target.value})}
+                  onChange={val => setFormData({...formData, accountId: val})}
+                  placeholder="-- Select Account --"
                   required
                   disabled={isLoadingAccounts}
-                >
-                  <option value="">-- Select Account --</option>
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name}
-                    </option>
-                  ))}
-                </select>
+                  variant="compact"
+                />
               </div>
               <div className="form-group">
                 <label>Expected Close Date <span className="required-asterisk">*</span></label>
@@ -189,6 +216,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
                   type="date" 
                   value={formData.closeDate} 
                   onChange={e => setFormData({...formData, closeDate: e.target.value})} 
+                  min={initialData ? undefined : getLocalDateString()}
                   required 
                 />
               </div>

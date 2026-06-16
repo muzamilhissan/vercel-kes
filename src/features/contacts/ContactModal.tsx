@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Contact } from './ContactTable';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 import './ContactModal.css';
 
 interface ContactModalProps {
@@ -73,6 +74,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
     } as Contact);
   };
 
+  const accountOptions = accounts.map(a => ({ value: a.id, label: a.name }));
+
   if (!isOpen) return null;
 
   return (
@@ -95,10 +98,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
               </div>
               <div className="form-group">
                 <label>Account <span className="required-asterisk">*</span></label>
-                <select value={formData.accountId} onChange={e => setFormData({...formData, accountId: e.target.value})} required>
-                  <option value="">Select Account</option>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                <SearchableSelect
+                  options={accountOptions}
+                  value={formData.accountId || ''}
+                  onChange={val => setFormData({...formData, accountId: val})}
+                  placeholder="Select Account"
+                  required
+                  variant="compact"
+                  placement="bottom"
+                />
               </div>
             </div>
             

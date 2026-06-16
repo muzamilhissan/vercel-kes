@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Lead } from './LeadTable';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 import './LeadModal.css';
 
 interface LeadModalProps {
@@ -83,6 +84,15 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
 
   if (!isOpen) return null;
 
+  const statusOptions = [
+    { value: 'New', label: 'New' },
+    { value: 'Contacted', label: 'Contacted' },
+    { value: 'Qualified', label: 'Qualified' }
+  ];
+  if (formData.status === 'Converted') {
+    statusOptions.push({ value: 'Converted', label: 'Converted' });
+  }
+
   return (
     <div className="modal-overlay">
       <div className="modal-content lead-modal-compact" onClick={e => e.stopPropagation()}>
@@ -118,18 +128,15 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
               </div>
               <div className="form-group">
                 <label>Status</label>
-                <select 
-                  value={formData.status} 
-                  onChange={e => setFormData({...formData, status: e.target.value as any})}
+                <SearchableSelect
+                  options={statusOptions}
+                  value={formData.status || ''}
+                  onChange={val => setFormData({...formData, status: val as any})}
                   disabled={initialData?.status === 'Converted' || initialData?.status === 'Qualified'}
-                >
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Qualified">Qualified</option>
-                  {formData.status === 'Converted' && (
-                    <option value="Converted">Converted</option>
-                  )}
-                </select>
+                  searchable={false}
+                  variant="compact"
+                  placement="bottom"
+                />
               </div>
             </div>
             

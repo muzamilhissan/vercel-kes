@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
 import './DealTable.css';
 
 export interface FrontendDeal {
@@ -17,9 +17,11 @@ interface DealTableProps {
   deals: FrontendDeal[];
   onEdit: (deal: FrontendDeal) => void;
   onDelete: (deal: FrontendDeal) => void;
+  onView: (deal: FrontendDeal) => void;
+  onAccountClick: (accountId: string) => void;
 }
 
-const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
+const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, onAccountClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'accountName' | 'value' | null; direction: 'asc' | 'desc' }>({
     key: null,
@@ -177,7 +179,23 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
                   <td>
                     <span className="lead-name-value">{deal.name}</span>
                   </td>
-                  <td className="lead-company-value">{deal.accountName}</td>
+                  <td className="lead-company-value">
+                    <span 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (deal.accountId) onAccountClick(deal.accountId);
+                      }}
+                      style={{ 
+                        color: '#70309f', 
+                        fontWeight: 600, 
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                    >
+                      {deal.accountName}
+                    </span>
+                  </td>
                   <td style={{ fontWeight: 600, color: '#1e293b' }}>{formatCurrency(deal.value)}</td>
                   <td style={{ color: '#64748b' }}>{deal.closeDate}</td>
                   <td>
@@ -187,6 +205,7 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete }) => {
                   </td>
                   <td className="text-center">
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
+                      <button className="action-btn" title="View Deal Details" onClick={() => onView(deal)}><Eye size={16} /></button>
                       <button className="action-btn" title="Edit Deal" onClick={() => onEdit(deal)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Deal" style={{ color: '#ef4444' }} onClick={() => onDelete(deal)}><Trash2 size={16} /></button>
                     </div>

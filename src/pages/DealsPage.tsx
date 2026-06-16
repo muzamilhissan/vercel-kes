@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import DealTable, { FrontendDeal } from '../features/deals/DealTable';
 import DealModal from '../features/deals/DealModal';
+import DealDetailsModal from '../features/deals/DealDetailsModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import { Plus } from 'lucide-react';
 import { dealService } from '../api/dealService';
@@ -30,6 +31,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<FrontendDeal | null>(null);
   const [isDealModalOpen, setIsDealModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +116,11 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       deal.stage.toLowerCase().includes(query)
     );
   });
+
+  const handleAccountClick = (accountId: string) => {
+    localStorage.setItem('autoOpenAccountDetailsId', accountId);
+    onNavigate('accounts');
+  };
 
   const handleSaveDeal = async (dealData: Omit<FrontendDeal, 'accountName'>) => {
     try {
@@ -208,8 +215,10 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       ) : (
         <DealTable 
           deals={filteredDeals} 
+          onView={(d) => { setSelectedDeal(d); setIsViewModalOpen(true); }}
           onEdit={(d) => { setSelectedDeal(d); setIsDealModalOpen(true); }} 
           onDelete={(d) => { setSelectedDeal(d); setIsDeleteModalOpen(true); }} 
+          onAccountClick={handleAccountClick}
         />
       )}
 
@@ -218,6 +227,13 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         onClose={() => setIsDealModalOpen(false)} 
         onSave={handleSaveDeal} 
         initialData={selectedDeal} 
+      />
+      
+      <DealDetailsModal 
+        isOpen={isViewModalOpen} 
+        onClose={() => setIsViewModalOpen(false)} 
+        deal={selectedDeal} 
+        onAccountClick={handleAccountClick}
       />
       
       <DeleteModal 

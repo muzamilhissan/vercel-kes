@@ -65,6 +65,20 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     fetchAccounts();
   }, []);
 
+  useEffect(() => {
+    if (!loading && accounts.length > 0) {
+      const autoOpenId = localStorage.getItem('autoOpenAccountDetailsId');
+      if (autoOpenId) {
+        const account = accounts.find(a => String(a.id) === String(autoOpenId));
+        if (account) {
+          setSelectedAccount(account);
+          setIsDetailsOpen(true);
+        }
+        localStorage.removeItem('autoOpenAccountDetailsId');
+      }
+    }
+  }, [accounts, loading]);
+
   const handleSaveAccount = async (accountData: Account) => {
     try {
       let formattedWebsite = accountData.website ? accountData.website.trim() : '';
