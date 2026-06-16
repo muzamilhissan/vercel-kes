@@ -30,6 +30,7 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
       const customEvent = e as CustomEvent;
       if (customEvent.detail && typeof customEvent.detail.query === 'string') {
         setSearchQuery(customEvent.detail.query);
+        setCurrentPage(1);
       }
     };
 
@@ -76,16 +77,8 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   };
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      fetchAccounts(1, searchQuery);
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
     fetchAccounts(currentPage, searchQuery);
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   useEffect(() => {
     if (!loading && accounts.length > 0) {

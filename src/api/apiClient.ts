@@ -13,9 +13,10 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
     url += `?${searchParams.toString()}`;
   }
 
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const defaultHeaders: Record<string, string> = {};
+  if (!(customConfig.body instanceof FormData)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
 
   const token = localStorage.getItem('token');
   if (token) {

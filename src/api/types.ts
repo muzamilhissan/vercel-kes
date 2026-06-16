@@ -157,3 +157,15 @@ export interface UpdateDealInput {
   stage?: string;
   notes?: string;
 }
+
+export interface DealFile {
+  id: string | number;
+  deal_id: string | number;
+  file_name: string;
+  file_path: string;
+  file_size?: number;
+  mime_type?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+

@@ -74,6 +74,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       const customEvent = e as CustomEvent;
       if (customEvent.detail && typeof customEvent.detail.query === 'string') {
         setSearchQuery(customEvent.detail.query);
+        setCurrentPage(1);
       }
     };
 
@@ -122,16 +123,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   };
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      fetchLeads(1, searchQuery);
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
     fetchLeads(currentPage, searchQuery);
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   const handleSaveLead = async (leadData: Lead) => {
     try {

@@ -42,6 +42,7 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
       const customEvent = e as CustomEvent;
       if (customEvent.detail && typeof customEvent.detail.query === 'string') {
         setSearchQuery(customEvent.detail.query);
+        setCurrentPage(1);
       }
     };
 
@@ -53,6 +54,24 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
 
   const filteredContacts = contacts;
 
+  // Load accounts list once on mount (only for dropdown in modal)
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const accountsRes = await accountService.list(1, 100) as any;
+        if (accountsRes.success) {
+          const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
+          if (Array.isArray(apiAccounts)) {
+            setAccounts(apiAccounts.map(a => ({ id: String(a.id), name: a.name })));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load accounts in ContactsPage:', err);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
   const fetchData = async (page?: number | any, query?: string) => {
     const pageNum = typeof page === 'number' ? page : currentPage;
     const queryStr = typeof query === 'string' ? query : searchQuery;
@@ -60,17 +79,7 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
       setLoading(true);
       setError(null);
       
-      const [contactsRes, accountsRes] = await Promise.all([
-        contactService.list(pageNum, 10, queryStr) as any,
-        accountService.list(1, 10) as any
-      ]);
-
-      if (accountsRes.success) {
-        const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
-        if (Array.isArray(apiAccounts)) {
-          setAccounts(apiAccounts.map(a => ({ id: String(a.id), name: a.name })));
-        }
-      }
+      const contactsRes = await contactService.list(pageNum, 10, queryStr) as any;
 
       if (contactsRes.success) {
         const apiContacts = contactsRes.contacts || contactsRes.data?.contacts || contactsRes.data;
@@ -102,16 +111,8 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   };
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      fetchData(1, searchQuery);
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
     fetchData(currentPage, searchQuery);
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   const handleSave = async (contactData: Contact) => {
     try {

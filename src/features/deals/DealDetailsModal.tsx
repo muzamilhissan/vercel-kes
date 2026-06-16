@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { FrontendDeal } from './DealTable';
+import DealAttachments from './DealAttachments';
 import '../leads/LeadModal.css';
 
 interface DealDetailsModalProps {
@@ -36,7 +37,16 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({ isOpen, onClose, de
           <h3 style={{ fontSize: '22px', fontWeight: 700 }}>Deal Details</h3>
           <button onClick={onClose} style={{ width: '32px', height: '32px', borderRadius: '10px' }}><X size={20} /></button>
         </div>
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px 32px 20px' }}>
+        
+        <div className="modal-body" style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '20px', 
+          padding: '24px 32px 20px',
+          maxHeight: 'calc(85vh - 160px)',
+          overflowY: 'auto'
+        }}>
+          {/* Metadata section */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 32px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deal Name</span>
@@ -79,7 +89,8 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({ isOpen, onClose, de
             </div>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px solid #f1f5f9', paddingTop: '16px', marginTop: '0px' }}>
+          {/* Notes Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notes</span>
             <span style={{ 
               fontSize: '14px', 
@@ -94,7 +105,11 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({ isOpen, onClose, de
               {deal.notes || 'No notes added for this deal.'}
             </span>
           </div>
+
+          {/* Separate File Attachments component */}
+          <DealAttachments dealId={deal.id} />
         </div>
+
         <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '16px 32px 20px', display: 'flex', justifyContent: 'flex-end', background: '#f8fafc' }}>
           <button onClick={onClose} className="btn-premium-primary" style={{ padding: '8px 20px', borderRadius: '10px' }}>
             Close

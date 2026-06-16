@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import DealTable, { FrontendDeal } from '../features/deals/DealTable';
 import DealModal from '../features/deals/DealModal';
@@ -41,23 +41,30 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  const fetchDealsAndAccounts = async (page?: number | any, query?: string) => {
+  // Load accounts once on mount
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const accountsRes = await accountService.list(1, 100) as any;
+        if (accountsRes.success) {
+          const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
+          if (Array.isArray(apiAccounts)) {
+            setAccounts(apiAccounts);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load accounts:', err);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
+  const fetchDeals = async (page?: number | any, query?: string) => {
     const pageNum = typeof page === 'number' ? page : currentPage;
     const queryStr = typeof query === 'string' ? query : searchQuery;
     try {
       setLoading(true);
       setError(null);
-      
-      // Load accounts first for lookup mapping (load all using high limit)
-      const accountsRes = await accountService.list(1, 10) as any;
-      let accountsList: Account[] = [];
-      if (accountsRes.success) {
-        const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
-        if (Array.isArray(apiAccounts)) {
-          accountsList = apiAccounts;
-          setAccounts(accountsList);
-        }
-      }
 
       // Load deals
       const dealsRes = await dealService.list(pageNum, 10, queryStr) as any;
@@ -65,12 +72,11 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         const apiDeals = dealsRes.deals || dealsRes.data?.deals || dealsRes.data;
         if (Array.isArray(apiDeals)) {
           const mappedDeals: FrontendDeal[] = apiDeals.map(d => {
-            const acc = accountsList.find(a => String(a.id) === String(d.account_id));
             return {
               id: String(d.id),
               name: d.name || '',
               accountId: String(d.account_id || ''),
-              accountName: acc ? acc.name : 'Unknown Account',
+              accountName: '', // Dynamically resolved in useMemo below
               value: Number(d.value || 0),
               closeDate: formatDateString(d.close_date),
               stage: d.stage || 'New',
@@ -107,22 +113,26 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   };
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      fetchDealsAndAccounts(1, searchQuery);
-    }
-  }, [searchQuery]);
+    fetchDeals(currentPage, searchQuery);
+  }, [currentPage, searchQuery]);
 
-  useEffect(() => {
-    fetchDealsAndAccounts(currentPage, searchQuery);
-  }, [currentPage]);
+  // Resolve accountName dynamically using useMemo to avoid repeated account fetches
+  const resolvedDeals = useMemo(() => {
+    return deals.map(d => {
+      const acc = accounts.find(a => String(a.id) === String(d.accountId));
+      return {
+        ...d,
+        accountName: acc ? acc.name : 'Unknown Account'
+      };
+    });
+  }, [deals, accounts]);
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail && typeof customEvent.detail.query === 'string') {
         setSearchQuery(customEvent.detail.query);
+        setCurrentPage(1);
       }
     };
 
@@ -132,7 +142,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     };
   }, []);
 
-  const filteredDeals = deals;
+  const filteredDeals = resolvedDeals;
 
   const handleAccountClick = (accountId: string) => {
     localStorage.setItem('autoOpenAccountDetailsId', accountId);
@@ -156,7 +166,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         // Edit flow
         const res = await dealService.update(selectedDeal.id, payload);
         if (res.success) {
-          await fetchDealsAndAccounts();
+          await fetchDeals();
           showToast('Deal updated successfully', 'success');
         } else {
           showToast(res.message || 'Failed to update deal', 'error');
@@ -165,7 +175,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         // Create flow
         const res = await dealService.store(payload);
         if (res.success) {
-          await fetchDealsAndAccounts();
+          await fetchDeals();
           showToast('Deal created successfully', 'success');
         } else {
           showToast(res.message || 'Failed to create deal', 'error');
@@ -185,7 +195,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       setError(null);
       const res = await dealService.delete(selectedDeal.id);
       if (res.success) {
-        await fetchDealsAndAccounts();
+        await fetchDeals();
         showToast('Deal deleted successfully', 'success');
       } else {
         showToast(res.message || 'Failed to delete deal', 'error');
@@ -227,7 +237,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       ) : error ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px', background: '#fff5f5', borderRadius: '16px', border: '1px solid #fecaca', margin: '24px 0', padding: '24px' }}>
           <p style={{ color: '#dc2626', fontWeight: 600 }}>{error}</p>
-          <button className="btn-primary" onClick={fetchDealsAndAccounts}>Try Again</button>
+          <button className="btn-primary" onClick={() => fetchDeals()}>Try Again</button>
         </div>
       ) : (
         <DealTable 
