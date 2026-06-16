@@ -18,10 +18,23 @@ interface LeadTableProps {
   onDelete: (lead: Lead) => void;
   onConvert: (lead: Lead) => void;
   onView: (lead: Lead) => void;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
 }
 
-const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConvert, onView }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const LeadTable: React.FC<LeadTableProps> = ({ 
+  leads, 
+  onEdit, 
+  onDelete, 
+  onConvert, 
+  onView,
+  currentPage,
+  totalPages,
+  totalItems,
+  onPageChange
+}) => {
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'company' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
@@ -44,10 +57,9 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
     });
   }, [leads, sortConfig]);
 
-  const totalPages = Math.ceil(sortedLeads.length / itemsPerPage) || 1;
-  const activePage = Math.min(currentPage, totalPages);
+  const activePage = currentPage;
   const startIndex = (activePage - 1) * itemsPerPage;
-  const displayedLeads = sortedLeads.slice(startIndex, startIndex + itemsPerPage);
+  const displayedLeads = sortedLeads;
 
   const handleSort = (key: 'name' | 'company' | 'email' | 'phone') => {
     setSortConfig(prev => {
@@ -60,7 +72,6 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   const getPageNumbers = () => {
@@ -212,14 +223,14 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
             <span className="pagination-highlight">
-              {Math.min(startIndex + itemsPerPage, leads.length)}
+              {Math.min(startIndex + itemsPerPage, totalItems)}
             </span>{' '}
-            of <span className="pagination-highlight">{leads.length}</span> entries
+            of <span className="pagination-highlight">{totalItems}</span> entries
           </div>
           <div className="pagination-buttons">
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => onPageChange(Math.max(activePage - 1, 1))}
               disabled={activePage === 1}
               aria-label="Previous page"
             >
@@ -238,7 +249,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
                 <button
                   key={`page-${page}`}
                   className={`pagination-btn ${activePage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(Number(page))}
+                  onClick={() => onPageChange(Number(page))}
                 >
                   {page}
                 </button>
@@ -247,7 +258,7 @@ const LeadTable: React.FC<LeadTableProps> = ({ leads, onEdit, onDelete, onConver
 
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => onPageChange(Math.min(activePage + 1, totalPages))}
               disabled={activePage === totalPages}
               aria-label="Next page"
             >

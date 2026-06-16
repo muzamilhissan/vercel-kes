@@ -6,8 +6,12 @@ export const dealService = {
    * Get all deals.
    * GET /deals/list
    */
-  async list(): Promise<ApiResponse<Deal[]>> {
-    return apiFetch<ApiResponse<Deal[]>>('/deals/list');
+  async list(page?: number, perPage?: number, search?: string): Promise<ApiResponse<Deal[]>> {
+    const params: Record<string, string> = {};
+    if (page !== undefined) params.page = String(page);
+    if (perPage !== undefined) params.per_page = String(perPage);
+    if (search !== undefined && search.trim() !== '') params.search = search;
+    return apiFetch<ApiResponse<Deal[]>>('/deals/list', { params });
   },
 
   /**

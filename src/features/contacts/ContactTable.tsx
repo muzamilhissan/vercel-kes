@@ -19,10 +19,23 @@ interface ContactTableProps {
   onDelete: (contact: Contact) => void;
   onAccountClick: (accountId: string) => void;
   onView: (contact: Contact) => void;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
 }
 
-const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete, onAccountClick, onView }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const ContactTable: React.FC<ContactTableProps> = ({ 
+  contacts, 
+  onEdit, 
+  onDelete, 
+  onAccountClick, 
+  onView,
+  currentPage,
+  totalPages,
+  totalItems,
+  onPageChange
+}) => {
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'jobTitle' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const itemsPerPage = 10;
 
@@ -36,10 +49,9 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete,
     });
   }, [contacts, sortConfig]);
 
-  const totalPages = Math.ceil(sortedContacts.length / itemsPerPage) || 1;
-  const activePage = Math.min(currentPage, totalPages);
+  const activePage = currentPage;
   const startIndex = (activePage - 1) * itemsPerPage;
-  const displayedContacts = sortedContacts.slice(startIndex, startIndex + itemsPerPage);
+  const displayedContacts = sortedContacts;
 
   const handleSort = (key: 'name' | 'jobTitle' | 'email' | 'phone') => {
     setSortConfig(prev => {
@@ -48,7 +60,6 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete,
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(1);
   };
 
   const getPageNumbers = () => {
@@ -198,14 +209,14 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete,
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
             <span className="pagination-highlight">
-              {Math.min(startIndex + itemsPerPage, contacts.length)}
+              {Math.min(startIndex + itemsPerPage, totalItems)}
             </span>{' '}
-            of <span className="pagination-highlight">{contacts.length}</span> entries
+            of <span className="pagination-highlight">{totalItems}</span> entries
           </div>
           <div className="pagination-buttons">
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => onPageChange(Math.max(activePage - 1, 1))}
               disabled={activePage === 1}
               aria-label="Previous page"
             >
@@ -224,7 +235,7 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete,
                 <button
                   key={`page-${page}`}
                   className={`pagination-btn ${activePage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(Number(page))}
+                  onClick={() => onPageChange(Number(page))}
                 >
                   {page}
                 </button>
@@ -233,7 +244,7 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete,
 
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => onPageChange(Math.min(activePage + 1, totalPages))}
               disabled={activePage === totalPages}
               aria-label="Next page"
             >

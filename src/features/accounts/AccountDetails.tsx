@@ -25,8 +25,8 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
         setLoading(true);
         try {
           const [contactsRes, dealsRes] = await Promise.all([
-            contactService.list() as any,
-            dealService.list() as any
+            contactService.list(1, 10) as any,
+            dealService.list(1, 10) as any
           ]);
           
           const apiContacts = contactsRes.contacts || contactsRes.data?.contacts || contactsRes.data;

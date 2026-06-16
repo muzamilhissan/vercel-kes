@@ -9,10 +9,22 @@ interface AccountTableProps {
   onEdit: (account: Account) => void;
   onDelete: (account: Account) => void;
   onView: (account: Account) => void;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
 }
 
-const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete, onView }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const AccountTable: React.FC<AccountTableProps> = ({ 
+  accounts, 
+  onEdit, 
+  onDelete, 
+  onView,
+  currentPage,
+  totalPages,
+  totalItems,
+  onPageChange
+}) => {
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'industry' | 'website' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
@@ -35,10 +47,9 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
     });
   }, [accounts, sortConfig]);
 
-  const totalPages = Math.ceil(sortedAccounts.length / itemsPerPage) || 1;
-  const activePage = Math.min(currentPage, totalPages);
+  const activePage = currentPage;
   const startIndex = (activePage - 1) * itemsPerPage;
-  const displayedAccounts = sortedAccounts.slice(startIndex, startIndex + itemsPerPage);
+  const displayedAccounts = sortedAccounts;
 
   const handleSort = (key: 'name' | 'industry' | 'website') => {
     setSortConfig(prev => {
@@ -51,7 +62,6 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(1);
   };
 
   const getPageNumbers = () => {
@@ -184,14 +194,14 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
             <span className="pagination-highlight">
-              {Math.min(startIndex + itemsPerPage, accounts.length)}
+              {Math.min(startIndex + itemsPerPage, totalItems)}
             </span>{' '}
-            of <span className="pagination-highlight">{accounts.length}</span> entries
+            of <span className="pagination-highlight">{totalItems}</span> entries
           </div>
           <div className="pagination-buttons">
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => onPageChange(Math.max(activePage - 1, 1))}
               disabled={activePage === 1}
               aria-label="Previous page"
             >
@@ -210,7 +220,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
                 <button
                   key={`page-${page}`}
                   className={`pagination-btn ${activePage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(Number(page))}
+                  onClick={() => onPageChange(Number(page))}
                 >
                   {page}
                 </button>
@@ -219,7 +229,7 @@ const AccountTable: React.FC<AccountTableProps> = ({ accounts, onEdit, onDelete,
 
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => onPageChange(Math.min(activePage + 1, totalPages))}
               disabled={activePage === totalPages}
               aria-label="Next page"
             >

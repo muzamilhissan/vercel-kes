@@ -6,8 +6,12 @@ export const accountService = {
    * Get all accounts.
    * GET /accounts/list
    */
-  async list(): Promise<ApiResponse<Account[]>> {
-    return apiFetch<ApiResponse<Account[]>>('/accounts/list');
+  async list(page?: number, perPage?: number, search?: string): Promise<ApiResponse<Account[]>> {
+    const params: Record<string, string> = {};
+    if (page !== undefined) params.page = String(page);
+    if (perPage !== undefined) params.per_page = String(perPage);
+    if (search !== undefined && search.trim() !== '') params.search = search;
+    return apiFetch<ApiResponse<Account[]>>('/accounts/list', { params });
   },
 
   /**

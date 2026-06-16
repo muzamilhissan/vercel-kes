@@ -65,6 +65,9 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [isDeletingLead, setIsDeletingLead] = useState(false);
   const [isConvertingLead, setIsConvertingLead] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('globalSearchQuery') || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -80,28 +83,31 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     };
   }, []);
 
-  const filteredLeads = leads.filter(lead => {
-    const query = searchQuery.toLowerCase();
-    return (
-      lead.name.toLowerCase().includes(query) ||
-      lead.company.toLowerCase().includes(query) ||
-      lead.email.toLowerCase().includes(query) ||
-      lead.phone.toLowerCase().includes(query)
-    );
-  });
+  const filteredLeads = leads;
 
-  const fetchLeads = async () => {
+  const fetchLeads = async (page?: number | any, query?: string) => {
+    const pageNum = typeof page === 'number' ? page : currentPage;
+    const queryStr = typeof query === 'string' ? query : searchQuery;
     try {
       setLoading(true);
       setError(null);
-      const res = await leadService.list() as any;
+      const res = await leadService.list(pageNum, 10, queryStr) as any;
       if (res.success) {
         const apiLeads = res.leads || res.data?.leads || res.data;
         if (Array.isArray(apiLeads)) {
           setLeads(apiLeads.map(mapApiLeadToFrontendLead));
+          if (res.meta) {
+            setTotalPages(res.meta.last_page || 1);
+            setTotalItems(res.meta.total || 0);
+          } else {
+            setTotalPages(1);
+            setTotalItems(apiLeads.length);
+          }
           window.dispatchEvent(new CustomEvent('leadsUpdated'));
         } else {
           setLeads([]);
+          setTotalPages(1);
+          setTotalItems(0);
           window.dispatchEvent(new CustomEvent('leadsUpdated'));
         }
       } else {
@@ -116,8 +122,16 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   };
 
   useEffect(() => {
-    fetchLeads();
-  }, []);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchLeads(1, searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchLeads(currentPage, searchQuery);
+  }, [currentPage]);
 
   const handleSaveLead = async (leadData: Lead) => {
     try {
@@ -246,6 +260,10 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }} 
           onConvert={(l) => { setSelectedLead(l); setIsConvertModalOpen(true); }} 
           onView={(l) => { setSelectedLead(l); setIsDetailsModalOpen(true); }}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
         />
       )}
 

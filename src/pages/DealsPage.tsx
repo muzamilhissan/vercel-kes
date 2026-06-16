@@ -37,14 +37,19 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [error, setError] = useState<string | null>(null);
   const [isDeletingDeal, setIsDeletingDeal] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('globalSearchQuery') || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchDealsAndAccounts = async () => {
+  const fetchDealsAndAccounts = async (page?: number | any, query?: string) => {
+    const pageNum = typeof page === 'number' ? page : currentPage;
+    const queryStr = typeof query === 'string' ? query : searchQuery;
     try {
       setLoading(true);
       setError(null);
       
-      // Load accounts first for lookup mapping
-      const accountsRes = await accountService.list() as any;
+      // Load accounts first for lookup mapping (load all using high limit)
+      const accountsRes = await accountService.list(1, 10) as any;
       let accountsList: Account[] = [];
       if (accountsRes.success) {
         const apiAccounts = accountsRes.accounts || accountsRes.data?.accounts || accountsRes.data;
@@ -55,7 +60,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       }
 
       // Load deals
-      const dealsRes = await dealService.list() as any;
+      const dealsRes = await dealService.list(pageNum, 10, queryStr) as any;
       if (dealsRes.success) {
         const apiDeals = dealsRes.deals || dealsRes.data?.deals || dealsRes.data;
         if (Array.isArray(apiDeals)) {
@@ -73,13 +78,24 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
             };
           });
           setDeals(mappedDeals);
+          if (dealsRes.meta) {
+            setTotalPages(dealsRes.meta.last_page || 1);
+            setTotalItems(dealsRes.meta.total || 0);
+          } else {
+            setTotalPages(1);
+            setTotalItems(apiDeals.length);
+          }
           window.dispatchEvent(new CustomEvent('dealsUpdated'));
         } else {
           setDeals([]);
+          setTotalPages(1);
+          setTotalItems(0);
           window.dispatchEvent(new CustomEvent('dealsUpdated'));
         }
       } else {
         setDeals([]);
+        setTotalPages(1);
+        setTotalItems(0);
         window.dispatchEvent(new CustomEvent('dealsUpdated'));
       }
     } catch (err: any) {
@@ -91,8 +107,16 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   };
 
   useEffect(() => {
-    fetchDealsAndAccounts();
-  }, []);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchDealsAndAccounts(1, searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchDealsAndAccounts(currentPage, searchQuery);
+  }, [currentPage]);
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -108,14 +132,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     };
   }, []);
 
-  const filteredDeals = deals.filter(deal => {
-    const query = searchQuery.toLowerCase();
-    return (
-      deal.name.toLowerCase().includes(query) ||
-      deal.accountName.toLowerCase().includes(query) ||
-      deal.stage.toLowerCase().includes(query)
-    );
-  });
+  const filteredDeals = deals;
 
   const handleAccountClick = (accountId: string) => {
     localStorage.setItem('autoOpenAccountDetailsId', accountId);
@@ -219,6 +236,10 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           onEdit={(d) => { setSelectedDeal(d); setIsDealModalOpen(true); }} 
           onDelete={(d) => { setSelectedDeal(d); setIsDeleteModalOpen(true); }} 
           onAccountClick={handleAccountClick}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
         />
       )}
 

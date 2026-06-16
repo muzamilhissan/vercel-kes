@@ -21,6 +21,9 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('globalSearchQuery') || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -36,18 +39,29 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     };
   }, []);
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = async (page?: number | any, query?: string) => {
+    const pageNum = typeof page === 'number' ? page : currentPage;
+    const queryStr = typeof query === 'string' ? query : searchQuery;
     try {
       setLoading(true);
       setError(null);
-      const res = await accountService.list() as any;
+      const res = await accountService.list(pageNum, 10, queryStr) as any;
       if (res.success) {
         const apiAccounts = res.accounts || res.data?.accounts || res.data;
         if (Array.isArray(apiAccounts)) {
           setAccounts(apiAccounts);
+          if (res.meta) {
+            setTotalPages(res.meta.last_page || 1);
+            setTotalItems(res.meta.total || 0);
+          } else {
+            setTotalPages(1);
+            setTotalItems(apiAccounts.length);
+          }
           window.dispatchEvent(new CustomEvent('accountsUpdated'));
         } else {
           setAccounts([]);
+          setTotalPages(1);
+          setTotalItems(0);
           window.dispatchEvent(new CustomEvent('accountsUpdated'));
         }
       } else {
@@ -62,8 +76,16 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   };
 
   useEffect(() => {
-    fetchAccounts();
-  }, []);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchAccounts(1, searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchAccounts(currentPage, searchQuery);
+  }, [currentPage]);
 
   useEffect(() => {
     if (!loading && accounts.length > 0) {
@@ -147,15 +169,7 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     }
   };
 
-  const filteredAccounts = accounts.filter(account => {
-    const query = searchQuery.toLowerCase();
-    return (
-      (account.name || '').toLowerCase().includes(query) ||
-      (account.industry || '').toLowerCase().includes(query) ||
-      (account.website || '').toLowerCase().includes(query) ||
-      (account.description || '').toLowerCase().includes(query)
-    );
-  });
+  const filteredAccounts = accounts;
 
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
@@ -197,6 +211,10 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
           onEdit={(a) => { setSelectedAccount(a); setIsModalOpen(true); }} 
           onDelete={(a) => { setSelectedAccount(a); setIsDeleteModalOpen(true); }} 
           onView={(a) => { setSelectedAccount(a); setIsDetailsOpen(true); }} 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
         />
       )}
 

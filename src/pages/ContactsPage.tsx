@@ -33,6 +33,9 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('globalSearchQuery') || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -48,25 +51,18 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     };
   }, []);
 
-  const filteredContacts = contacts.filter(contact => {
-    const query = searchQuery.toLowerCase();
-    return (
-      contact.name.toLowerCase().includes(query) ||
-      contact.jobTitle.toLowerCase().includes(query) ||
-      contact.email.toLowerCase().includes(query) ||
-      contact.phone.toLowerCase().includes(query) ||
-      contact.accountName.toLowerCase().includes(query)
-    );
-  });
+  const filteredContacts = contacts;
 
-  const fetchData = async () => {
+  const fetchData = async (page?: number | any, query?: string) => {
+    const pageNum = typeof page === 'number' ? page : currentPage;
+    const queryStr = typeof query === 'string' ? query : searchQuery;
     try {
       setLoading(true);
       setError(null);
       
       const [contactsRes, accountsRes] = await Promise.all([
-        contactService.list() as any,
-        accountService.list() as any
+        contactService.list(pageNum, 10, queryStr) as any,
+        accountService.list(1, 10) as any
       ]);
 
       if (accountsRes.success) {
@@ -80,9 +76,18 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
         const apiContacts = contactsRes.contacts || contactsRes.data?.contacts || contactsRes.data;
         if (Array.isArray(apiContacts)) {
           setContacts(apiContacts.map(mapApiContactToFrontendContact));
+          if (contactsRes.meta) {
+            setTotalPages(contactsRes.meta.last_page || 1);
+            setTotalItems(contactsRes.meta.total || 0);
+          } else {
+            setTotalPages(1);
+            setTotalItems(apiContacts.length);
+          }
           window.dispatchEvent(new CustomEvent('contactsUpdated'));
         } else {
           setContacts([]);
+          setTotalPages(1);
+          setTotalItems(0);
           window.dispatchEvent(new CustomEvent('contactsUpdated'));
         }
       } else {
@@ -97,8 +102,16 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchData(1, searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchData(currentPage, searchQuery);
+  }, [currentPage]);
 
   const handleSave = async (contactData: Contact) => {
     try {
@@ -210,6 +223,10 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
           onDelete={(c) => { setSelectedContact(c); setIsDeleteModalOpen(true); }} 
           onAccountClick={handleAccountClick}
           onView={(c) => { setSelectedContact(c); setIsDetailsOpen(true); }}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
         />
       )}
 

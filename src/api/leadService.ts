@@ -6,8 +6,12 @@ export const leadService = {
    * Get all leads.
    * GET /leads/list
    */
-  async list(): Promise<ApiResponse<Lead[]>> {
-    return apiFetch<ApiResponse<Lead[]>>('/leads/list');
+  async list(page?: number, perPage?: number, search?: string): Promise<ApiResponse<Lead[]>> {
+    const params: Record<string, string> = {};
+    if (page !== undefined) params.page = String(page);
+    if (perPage !== undefined) params.per_page = String(perPage);
+    if (search !== undefined && search.trim() !== '') params.search = search;
+    return apiFetch<ApiResponse<Lead[]>>('/leads/list', { params });
   },
 
   /**

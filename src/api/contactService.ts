@@ -6,8 +6,12 @@ export const contactService = {
    * Get all contacts.
    * GET /contacts/list
    */
-  async list(): Promise<ApiResponse<Contact[]>> {
-    return apiFetch<ApiResponse<Contact[]>>('/contacts/list');
+  async list(page?: number, perPage?: number, search?: string): Promise<ApiResponse<Contact[]>> {
+    const params: Record<string, string> = {};
+    if (page !== undefined) params.page = String(page);
+    if (perPage !== undefined) params.per_page = String(perPage);
+    if (search !== undefined && search.trim() !== '') params.search = search;
+    return apiFetch<ApiResponse<Contact[]>>('/contacts/list', { params });
   },
 
   /**

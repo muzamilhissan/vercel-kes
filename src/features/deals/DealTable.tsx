@@ -19,10 +19,23 @@ interface DealTableProps {
   onDelete: (deal: FrontendDeal) => void;
   onView: (deal: FrontendDeal) => void;
   onAccountClick: (accountId: string) => void;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
 }
 
-const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, onAccountClick }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const DealTable: React.FC<DealTableProps> = ({ 
+  deals, 
+  onEdit, 
+  onDelete, 
+  onView, 
+  onAccountClick,
+  currentPage,
+  totalPages,
+  totalItems,
+  onPageChange
+}) => {
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'accountName' | 'value' | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc'
@@ -46,10 +59,9 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, 
     });
   }, [deals, sortConfig]);
 
-  const totalPages = Math.ceil(sortedDeals.length / itemsPerPage) || 1;
-  const activePage = Math.min(currentPage, totalPages);
+  const activePage = currentPage;
   const startIndex = (activePage - 1) * itemsPerPage;
-  const displayedDeals = sortedDeals.slice(startIndex, startIndex + itemsPerPage);
+  const displayedDeals = sortedDeals;
 
   const handleSort = (key: 'name' | 'accountName' | 'value') => {
     setSortConfig(prev => {
@@ -62,7 +74,6 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, 
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(1);
   };
 
   const getPageNumbers = () => {
@@ -222,14 +233,14 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, 
           <div className="pagination-info">
             Showing <span className="pagination-highlight">{startIndex + 1}</span> to{' '}
             <span className="pagination-highlight">
-              {Math.min(startIndex + itemsPerPage, deals.length)}
+              {Math.min(startIndex + itemsPerPage, totalItems)}
             </span>{' '}
-            of <span className="pagination-highlight">{deals.length}</span> entries
+            of <span className="pagination-highlight">{totalItems}</span> entries
           </div>
           <div className="pagination-buttons">
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => onPageChange(Math.max(activePage - 1, 1))}
               disabled={activePage === 1}
               aria-label="Previous page"
             >
@@ -248,7 +259,7 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, 
                 <button
                   key={`page-${page}`}
                   className={`pagination-btn ${activePage === page ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(Number(page))}
+                  onClick={() => onPageChange(Number(page))}
                 >
                   {page}
                 </button>
@@ -257,7 +268,7 @@ const DealTable: React.FC<DealTableProps> = ({ deals, onEdit, onDelete, onView, 
 
             <button
               className="pagination-btn"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => onPageChange(Math.min(activePage + 1, totalPages))}
               disabled={activePage === totalPages}
               aria-label="Next page"
             >
