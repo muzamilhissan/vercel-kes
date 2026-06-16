@@ -244,7 +244,7 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         onClose={() => !deletingId && setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         itemName={fileToDelete ? (fileToDelete.file_name || (fileToDelete as any).original_name || 'Unnamed file') : ''}
-        isDeleting={deletingId !== null && fileToDelete && deletingId === fileToDelete.id}
+        isDeleting={!!(deletingId && fileToDelete && deletingId === fileToDelete.id)}
       />
     </div>
   );
