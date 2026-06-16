@@ -25,21 +25,25 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
         setLoading(true);
         try {
           const [contactsRes, dealsRes] = await Promise.all([
-            contactService.list(),
-            dealService.list()
+            contactService.list() as any,
+            dealService.list() as any
           ]);
           
-          if (contactsRes.success && Array.isArray(contactsRes.data)) {
-            const filteredContacts = contactsRes.data.filter(
+          const apiContacts = contactsRes.contacts || contactsRes.data?.contacts || contactsRes.data;
+          if (contactsRes.success && Array.isArray(apiContacts)) {
+            const filteredContacts = apiContacts.filter(
               c => String(c.account_id) === String(account.id)
             );
             setContacts(filteredContacts);
           }
           
-          if (dealsRes.success && Array.isArray(dealsRes.data)) {
-            const filteredDeals = dealsRes.data.filter(
-              d => String(d.account_id) === String(account.id)
-            );
+          const apiDeals = dealsRes.deals || dealsRes.data?.deals || dealsRes.data;
+          if (dealsRes.success && Array.isArray(apiDeals)) {
+            const filteredDeals = apiDeals.filter(d => {
+              if (String(d.account_id) !== String(account.id)) return false;
+              const stageLower = (d.stage || '').toLowerCase().trim();
+              return stageLower === 'new' || stageLower.includes('progress') || stageLower.includes('process');
+            });
             setDeals(filteredDeals);
           }
         } catch (err) {
@@ -111,10 +115,10 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
                 </div>
               </section>
               <section className="details-section">
-                <div className="section-title"><Briefcase size={18} /> <h3>Related deals ({deals.length})</h3></div>
+                <div className="section-title"><Briefcase size={18} /> <h3>Open deals ({deals.length})</h3></div>
                 <div className="linked-list">
                   {deals.length === 0 ? (
-                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>No related deals found.</span>
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>No open deals found.</span>
                   ) : (
                     deals.map(d => (
                       <div key={d.id} className="linked-item">

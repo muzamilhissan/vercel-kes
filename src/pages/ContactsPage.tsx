@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import ContactTable, { Contact } from '../features/contacts/ContactTable';
 import ContactModal from '../features/contacts/ContactModal';
+import ContactDetailsModal from '../features/contacts/ContactDetailsModal';
 import DeleteModal from '../features/leads/DeleteModal';
-import { UserPlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { contactService } from '../api/contactService';
 import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
@@ -27,6 +28,7 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -162,6 +164,11 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     }
   };
 
+  const handleAccountClick = (accountId: string) => {
+    localStorage.setItem('autoOpenAccountDetailsId', accountId);
+    onNavigate('accounts');
+  };
+
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
       <div className="page-header">
@@ -174,7 +181,7 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
             onClick={() => { setSelectedContact(null); setIsModalOpen(true); }} 
             className="btn-primary"
           >
-            <UserPlus size={16} /> 
+            <Plus size={16} /> 
             <span>Add Contact</span>
           </button>
         </div>
@@ -201,11 +208,14 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
           contacts={filteredContacts} 
           onEdit={(c) => { setSelectedContact(c); setIsModalOpen(true); }} 
           onDelete={(c) => { setSelectedContact(c); setIsDeleteModalOpen(true); }} 
+          onAccountClick={handleAccountClick}
+          onView={(c) => { setSelectedContact(c); setIsDetailsOpen(true); }}
         />
       )}
 
       <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} initialData={selectedContact} accounts={accounts} />
       <DeleteModal isOpen={isDeleteModalOpen} onClose={() => !isDeleting && setIsDeleteModalOpen(false)} onConfirm={handleDelete} itemName={selectedContact?.name || ''} isDeleting={isDeleting} />
+      <ContactDetailsModal isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} contact={selectedContact} />
     </MainLayout>
   );
 };

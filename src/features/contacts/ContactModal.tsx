@@ -90,11 +90,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
             <div className="contact-form-row-3">
               <div className="form-group">
                 <label>Full Name <span className="required-asterisk">*</span></label>
-                <input type="text" placeholder="Enter full name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+                <input type="text" placeholder="Enter full name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} maxLength={150} required />
               </div>
               <div className="form-group">
                 <label>Job Title <span className="required-asterisk">*</span></label>
-                <input type="text" placeholder="Enter job title" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} required />
+                <input type="text" placeholder="Enter job title" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} maxLength={150} required />
               </div>
               <div className="form-group">
                 <label>Account <span className="required-asterisk">*</span></label>

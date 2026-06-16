@@ -51,7 +51,7 @@ const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ isOpen, onClose, le
             </div>
           </div>
         </div>
-        <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '20px 32px 24px', display: 'flex', justifyContent: 'flex-end', background: '#f8fafc' }}>
+        <div className="modal-footer" style={{ borderTop: '1px solid #f1f5f9', padding: '20px 32px 24px', display: 'flex', justifyContent: 'flex-end', background: '#f8fafc', borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           <button onClick={onClose} className="btn-premium-primary" style={{ padding: '10px 24px', borderRadius: '10px' }}>
             Close
           </button>

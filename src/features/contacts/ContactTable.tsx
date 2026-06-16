@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, Mail, Phone, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Mail, Phone, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import './ContactTable.css';
 import { capitalize } from '../../utils/stringUtils';
 
@@ -17,9 +17,11 @@ interface ContactTableProps {
   contacts: Contact[];
   onEdit: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
+  onAccountClick: (accountId: string) => void;
+  onView: (contact: Contact) => void;
 }
 
-const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete }) => {
+const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete, onAccountClick, onView }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: 'name' | 'jobTitle' | 'email' | 'phone' | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const itemsPerPage = 10;
@@ -130,7 +132,7 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete 
                   )}
                 </div>
               </th>
-              <th className="text-right">Actions</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -148,19 +150,39 @@ const ContactTable: React.FC<ContactTableProps> = ({ contacts, onEdit, onDelete 
                 return (
                   <tr key={contact.id}>
                     <td>
-                      <div className="avatar-cell">
-                        <div className="avatar-circle">{displayName.charAt(0)}</div>
-                        <span style={{ fontWeight: 600 }}>{displayName}</span>
-                      </div>
+                      <span style={{ fontWeight: 600 }}>{displayName}</span>
                     </td>
                     <td style={{ color: '#64748b' }}>{displayJobTitle}</td>
-                    <td style={{ fontWeight: 600, color: '#70309f' }}>{contact.accountName}</td>
+                    <td>
+                      {contact.accountId ? (
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAccountClick(contact.accountId);
+                          }}
+                          style={{ 
+                            color: '#70309f', 
+                            fontWeight: 600, 
+                            cursor: 'pointer'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                        >
+                          {contact.accountName}
+                        </span>
+                      ) : (
+                        <span style={{ fontWeight: 600, color: '#64748b' }}>
+                          {contact.accountName}
+                        </span>
+                      )}
+                    </td>
                     <td>{contact.email}</td>
                     <td>{contact.phone}</td>
-                    <td className="text-right">
-                      <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
-                        <button className="action-btn" onClick={() => onEdit(contact)}><Edit2 size={16} /></button>
-                        <button className="action-btn" style={{ color: '#ef4444' }} onClick={() => onDelete(contact)}><Trash2 size={16} /></button>
+                    <td className="text-center">
+                      <div className="table-actions" style={{ justifyContent: 'center' }}>
+                        <button className="action-btn" title="View Contact Details" onClick={() => onView(contact)}><Eye size={16} /></button>
+                        <button className="action-btn" title="Edit Contact" onClick={() => onEdit(contact)}><Edit2 size={16} /></button>
+                        <button className="action-btn" title="Delete Contact" style={{ color: '#ef4444' }} onClick={() => onDelete(contact)}><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
