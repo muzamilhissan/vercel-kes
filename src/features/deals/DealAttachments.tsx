@@ -122,11 +122,19 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
           fileInputRef.current.value = '';
         }
       } else {
-        showToast(res.message || 'Failed to upload file', 'error');
+        let errorMsg = res.message || 'Failed to upload file';
+        if (errorMsg.toLowerCase().includes('unsupported file type')) {
+          errorMsg = 'File type not supported';
+        }
+        showToast(errorMsg, 'error');
       }
     } catch (err: any) {
       console.error(err);
-      showToast(err.message || 'Error uploading file', 'error');
+      let errorMsg = err.message || 'Error uploading file';
+      if (errorMsg.toLowerCase().includes('unsupported file type')) {
+        errorMsg = 'File type not supported';
+      }
+      showToast(errorMsg, 'error');
     } finally {
       setUploading(false);
     }
