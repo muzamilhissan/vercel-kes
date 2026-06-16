@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Folder } from 'lucide-react';
 import './DealTable.css';
 
 export interface FrontendDeal {
@@ -18,6 +18,7 @@ interface DealTableProps {
   onEdit: (deal: FrontendDeal) => void;
   onDelete: (deal: FrontendDeal) => void;
   onView: (deal: FrontendDeal) => void;
+  onFilesClick: (deal: FrontendDeal) => void;
   onAccountClick: (accountId: string) => void;
   currentPage: number;
   totalPages: number;
@@ -30,6 +31,7 @@ const DealTable: React.FC<DealTableProps> = ({
   onEdit, 
   onDelete, 
   onView, 
+  onFilesClick,
   onAccountClick,
   currentPage,
   totalPages,
@@ -216,6 +218,7 @@ const DealTable: React.FC<DealTableProps> = ({
                   </td>
                   <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
+                      <button className="action-btn" title="Manage Attachments" style={{ color: '#70309f' }} onClick={() => onFilesClick(deal)}><Folder size={16} /></button>
                       <button className="action-btn" title="Edit Deal" onClick={() => onEdit(deal)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Deal" style={{ color: '#ef4444' }} onClick={() => onDelete(deal)}><Trash2 size={16} /></button>
                     </div>

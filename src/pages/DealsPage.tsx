@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout';
 import DealTable, { FrontendDeal } from '../features/deals/DealTable';
 import DealModal from '../features/deals/DealModal';
 import DealDetailsModal from '../features/deals/DealDetailsModal';
+import DealAttachmentsModal from '../features/deals/DealAttachmentsModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import { Plus } from 'lucide-react';
 import { dealService } from '../api/dealService';
@@ -32,6 +33,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [selectedDeal, setSelectedDeal] = useState<FrontendDeal | null>(null);
   const [isDealModalOpen, setIsDealModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isAttachmentsModalOpen, setIsAttachmentsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -243,6 +245,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         <DealTable 
           deals={filteredDeals} 
           onView={(d) => { setSelectedDeal(d); setIsViewModalOpen(true); }}
+          onFilesClick={(d) => { setSelectedDeal(d); setIsAttachmentsModalOpen(true); }}
           onEdit={(d) => { setSelectedDeal(d); setIsDealModalOpen(true); }} 
           onDelete={(d) => { setSelectedDeal(d); setIsDeleteModalOpen(true); }} 
           onAccountClick={handleAccountClick}
@@ -273,6 +276,12 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         onConfirm={handleDeleteDeal} 
         itemName={selectedDeal?.name || ''} 
         isDeleting={isDeletingDeal} 
+      />
+      
+      <DealAttachmentsModal
+        isOpen={isAttachmentsModalOpen}
+        onClose={() => setIsAttachmentsModalOpen(false)}
+        deal={selectedDeal}
       />
     </MainLayout>
   );
