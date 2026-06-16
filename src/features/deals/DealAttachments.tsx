@@ -23,7 +23,6 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   // Operation indicators for files
   const [downloadingId, setDownloadingId] = useState<string | number | null>(null);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
-  const [loadingSignedUrlId, setLoadingSignedUrlId] = useState<string | number | null>(null);
   
   const [isDragging, setIsDragging] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<DealFile | null>(null);
@@ -127,19 +126,6 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
     }
   };
 
-  const handleOpenSignedUrl = async (file: DealFile) => {
-    try {
-      setLoadingSignedUrlId(file.id);
-      const blob = await dealService.downloadFile(dealId, file.id);
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    } catch (err: any) {
-      console.error(err);
-      showToast(err.message || 'Failed to open file', 'error');
-    } finally {
-      setLoadingSignedUrlId(null);
-    }
-  };
 
   const handleDeleteClick = (file: DealFile) => {
     setFileToDelete(file);
@@ -297,10 +283,8 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
             <AttachmentItem
               key={file.id}
               file={file}
-              loadingSignedUrlId={loadingSignedUrlId}
               downloadingId={downloadingId}
               deletingId={deletingId}
-              onOpenSignedUrl={handleOpenSignedUrl}
               onDownload={handleDownload}
               onDeleteClick={handleDeleteClick}
             />

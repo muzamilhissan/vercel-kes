@@ -7,10 +7,8 @@ import { DealFile } from '../../api/types';
 
 interface AttachmentItemProps {
   file: DealFile;
-  loadingSignedUrlId: string | number | null;
   downloadingId: string | number | null;
   deletingId: string | number | null;
-  onOpenSignedUrl: (file: DealFile) => void;
   onDownload: (file: DealFile) => void;
   onDeleteClick: (file: DealFile) => void;
 }
@@ -67,10 +65,8 @@ const getFileIcon = (filename?: string) => {
 
 const AttachmentItem: React.FC<AttachmentItemProps> = ({
   file,
-  loadingSignedUrlId,
   downloadingId,
   deletingId,
-  onOpenSignedUrl,
   onDownload,
   onDeleteClick
 }) => {
@@ -127,42 +123,10 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({
 
       {/* Right: actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-        {/* View Link / Signed URL button */}
-        <button 
-          onClick={() => onOpenSignedUrl(file)}
-          disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
-          title="View File Link"
-          style={{ 
-            width: '28px', 
-            height: '28px', 
-            borderRadius: '6px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            background: 'transparent', 
-            color: '#475569',
-            transition: 'background-color 0.2s, color 0.2s'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = '#f1f5f9';
-            e.currentTarget.style.color = '#70309f';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = '#475569';
-          }}
-        >
-          {loadingSignedUrlId === file.id ? (
-            <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-          ) : (
-            <ExternalLink size={14} />
-          )}
-        </button>
-
         {/* Download button */}
         <button 
           onClick={() => onDownload(file)}
-          disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
+          disabled={downloadingId !== null || deletingId !== null}
           title="Download Attachment"
           style={{ 
             width: '28px', 
@@ -194,7 +158,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({
         {/* Delete button */}
         <button 
           onClick={() => onDeleteClick(file)}
-          disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
+          disabled={downloadingId !== null || deletingId !== null}
           title="Delete Attachment"
           style={{ 
             width: '28px', 
