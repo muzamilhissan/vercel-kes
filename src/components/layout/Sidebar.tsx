@@ -52,6 +52,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
       <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
         <X size={20} />
       </button>
+      <div className="sidebar-brand">
+        <img src="/nobg-logo.png" alt="KES Logo" className="sidebar-logo" />
+      </div>
       <div className="sidebar-profile">
         <div className="avatar-wrapper">
           <div className="status-ring"></div>
