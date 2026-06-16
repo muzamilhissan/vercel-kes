@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import './DealTable.css';
 
 export interface FrontendDeal {
@@ -186,7 +186,7 @@ const DealTable: React.FC<DealTableProps> = ({
               </tr>
             ) : (
               displayedDeals.map(deal => (
-                <tr key={deal.id}>
+                <tr key={deal.id} onClick={() => onView(deal)} style={{ cursor: 'pointer' }} className="clickable-row">
                   <td>
                     <span className="lead-name-value">{deal.name}</span>
                   </td>
@@ -214,9 +214,8 @@ const DealTable: React.FC<DealTableProps> = ({
                       {deal.stage}
                     </span>
                   </td>
-                  <td className="text-center">
+                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button className="action-btn" title="View Deal Details" onClick={() => onView(deal)}><Eye size={16} /></button>
                       <button className="action-btn" title="Edit Deal" onClick={() => onEdit(deal)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Deal" style={{ color: '#ef4444' }} onClick={() => onDelete(deal)}><Trash2 size={16} /></button>
                     </div>

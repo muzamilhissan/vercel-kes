@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, Mail, Phone, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Mail, Phone, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import './ContactTable.css';
 import { capitalize } from '../../utils/stringUtils';
 
@@ -159,7 +159,7 @@ const ContactTable: React.FC<ContactTableProps> = ({
                 const displayJobTitle = contact.jobTitle ? capitalize(contact.jobTitle) : 'N/A';
                 
                 return (
-                  <tr key={contact.id}>
+                  <tr key={contact.id} onClick={() => onView(contact)} style={{ cursor: 'pointer' }} className="clickable-row">
                     <td>
                       <span style={{ fontWeight: 600 }}>{displayName}</span>
                     </td>
@@ -189,9 +189,8 @@ const ContactTable: React.FC<ContactTableProps> = ({
                     </td>
                     <td>{contact.email}</td>
                     <td>{contact.phone}</td>
-                    <td className="text-center">
+                    <td className="text-center" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions" style={{ justifyContent: 'center' }}>
-                        <button className="action-btn" title="View Contact Details" onClick={() => onView(contact)}><Eye size={16} /></button>
                         <button className="action-btn" title="Edit Contact" onClick={() => onEdit(contact)}><Edit2 size={16} /></button>
                         <button className="action-btn" title="Delete Contact" style={{ color: '#ef4444' }} onClick={() => onDelete(contact)}><Trash2 size={16} /></button>
                       </div>

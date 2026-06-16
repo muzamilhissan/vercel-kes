@@ -67,7 +67,10 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
         try {
           const d = new Date(initialData.closeDate);
           if (!isNaN(d.getTime())) {
-            formattedDate = d.toISOString().split('T')[0];
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            formattedDate = `${yyyy}-${mm}-${dd}`;
           }
         } catch {}
       }

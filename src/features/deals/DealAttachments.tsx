@@ -35,7 +35,8 @@ const formatDateString = (dateStr?: string): string => {
   }
 };
 
-const getFileIcon = (filename: string) => {
+const getFileIcon = (filename?: string) => {
+  if (!filename) return <File size={18} style={{ color: '#64748b' }} />;
   const ext = filename.split('.').pop()?.toLowerCase();
   if (!ext) return <File size={18} style={{ color: '#64748b' }} />;
   
@@ -82,7 +83,9 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
       setErrorFiles(null);
       const res = await dealService.listFiles(dealId);
       if (res.success) {
-        setFiles(res.data || []);
+        const fileList = (res as any).files || (res.data as any)?.files || res.data || [];
+        const validFiles = Array.isArray(fileList) ? fileList.filter((f: any) => f && typeof f === 'object') : [];
+        setFiles(validFiles);
       } else {
         setErrorFiles(res.message || 'Failed to load files');
       }
@@ -150,7 +153,7 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = file.file_name || 'download';
+      a.download = file.file_name || (file as any).original_name || 'download';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -167,8 +170,9 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
     try {
       setLoadingSignedUrlId(file.id);
       const res = await dealService.getSignedUrl(dealId, file.id);
-      if (res.success && res.data?.url) {
-        window.open(res.data.url, '_blank', 'noopener,noreferrer');
+      const url = (res as any).signed_url || res.data?.url || (res.data as any)?.signed_url;
+      if (res.success && url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
       } else {
         showToast(res.message || 'Failed to get signed URL', 'error');
       }
@@ -181,7 +185,8 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   };
 
   const handleDeleteFile = async (file: DealFile) => {
-    if (!confirm(`Are you sure you want to delete "${file.file_name}"?`)) return;
+    const fileName = file.file_name || (file as any).original_name || 'Unnamed file';
+    if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
     try {
       setDeletingId(file.id);
       const res = await dealService.deleteFile(dealId, file.id);
@@ -272,155 +277,159 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {files.map(file => (
-            <div 
-              key={file.id} 
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'space-between', 
-                padding: '10px 14px', 
-                background: '#ffffff', 
-                borderRadius: '10px', 
-                border: '1.5px solid #e2e8f0',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = '#70309f';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(112, 48, 159, 0.04)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              {/* Left: icon + details */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden', marginRight: '16px' }}>
-                <div style={{ display: 'flex', flexShrink: 0 }}>
-                  {getFileIcon(file.file_name)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span 
-                    style={{ 
-                      fontSize: '13px', 
-                      fontWeight: 600, 
-                      color: '#334155', 
-                      whiteSpace: 'nowrap', 
-                      textOverflow: 'ellipsis', 
-                      overflow: 'hidden' 
-                    }}
-                    title={file.file_name}
-                  >
-                    {file.file_name}
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
-                    <span>{formatFileSize(file.file_size)}</span>
-                    <span>•</span>
-                    <span>{formatDateString(file.created_at)}</span>
+          {files.map(file => {
+            const fileName = file.file_name || (file as any).original_name || 'Unnamed File';
+            const fileSize = file.file_size !== undefined ? file.file_size : (file as any).size;
+            
+            return (
+              <div 
+                key={file.id} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  padding: '10px 14px', 
+                  background: '#ffffff', 
+                  borderRadius: '10px', 
+                  border: '1.5px solid #e2e8f0',
+                  transition: 'border-color 0.2s, box-shadow 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = '#70309f';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(112, 48, 159, 0.04)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                {/* Left: icon + details */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden', marginRight: '16px' }}>
+                  <div style={{ display: 'flex', flexShrink: 0 }}>
+                    {getFileIcon(fileName)}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <span 
+                      style={{ 
+                        fontSize: '13px', 
+                        fontWeight: 600, 
+                        color: '#334155', 
+                        whiteSpace: 'nowrap', 
+                        textOverflow: 'ellipsis', 
+                        overflow: 'hidden' 
+                      }}
+                      title={fileName}
+                    >
+                      {fileName}
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
+                      <span>{formatFileSize(fileSize)}</span>
+                      <span>•</span>
+                      <span>{formatDateString(file.created_at)}</span>
+                    </div>
                   </div>
                 </div>
+                {/* Right: actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  {/* View Link / Signed URL button */}
+                  <button 
+                    onClick={() => handleOpenSignedUrl(file)}
+                    disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
+                    title="View File Link"
+                    style={{ 
+                      width: '28px', 
+                      height: '28px', 
+                      borderRadius: '6px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      background: 'transparent', 
+                      color: '#475569',
+                      transition: 'background-color 0.2s, color 0.2s'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#70309f';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#475569';
+                    }}
+                  >
+                    {loadingSignedUrlId === file.id ? (
+                      <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <ExternalLink size={14} />
+                    )}
+                  </button>
+
+                  {/* Download button */}
+                  <button 
+                    onClick={() => handleDownload(file)}
+                    disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
+                    title="Download Attachment"
+                    style={{ 
+                      width: '28px', 
+                      height: '28px', 
+                      borderRadius: '6px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      background: 'transparent', 
+                      color: '#475569',
+                      transition: 'background-color 0.2s, color 0.2s'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = '#f1f5f9';
+                      e.currentTarget.style.color = '#70309f';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#475569';
+                    }}
+                  >
+                    {downloadingId === file.id ? (
+                      <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Download size={14} />
+                    )}
+                  </button>
+
+                  {/* Delete button */}
+                  <button 
+                    onClick={() => handleDeleteFile(file)}
+                    disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
+                    title="Delete Attachment"
+                    style={{ 
+                      width: '28px', 
+                      height: '28px', 
+                      borderRadius: '6px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      background: 'transparent', 
+                      color: '#64748b',
+                      transition: 'background-color 0.2s, color 0.2s'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = '#fff1f1';
+                      e.currentTarget.style.color = '#ef4444';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#64748b';
+                    }}
+                  >
+                    {deletingId === file.id ? (
+                      <Loader2 size={14} style={{ color: '#ef4444', animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                  </button>
+                </div>
               </div>
-
-              {/* Right: actions */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                {/* View Link / Signed URL button */}
-                <button 
-                  onClick={() => handleOpenSignedUrl(file)}
-                  disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
-                  title="View File Link"
-                  style={{ 
-                    width: '28px', 
-                    height: '28px', 
-                    borderRadius: '6px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    background: 'transparent', 
-                    color: '#475569',
-                    transition: 'background-color 0.2s, color 0.2s'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9';
-                    e.currentTarget.style.color = '#70309f';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#475569';
-                  }}
-                >
-                  {loadingSignedUrlId === file.id ? (
-                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                  ) : (
-                    <ExternalLink size={14} />
-                  )}
-                </button>
-
-                {/* Download button */}
-                <button 
-                  onClick={() => handleDownload(file)}
-                  disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
-                  title="Download Attachment"
-                  style={{ 
-                    width: '28px', 
-                    height: '28px', 
-                    borderRadius: '6px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    background: 'transparent', 
-                    color: '#475569',
-                    transition: 'background-color 0.2s, color 0.2s'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9';
-                    e.currentTarget.style.color = '#70309f';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#475569';
-                  }}
-                >
-                  {downloadingId === file.id ? (
-                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                  ) : (
-                    <Download size={14} />
-                  )}
-                </button>
-
-                {/* Delete button */}
-                <button 
-                  onClick={() => handleDeleteFile(file)}
-                  disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
-                  title="Delete Attachment"
-                  style={{ 
-                    width: '28px', 
-                    height: '28px', 
-                    borderRadius: '6px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    background: 'transparent', 
-                    color: '#64748b',
-                    transition: 'background-color 0.2s, color 0.2s'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = '#fff1f1';
-                    e.currentTarget.style.color = '#ef4444';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#64748b';
-                  }}
-                >
-                  {deletingId === file.id ? (
-                    <Loader2 size={14} style={{ color: '#ef4444', animation: 'spin 1s linear infinite' }} />
-                  ) : (
-                    <Trash2 size={14} />
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       

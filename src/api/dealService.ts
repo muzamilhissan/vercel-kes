@@ -109,7 +109,7 @@ export const dealService = {
    * DELETE /deals/:deal/files/:file
    */
   async deleteFile(dealId: string | number, fileId: string | number): Promise<ApiResponse<void>> {
-    return apiFetch<ApiResponse<void>>(`/deals/${dealId}/files/${fileId}`, {
+    return apiFetch<ApiResponse<void>>(`/deals/${dealId}/files/${fileId}/delete`, {
       method: 'DELETE',
     });
   },

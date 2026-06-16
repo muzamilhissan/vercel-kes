@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import './LeadTable.css';
 
 export interface Lead {
@@ -183,7 +183,7 @@ const LeadTable: React.FC<LeadTableProps> = ({
               </tr>
             ) : (
               displayedLeads.map(lead => (
-                <tr key={lead.id}>
+                <tr key={lead.id} onClick={() => onView(lead)} style={{ cursor: 'pointer' }} className="clickable-row">
                   <td>
                     <span className="lead-name-value">{lead.name}</span>
                   </td>
@@ -195,9 +195,8 @@ const LeadTable: React.FC<LeadTableProps> = ({
                       {lead.status}
                     </span>
                   </td>
-                  <td className="text-center">
+                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button className="action-btn" title="View Lead Details" onClick={() => onView(lead)}><Eye size={16} /></button>
                       <button className="action-btn" title="Edit Lead" onClick={() => onEdit(lead)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Lead" style={{ color: '#ef4444' }} onClick={() => onDelete(lead)}><Trash2 size={16} /></button>
                       <button 
