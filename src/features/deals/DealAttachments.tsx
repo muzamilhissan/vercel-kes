@@ -6,6 +6,7 @@ import {
 import { dealService } from '../../api/dealService';
 import { DealFile } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
+import DeleteModal from '../leads/DeleteModal';
 
 interface DealAttachmentsProps {
   dealId: string | number;
@@ -76,6 +77,9 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   const [loadingSignedUrlId, setLoadingSignedUrlId] = useState<string | number | null>(null);
   
   const [isDragging, setIsDragging] = useState(false);
+  
+  const [fileToDelete, setFileToDelete] = useState<DealFile | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchFiles = async () => {
     try {
@@ -184,12 +188,17 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
     }
   };
 
-  const handleDeleteFile = async (file: DealFile) => {
-    const fileName = file.file_name || (file as any).original_name || 'Unnamed file';
-    if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
+  const handleDeleteClick = (file: DealFile) => {
+    setFileToDelete(file);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!fileToDelete) return;
     try {
-      setDeletingId(file.id);
-      const res = await dealService.deleteFile(dealId, file.id);
+      setDeletingId(fileToDelete.id);
+      setIsDeleteModalOpen(false);
+      const res = await dealService.deleteFile(dealId, fileToDelete.id);
       if (res.success) {
         showToast('File deleted successfully', 'success');
         await fetchFiles();
@@ -201,6 +210,7 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
       showToast(err.message || 'Failed to delete file', 'error');
     } finally {
       setDeletingId(null);
+      setFileToDelete(null);
     }
   };
 
@@ -397,7 +407,7 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
 
                   {/* Delete button */}
                   <button 
-                    onClick={() => handleDeleteFile(file)}
+                    onClick={() => handleDeleteClick(file)}
                     disabled={loadingSignedUrlId !== null || downloadingId !== null || deletingId !== null}
                     title="Delete Attachment"
                     style={{ 
@@ -440,6 +450,13 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !deletingId && setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemName={fileToDelete ? (fileToDelete.file_name || (fileToDelete as any).original_name || 'Unnamed file') : ''}
+        isDeleting={deletingId !== null && fileToDelete && deletingId === fileToDelete.id}
+      />
     </div>
   );
 };

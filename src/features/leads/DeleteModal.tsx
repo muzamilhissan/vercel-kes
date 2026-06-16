@@ -25,7 +25,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, i
           </div>
           <h4 className="delete-title">Confirm Deletion</h4>
           <p className="delete-desc">
-            Are you sure you want to delete?
+            Are you sure you want to delete {itemName ? <strong style={{ color: '#1e293b' }}>"{itemName}"</strong> : 'this item'}?
           </p>
           <div className="delete-footer-actions">
             <button onClick={onClose} className="btn-premium-secondary compact-btn" disabled={isDeleting}>
