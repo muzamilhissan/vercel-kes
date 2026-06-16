@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import DeleteModal from '../leads/DeleteModal';
 import UploadZone from './UploadZone';
 import AttachmentItem from './AttachmentItem';
+import { FileSkeleton, SearchSkeleton } from './FileSkeleton';
 
 interface DealAttachmentsProps {
   dealId: string | number;
@@ -177,6 +178,82 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
       </div>
 
       {/* Drag and drop upload zone */}
+      {/* Search Bar */}
+      {loadingFiles ? (
+        <SearchSkeleton />
+      ) : (
+        files.length > 0 && (
+          <div style={{ position: 'relative', width: '100%', marginBottom: '4px' }}>
+            <input
+              type="text"
+              placeholder="Search attachments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px 10px 38px',
+                fontSize: '13px',
+                borderRadius: '10px',
+                border: '1.5px solid #e2e8f0',
+                background: '#f8fafc',
+                outline: 'none',
+                transition: 'all 0.25s ease',
+                boxSizing: 'border-box'
+              }}
+              onFocus={(e) => {
+                e.target.style.background = '#ffffff';
+                e.target.style.borderColor = '#70309f';
+                e.target.style.boxShadow = '0 0 0 4px rgba(112, 48, 159, 0.06)';
+              }}
+              onBlur={(e) => {
+                e.target.style.background = '#f8fafc';
+                e.target.style.borderColor = '#e2e8f0';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+            <svg
+              style={{
+                position: 'absolute',
+                left: '14px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#94a3b8',
+                width: '16px',
+                height: '16px',
+                pointerEvents: 'none'
+              }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '14px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  fontSize: '18px',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )
+      )}
+
+      {/* Drag and drop upload zone */}
       <UploadZone
         uploading={uploading}
         isDragging={isDragging}
@@ -188,82 +265,11 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         onFileSelect={handleFileSelect}
       />
 
-      {/* Search Bar */}
-      {files.length > 0 && (
-        <div style={{ position: 'relative', width: '100%', marginBottom: '4px' }}>
-          <input
-            type="text"
-            placeholder="Search attachments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 14px 10px 38px',
-              fontSize: '13px',
-              borderRadius: '10px',
-              border: '1.5px solid #e2e8f0',
-              background: '#f8fafc',
-              outline: 'none',
-              transition: 'all 0.25s ease',
-              boxSizing: 'border-box'
-            }}
-            onFocus={(e) => {
-              e.target.style.background = '#ffffff';
-              e.target.style.borderColor = '#70309f';
-              e.target.style.boxShadow = '0 0 0 4px rgba(112, 48, 159, 0.06)';
-            }}
-            onBlur={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#e2e8f0';
-              e.target.style.boxShadow = 'none';
-            }}
-          />
-          <svg
-            style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#94a3b8',
-              width: '16px',
-              height: '16px',
-              pointerEvents: 'none'
-            }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              style={{
-                position: 'absolute',
-                right: '14px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                padding: '2px',
-                fontSize: '18px',
-                lineHeight: 1
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      )}
-
       {/* File List */}
       {loadingFiles ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px 0', gap: '10px' }}>
-          <Loader2 size={18} style={{ color: '#70309f', animation: 'spin 1s linear infinite' }} />
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Loading attachments...</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <FileSkeleton />
+          <FileSkeleton />
         </div>
       ) : errorFiles ? (
         <div style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center', padding: '12px', background: '#fff5f5', borderRadius: '8px' }}>
@@ -292,11 +298,15 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
         </div>
       )}
       
-      {/* Local spinner animation style */}
+      {/* Local spinner/pulse animation style */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
         }
       `}</style>
       

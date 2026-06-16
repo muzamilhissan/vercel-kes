@@ -30,7 +30,7 @@ const DealAttachmentsModal: React.FC<DealAttachmentsModalProps> = ({ isOpen, onC
           overflowY: 'auto'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deal Opportunity</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deal</span>
             <span style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>{deal.name}</span>
           </div>
 
