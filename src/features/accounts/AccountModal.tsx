@@ -18,7 +18,11 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
   useEffect(() => {
     setWebsiteError(null);
     if (initialData) {
-      setFormData(initialData);
+      const strippedWebsite = initialData.website ? initialData.website.replace(/^https?:\/\//i, '') : '';
+      setFormData({
+        ...initialData,
+        website: strippedWebsite
+      });
     } else {
       setFormData({ name: '', industry: '', website: '', description: '' });
     }
@@ -87,17 +91,21 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
             </div>
             <div className="form-group">
               <label>Website <span className="required-asterisk">*</span></label>
-              <input 
-                type="text" 
-                value={formData.website || ''} 
-                onChange={e => {
-                  setFormData({...formData, website: e.target.value});
-                  if (websiteError) setWebsiteError(null);
-                }} 
-                placeholder="e.g. google.com"
-                required 
-                disabled={isSaving}
-              />
+              <div className="website-input-wrapper">
+                <span className="website-prefix">https://</span>
+                <input 
+                  type="text" 
+                  value={formData.website || ''} 
+                  onChange={e => {
+                    const val = e.target.value.replace(/^https?:\/\//i, '');
+                    setFormData({...formData, website: val});
+                    if (websiteError) setWebsiteError(null);
+                  }} 
+                  placeholder="e.g. google.com"
+                  required 
+                  disabled={isSaving}
+                />
+              </div>
               {websiteError && (
                 <div style={{ color: '#dc2626', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>
                   {websiteError}
@@ -114,8 +122,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSave, in
                 disabled={isSaving}
                 maxLength={1000}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
-                <span>Maximum 1,000 characters</span>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
                 <span>{(formData.description || '').length}/1000</span>
               </div>
             </div>

@@ -9,7 +9,7 @@ import './ContactModal.css';
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (contact: Contact) => void;
+  onSave: (contact: Contact) => Promise<void>;
   initialData?: Contact | null;
   accounts: { id: string, name: string }[];
 }
@@ -18,6 +18,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
   const [formData, setFormData] = useState<Partial<Contact>>({ name: '', jobTitle: '', email: '', phone: '', accountId: '' });
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>('');
   const [phoneError, setPhoneError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleValidate = (): boolean => {
     if (!phoneNumber) {
@@ -62,16 +63,23 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isPhoneValid = handleValidate();
     if (!isPhoneValid) return;
 
-    onSave({
-      ...formData, 
-      id: initialData?.id || Math.random().toString(36).substr(2, 9), 
-      accountName: accounts.find(a => a.id === formData.accountId)?.name || ''
-    } as Contact);
+    setIsSaving(true);
+    try {
+      await onSave({
+        ...formData, 
+        id: initialData?.id || Math.random().toString(36).substr(2, 9), 
+        accountName: accounts.find(a => a.id === formData.accountId)?.name || ''
+      } as Contact);
+    } catch (err) {
+      console.error('Failed to save contact:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const accountOptions = accounts.map(a => ({ value: a.id, label: a.name }));
@@ -83,18 +91,18 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
       <div className="modal-content contact-modal-compact" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{initialData ? 'Edit Contact' : 'Create New'}</h3>
-          <button type="button" onClick={onClose}><X size={20} /></button>
+          <button type="button" onClick={onClose} disabled={isSaving}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             <div className="contact-form-row-3">
               <div className="form-group">
                 <label>Full Name <span className="required-asterisk">*</span></label>
-                <input type="text" placeholder="Enter full name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} maxLength={150} required />
+                <input type="text" placeholder="Enter full name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} maxLength={150} required disabled={isSaving} />
               </div>
               <div className="form-group">
                 <label>Job Title <span className="required-asterisk">*</span></label>
-                <input type="text" placeholder="Enter job title" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} maxLength={150} required />
+                <input type="text" placeholder="Enter job title" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} maxLength={150} required disabled={isSaving} />
               </div>
               <div className="form-group">
                 <label>Account <span className="required-asterisk">*</span></label>
@@ -106,6 +114,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
                   required
                   variant="compact"
                   placement="bottom"
+                  disabled={isSaving}
                 />
               </div>
             </div>
@@ -122,6 +131,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
                   className={phoneError ? 'invalid' : ''}
                   onBlur={handleValidate}
                   required
+                  disabled={isSaving}
                 />
                 {phoneError && (
                   <div className="phone-error-message">
@@ -131,13 +141,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, onSave, in
               </div>
               <div className="form-group">
                 <label>Email <span className="required-asterisk">*</span></label>
-                <input type="email" placeholder="Enter email address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                <input type="email" placeholder="Enter email address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required disabled={isSaving} />
               </div>
             </div>
           </div>
           <div className="modal-footer">
-            <button type="button" onClick={onClose} className="btn-premium-secondary">Cancel</button>
-            <button type="submit" className="btn-premium-primary">Save</button>
+            <button type="button" onClick={onClose} className="btn-premium-secondary" disabled={isSaving}>Cancel</button>
+            <button type="submit" className="btn-premium-primary" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save'}</button>
           </div>
         </form>
       </div>

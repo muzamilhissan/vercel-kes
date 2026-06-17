@@ -12,7 +12,7 @@ import LogoutModal from './components/layout/LogoutModal'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [currentPath, setCurrentPath] = useState('leads');
+  const [currentPath, setCurrentPath] = useState(() => localStorage.getItem('currentPath') || 'leads');
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -49,6 +49,7 @@ function App() {
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('currentPath');
       setIsAuthenticated(false);
       setCurrentPath('leads');
       setIsLoggingOut(false);
@@ -61,6 +62,7 @@ function App() {
       setIsLogoutModalOpen(true);
     } else {
       setCurrentPath(path);
+      localStorage.setItem('currentPath', path);
     }
   };
 

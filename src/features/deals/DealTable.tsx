@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Folder } from 'lucide-react';
+import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import './DealTable.css';
 
 export interface FrontendDeal {
@@ -193,21 +193,27 @@ const DealTable: React.FC<DealTableProps> = ({
                     <span className="lead-name-value">{deal.name}</span>
                   </td>
                   <td className="lead-company-value">
-                    <span 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (deal.accountId) onAccountClick(deal.accountId);
-                      }}
-                      style={{ 
-                        color: '#70309f', 
-                        fontWeight: 600, 
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                    >
-                      {deal.accountName}
-                    </span>
+                    {deal.accountId && deal.accountName !== 'No account linked' ? (
+                      <span 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAccountClick(deal.accountId);
+                        }}
+                        style={{ 
+                          color: '#70309f', 
+                          fontWeight: 600, 
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                        onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                      >
+                        {deal.accountName}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#64748b', fontWeight: 500 }}>
+                        {deal.accountName || 'No account linked'}
+                      </span>
+                    )}
                   </td>
                   <td style={{ fontWeight: 600, color: '#1e293b' }}>{formatCurrency(deal.value)}</td>
                   <td style={{ color: '#64748b' }}>{deal.closeDate}</td>
@@ -218,7 +224,7 @@ const DealTable: React.FC<DealTableProps> = ({
                   </td>
                   <td className="text-center" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button className="action-btn" title="Manage Attachments" style={{ color: '#70309f' }} onClick={() => onFilesClick(deal)}><Folder size={16} /></button>
+                      <button className="action-btn" title="Upload Attachments" style={{ color: '#70309f' }} onClick={() => onFilesClick(deal)}><Upload size={16} /></button>
                       <button className="action-btn" title="Edit Deal" onClick={() => onEdit(deal)}><Edit2 size={16} /></button>
                       <button className="action-btn" title="Delete Deal" style={{ color: '#ef4444' }} onClick={() => onDelete(deal)}><Trash2 size={16} /></button>
                     </div>

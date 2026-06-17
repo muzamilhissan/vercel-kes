@@ -42,7 +42,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
             const filteredDeals = apiDeals.filter(d => {
               if (String(d.account_id) !== String(account.id)) return false;
               const stageLower = (d.stage || '').toLowerCase().trim();
-              return stageLower === 'new' || stageLower.includes('progress') || stageLower.includes('process');
+              return stageLower === 'new';
             });
             setDeals(filteredDeals);
           }

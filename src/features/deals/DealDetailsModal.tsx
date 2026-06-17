@@ -58,22 +58,28 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({ isOpen, onClose, de
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Linked Account</span>
-              <span 
-                onClick={() => {
-                  onClose();
-                  if (deal.accountId) onAccountClick(deal.accountId);
-                }}
-                style={{ 
-                  fontSize: '15px', 
-                  fontWeight: 600, 
-                  color: '#70309f', 
-                  cursor: 'pointer' 
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-              >
-                {deal.accountName}
-              </span>
+              {deal.accountId && deal.accountName !== 'No account linked' ? (
+                <span 
+                  onClick={() => {
+                    onClose();
+                    onAccountClick(deal.accountId);
+                  }}
+                  style={{ 
+                    fontSize: '15px', 
+                    fontWeight: 600, 
+                    color: '#70309f', 
+                    cursor: 'pointer' 
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  {deal.accountName}
+                </span>
+              ) : (
+                <span style={{ fontSize: '15px', fontWeight: 500, color: '#64748b' }}>
+                  {deal.accountName || 'No account linked'}
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected Close Date</span>

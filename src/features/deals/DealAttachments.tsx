@@ -110,15 +110,36 @@ const DealAttachments: React.FC<DealAttachmentsProps> = ({ dealId }) => {
   const handleDownload = async (file: DealFile) => {
     try {
       setDownloadingId(file.id);
-      const blob = await dealService.downloadFile(dealId, file.id);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.file_name || (file as any).original_name || 'download';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
+      // Try to get a signed URL first to avoid CORS issues with redirects on fetch
+      const res = await dealService.getSignedUrl(dealId, file.id);
+      console.log('getSignedUrl response:', res);
+      
+      const signedUrl = (res as any)?.signed_url || res?.data?.url || (res as any)?.url || (res as any)?.data;
+      
+      if (signedUrl && typeof signedUrl === 'string' && signedUrl.startsWith('http')) {
+        const a = document.createElement('a');
+        a.href = signedUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        // Suggest file name for download
+        a.download = file.file_name || (file as any).original_name || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        console.warn('Could not resolve signed URL, falling back to direct download:', res);
+        // Fallback to fetching blob if signed URL retrieval is unsuccessful
+        const blob = await dealService.downloadFile(dealId, file.id);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.file_name || (file as any).original_name || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (err: any) {
       console.error(err);
       showToast(err.message || 'Failed to download file', 'error');

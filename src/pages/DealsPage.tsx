@@ -124,7 +124,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       const acc = accounts.find(a => String(a.id) === String(d.accountId));
       return {
         ...d,
-        accountName: acc ? acc.name : 'Unknown Account'
+        accountName: acc ? acc.name : 'No account linked'
       };
     });
   }, [deals, accounts]);

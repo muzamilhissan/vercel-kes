@@ -94,15 +94,13 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
     e.preventDefault();
     if (!formData.closeDate) return;
 
-    if (!initialData) {
-      const selected = new Date(formData.closeDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      selected.setHours(0, 0, 0, 0);
-      if (selected < today) {
-        showToast('Close Date cannot be in the past', 'error');
-        return;
-      }
+    const selected = new Date(formData.closeDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selected.setHours(0, 0, 0, 0);
+    if (selected < today) {
+      showToast('Close Date cannot be in the past', 'error');
+      return;
     }
 
     let savedDate = formData.closeDate;
@@ -162,7 +160,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
             </div>
             <div className="form-grid">
               <div className="form-group"><label>Value ($)</label><input type="number" value={formData.value || 0} onChange={e => setFormData({...formData, value: Number(e.target.value)})} required /></div>
-              <div className="form-group"><label>Close Date</label><input type="date" value={formData.closeDate || ''} onChange={e => setFormData({...formData, closeDate: e.target.value})} min={initialData ? undefined : getLocalDateString()} required /></div>
+              <div className="form-group"><label>Close Date</label><input type="date" value={formData.closeDate || ''} onChange={e => setFormData({...formData, closeDate: e.target.value})} min={getLocalDateString()} required /></div>
             </div>
             <div className="form-group">
               <label>Pipeline Stage</label>

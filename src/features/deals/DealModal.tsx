@@ -99,15 +99,13 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
     e.preventDefault();
     if (!formData.accountId) return;
 
-    if (!initialData) {
-      const selected = new Date(formData.closeDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      selected.setHours(0, 0, 0, 0);
-      if (selected < today) {
-        showToast('Expected Close Date cannot be in the past', 'error');
-        return;
-      }
+    const selected = new Date(formData.closeDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selected.setHours(0, 0, 0, 0);
+    if (selected < today) {
+      showToast('Expected Close Date cannot be in the past', 'error');
+      return;
     }
 
     setIsSaving(true);
@@ -219,7 +217,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
                   type="date" 
                   value={formData.closeDate} 
                   onChange={e => setFormData({...formData, closeDate: e.target.value})} 
-                  min={initialData ? undefined : getLocalDateString()}
+                  min={getLocalDateString()}
                   required 
                 />
               </div>
@@ -231,7 +229,7 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
               <textarea 
                 value={formData.notes} 
                 onChange={e => setFormData({...formData, notes: e.target.value})} 
-                placeholder="Add notes about this opportunity..."
+                placeholder="Any optional notes"
                 rows={3}
                 style={{
                   width: '100%',
