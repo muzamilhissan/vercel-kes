@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import AccountTable from '../features/accounts/AccountTable';
+import Loader from '../components/ui/Loader';
 import AccountModal from '../features/accounts/AccountModal';
 import AccountDetails from '../features/accounts/AccountDetails';
 import DeleteModal from '../features/accounts/DeleteModal';
@@ -183,16 +184,7 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', border: '4px solid #f3f3f3', borderTop: '4px solid #70309f', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Loading company accounts...</p>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
+        <Loader message="Loading company accounts..." />
       ) : error ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px', background: '#fff5f5', borderRadius: '16px', border: '1px solid #fecaca', margin: '24px 0', padding: '24px' }}>
           <p style={{ color: '#dc2626', fontWeight: 600 }}>{error}</p>

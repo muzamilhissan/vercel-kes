@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Users, Briefcase, Info } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 import { Account, Contact, Deal } from '../../api/types';
 import { contactService } from '../../api/contactService';
 import { dealService } from '../../api/dealService';
@@ -88,15 +89,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ isOpen, onClose, accoun
           </section>
 
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '24px' }}>
-              <div style={{ width: '32px', height: '32px', border: '3px solid #f3f3f3', borderTop: '3px solid #70309f', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-              <style>{`
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `}</style>
-            </div>
+            <Loader height="100px" />
           ) : (
             <div className="details-grid">
               <section className="details-section">

@@ -70,6 +70,8 @@ input {
   gap: 8px;
   box-shadow: 0 4px 6px -1px rgba(112, 48, 159, 0.2);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-primary:hover {
@@ -124,5 +126,133 @@ input {
   .page-header-actions button {
     flex: 1;
     justify-content: center;
+  }
+}
+
+/* Date Filter Styling */
+.date-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-filter-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0;
+  height: 40px;
+  width: 40px;
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.date-filter-input-wrapper.has-date {
+  width: 135px;
+  padding: 8px 12px;
+  justify-content: flex-start;
+}
+
+.date-filter-input-wrapper:focus-within {
+  border-color: #70309f;
+  box-shadow: 0 0 0 4px rgba(112, 48, 159, 0.06);
+}
+
+.date-filter-calendar-icon {
+  color: #70309f;
+  flex-shrink: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.date-filter-input {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  padding: 0 12px 0 36px !important;
+  margin: 0 !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: transparent !important;
+  font-family: inherit;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.date-filter-input-wrapper.has-date .date-filter-input {
+  color: #475569 !important;
+}
+
+.date-filter-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.date-filter-clear-btn {
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.date-filter-clear-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fff5f5;
+}
+
+@media (max-width: 640px) {
+  .page-header-actions {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .date-filter-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .action-add-btn-collapsed .action-add-btn-text {
+    display: none !important;
+  }
+
+  .action-add-btn-collapsed {
+    padding: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
   }
 }

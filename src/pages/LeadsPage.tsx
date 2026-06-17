@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import LeadTable, { Lead } from '../features/leads/LeadTable';
+import Loader from '../components/ui/Loader';
 import LeadModal from '../features/leads/LeadModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import ConvertModal from '../features/leads/ConvertModal';
 import LeadDetailsModal from '../features/leads/LeadDetailsModal';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Calendar, X } from 'lucide-react';
 import { leadService } from '../api/leadService';
 import { useToast } from '../context/ToastContext';
+
+const getLocalDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
 
 const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
   // Normalize status to match LeadTable status type: 'New' | 'Contacted' | 'Qualified' | 'Converted'
@@ -68,6 +77,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [filterDate, setFilterDate] = useState('');
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -84,7 +94,20 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     };
   }, []);
 
-  const filteredLeads = leads;
+  const filteredLeads = React.useMemo(() => {
+    if (!filterDate) return leads;
+    return leads.filter(lead => {
+      try {
+        const leadDate = new Date(lead.dateAdded);
+        const selectedDate = new Date(filterDate);
+        return leadDate.getFullYear() === selectedDate.getFullYear() &&
+               leadDate.getMonth() === selectedDate.getMonth() &&
+               leadDate.getDate() === selectedDate.getDate();
+      } catch {
+        return false;
+      }
+    });
+  }, [leads, filterDate]);
 
   const fetchLeads = async (page?: number | any, query?: string) => {
     const pageNum = typeof page === 'number' ? page : currentPage;
@@ -223,24 +246,36 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           <h2>Lead Management</h2>
           <p>Track and qualify your incoming sales opportunities.</p>
         </div>
-        <div className="page-header-actions">
-          <button onClick={() => { setSelectedLead(null); setIsLeadModalOpen(true); }} className="btn-primary">
-            <Plus size={16} /> <span>Add Lead</span>
+        <div className="page-header-actions lead-header-actions">
+          <div className="date-filter-container">
+            <div className={`date-filter-input-wrapper ${filterDate ? 'has-date' : ''}`}>
+              <Calendar size={16} className="date-filter-calendar-icon" />
+              <input 
+                type="date" 
+                value={filterDate} 
+                onChange={e => setFilterDate(e.target.value)} 
+                className="date-filter-input"
+                max={getLocalDateString()}
+              />
+            </div>
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')} 
+                className="date-filter-clear-btn"
+                title="Clear filter"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <button onClick={() => { setSelectedLead(null); setIsLeadModalOpen(true); }} className={`btn-primary action-add-btn ${filterDate ? 'action-add-btn-collapsed' : ''}`}>
+            <Plus size={16} /> <span className="action-add-btn-text">Add Lead</span>
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', border: '4px solid #f3f3f3', borderTop: '4px solid #70309f', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Loading sales opportunities...</p>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
+        <Loader message="Loading sales opportunities..." />
       ) : error ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px', background: '#fff5f5', borderRadius: '16px', border: '1px solid #fecaca', margin: '24px 0', padding: '24px' }}>
           <p style={{ color: '#dc2626', fontWeight: 600 }}>{error}</p>

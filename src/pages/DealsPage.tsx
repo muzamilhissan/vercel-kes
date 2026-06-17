@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import DealTable, { FrontendDeal } from '../features/deals/DealTable';
+import Loader from '../components/ui/Loader';
 import DealModal from '../features/deals/DealModal';
 import DealDetailsModal from '../features/deals/DealDetailsModal';
 import DealAttachmentsModal from '../features/deals/DealAttachmentsModal';
 import DeleteModal from '../features/leads/DeleteModal';
-import { Plus } from 'lucide-react';
+import { Plus, Calendar, X } from 'lucide-react';
 import { dealService } from '../api/dealService';
 import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
 import { Account, Deal } from '../api/types';
-
 const formatDateString = (dateStr: string | undefined): string => {
   if (!dateStr) return '';
   try {
@@ -42,6 +42,7 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [filterDate, setFilterDate] = useState('');
 
   // Load accounts once on mount
   useEffect(() => {
@@ -144,7 +145,20 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     };
   }, []);
 
-  const filteredDeals = resolvedDeals;
+  const filteredDeals = useMemo(() => {
+    if (!filterDate) return resolvedDeals;
+    return resolvedDeals.filter(deal => {
+      try {
+        const dealDate = new Date(deal.closeDate);
+        const selectedDate = new Date(filterDate);
+        return dealDate.getFullYear() === selectedDate.getFullYear() &&
+               dealDate.getMonth() === selectedDate.getMonth() &&
+               dealDate.getDate() === selectedDate.getDate();
+      } catch {
+        return false;
+      }
+    });
+  }, [resolvedDeals, filterDate]);
 
   const handleAccountClick = (accountId: string) => {
     localStorage.setItem('autoOpenAccountDetailsId', accountId);
@@ -218,24 +232,35 @@ const DealsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           <h2>Deal Management</h2>
           <p>Track business opportunities, stages, and projected values.</p>
         </div>
-        <div className="page-header-actions">
-          <button onClick={() => { setSelectedDeal(null); setIsDealModalOpen(true); }} className="btn-primary">
-            <Plus size={16} /> <span>Add Deal</span>
+        <div className="page-header-actions lead-header-actions">
+          <div className="date-filter-container">
+            <div className={`date-filter-input-wrapper ${filterDate ? 'has-date' : ''}`}>
+              <Calendar size={16} className="date-filter-calendar-icon" />
+              <input 
+                type="date" 
+                value={filterDate} 
+                onChange={e => setFilterDate(e.target.value)} 
+                className="date-filter-input"
+              />
+            </div>
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')} 
+                className="date-filter-clear-btn"
+                title="Clear filter"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <button onClick={() => { setSelectedDeal(null); setIsDealModalOpen(true); }} className={`btn-primary action-add-btn ${filterDate ? 'action-add-btn-collapsed' : ''}`}>
+            <Plus size={16} /> <span className="action-add-btn-text">Add Deal</span>
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', border: '4px solid #f3f3f3', borderTop: '4px solid #70309f', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Loading deals...</p>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
+        <Loader message="Loading deals..." />
       ) : error ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px', flexDirection: 'column', gap: '16px', background: '#fff5f5', borderRadius: '16px', border: '1px solid #fecaca', margin: '24px 0', padding: '24px' }}>
           <p style={{ color: '#dc2626', fontWeight: 600 }}>{error}</p>

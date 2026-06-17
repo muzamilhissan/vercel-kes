@@ -11,6 +11,7 @@ export interface Contact {
   phone: string;
   accountId: string;
   accountName: string;
+  createdAt?: string;
 }
 
 interface ContactTableProps {
