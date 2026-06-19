@@ -31,14 +31,14 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm, i
               </div>
               <h4 className="logout-title">Confirm Sign Out</h4>
               <p className="logout-desc">
-                Are you sure you want to log out of KudonCRM?
+                Are you sure you want to sign out of KudonCRM?
               </p>
               <div className="logout-footer-actions">
                 <button onClick={onClose} className="btn-premium-secondary compact-btn">
                   Cancel
                 </button>
                 <button onClick={onConfirm} className="btn-premium-primary compact-btn logout-btn">
-                  Log Out
+                  Sign Out
                 </button>
               </div>
             </div>

@@ -132,7 +132,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                   options={statusOptions}
                   value={formData.status || ''}
                   onChange={val => setFormData({...formData, status: val as any})}
-                  disabled={initialData?.status === 'Converted' || initialData?.status === 'Qualified'}
+                  disabled={!initialData || initialData?.status === 'Converted' || initialData?.status === 'Qualified'}
                   searchable={false}
                   variant="compact"
                   placement="bottom"

@@ -223,12 +223,18 @@ const DealModal: React.FC<DealModalProps> = ({ isOpen, onClose, onSave, initialD
               </div>
             </div>
 
-            {/* Notes full width */}
+            {/* Notes full width with character limit */}
             <div className="form-group" style={{ marginTop: '4px' }}>
-              <label>Notes</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ margin: 0 }}>Notes</label>
+                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                  {(formData.notes || '').length}/1000
+                </span>
+              </div>
               <textarea 
                 value={formData.notes} 
                 onChange={e => setFormData({...formData, notes: e.target.value})} 
+                maxLength={1000}
                 placeholder="Any optional notes"
                 rows={3}
                 style={{

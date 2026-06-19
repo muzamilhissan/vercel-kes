@@ -91,7 +91,7 @@ const AccountTable: React.FC<AccountTableProps> = ({
   };
 
   return (
-    <div className="account-table-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="lead-table-wrapper">
       <div className="table-container">
         <table className="premium-table">
           <thead>

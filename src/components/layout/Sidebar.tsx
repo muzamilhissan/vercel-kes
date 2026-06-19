@@ -118,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
 
       <div className="sidebar-footer">
         {/* <NavItem icon={<Settings size={20} />} label="Configurations" path="settings" onClick={onNavigate} /> */}
-        <NavItem icon={<LogOut size={20} />} label="Logout" path="logout" onClick={onNavigate} />
+        <NavItem icon={<LogOut size={20} />} label="Sign Out" path="logout" onClick={onNavigate} />
       </div>
     </aside>
   );
