@@ -8,9 +8,11 @@ import {
   LogOut,
   Contact,
   Building,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react';
 import './Sidebar.css';
+import { redirectToKudonPOMS } from '../../utils/ssoService';
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -85,6 +87,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             active={currentPath === 'leads'} 
             onClick={onNavigate}
           />
+          {/* SSO Button: Go to POMS */}
+          <div 
+            className="nav-item" 
+            onClick={redirectToKudonPOMS}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="nav-item-content">
+              <span className="nav-icon"><ExternalLink size={20} /></span>
+              <span className="nav-label">Go to POMS</span>
+            </div>
+          </div>
           <NavItem 
             icon={<Briefcase size={20} />} 
             label="Deals" 

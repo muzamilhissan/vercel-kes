@@ -6,6 +6,7 @@ import DealsPage from './pages/DealsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import ContactsPage from './pages/ContactsPage'
 import AccountsPage from './pages/AccountsPage'
+import SSOLogin from './pages/SSOLogin'
 import MainLayout from './components/layout/MainLayout'
 import { authService } from './api/authService'
 import LogoutModal from './components/layout/LogoutModal'
@@ -15,6 +16,11 @@ function App() {
   const [currentPath, setCurrentPath] = useState(() => localStorage.getItem('currentPath') || 'leads');
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSSO, setIsSSO] = useState(() => {
+    // Check if URL has SSO token
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('token');
+  });
 
   useEffect(() => {
     document.title = isAuthenticated ? 'KudonCRM' : 'Login';
@@ -38,6 +44,12 @@ function App() {
     } catch (error: any) {
       throw error;
     }
+  };
+
+  const handleSSOLogin = () => {
+    setIsAuthenticated(true);
+    setIsSSO(false);
+    setCurrentPath('leads');
   };
 
   const handleLogoutConfirm = async () => {
@@ -85,6 +97,11 @@ function App() {
         return <Dashboard currentPath={currentPath} onNavigate={handleNavigate} />;
     }
   };
+
+  // Handle SSO login flow
+  if (isSSO && !isAuthenticated) {
+    return <SSOLogin onLogin={handleSSOLogin} />;
+  }
 
   return (
     <div className="App">
