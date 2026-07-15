@@ -43,6 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
   const user = userStr ? JSON.parse(userStr) : null;
   const fullName = user?.name || user?.fullName || 'Jane Sparrow';
   const designation = user?.roles?.[0]?.name || user?.designation || 'Sales Executive';
+  const userEmail = user?.email || '';
   const avatarUrl = userStr
     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=70309f&color=fff&bold=true`
     : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop";
@@ -87,17 +88,19 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             active={currentPath === 'leads'} 
             onClick={onNavigate}
           />
-          {/* SSO Button: Go to POMS */}
-          <div 
-            className="nav-item" 
-            onClick={redirectToKudonPOMS}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="nav-item-content">
-              <span className="nav-icon"><ExternalLink size={20} /></span>
-              <span className="nav-label">Go to POMS</span>
+          {/* SSO Button: Go to POMS - Only visible for zubairnaeem45@gmail.com */}
+          {userEmail === 'zubairnaeem45@gmail.com' && (
+            <div 
+              className="nav-item" 
+              onClick={redirectToKudonPOMS}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="nav-item-content">
+                <span className="nav-icon"><ExternalLink size={20} /></span>
+                <span className="nav-label">Go to POMS</span>
+              </div>
             </div>
-          </div>
+          )}
           <NavItem 
             icon={<Briefcase size={20} />} 
             label="Deals" 
