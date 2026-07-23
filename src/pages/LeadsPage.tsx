@@ -58,6 +58,8 @@ const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
     phone: apiLead.phone || '',
     status: normalizedStatus,
     dateAdded: dateStr,
+    industry: apiLead.industry || '',
+    province: apiLead.province || '',
   };
 };
 
@@ -160,6 +162,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           email: leadData.email,
           phone: leadData.phone,
           status: leadData.status,
+          industry: leadData.industry,
+          province: leadData.province,
         };
         const res = await leadService.update(selectedLead.id, payload);
         if (res.success) {
@@ -175,6 +179,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           company: leadData.company,
           email: leadData.email,
           phone: leadData.phone,
+          industry: leadData.industry,
+          province: leadData.province,
         };
         const res = await leadService.store(payload);
         if (res.success) {

@@ -10,6 +10,8 @@ export interface Lead {
   phone: string;
   status: 'New' | 'Contacted' | 'Qualified' | 'Converted';
   dateAdded: string;
+  industry?: string;
+  province?: string;
 }
 
 interface LeadTableProps {

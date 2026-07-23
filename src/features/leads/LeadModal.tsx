@@ -14,7 +14,7 @@ interface LeadModalProps {
 }
 
 const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
-  const [formData, setFormData] = useState<Partial<Lead>>({ name: '', company: '', email: '', phone: '', status: 'New' });
+  const [formData, setFormData] = useState<Partial<Lead>>({ name: '', company: '', email: '', phone: '', status: 'New', industry: '', province: '' });
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>('');
   const [phoneError, setPhoneError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +39,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
       setFormData(initialData);
       setPhoneNumber(initialData.phone || '');
     } else {
-      setFormData({ name: '', company: '', email: '', phone: '', status: 'New' });
+      setFormData({ name: '', company: '', email: '', phone: '', status: 'New', industry: '', province: '' });
       setPhoneNumber('');
     }
   }, [initialData, isOpen]);
@@ -168,6 +168,30 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                   onChange={e => setFormData({...formData, email: e.target.value})} 
                   placeholder="Enter email address"
                   required 
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Two fields (Industry, Province) */}
+            <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
+              <div className="form-group">
+                <label>Industry <span className="required-asterisk">*</span></label>
+                <input 
+                  type="text" 
+                  value={formData.industry || ''} 
+                  onChange={e => setFormData({...formData, industry: e.target.value})} 
+                  placeholder="Enter industry"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Province <span className="required-asterisk">*</span></label>
+                <input 
+                  type="text" 
+                  value={formData.province || ''} 
+                  onChange={e => setFormData({...formData, province: e.target.value})} 
+                  placeholder="Enter province"
+                  required
                 />
               </div>
             </div>
