@@ -38,7 +38,7 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
   });
 
   return (
-    <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30` }}>
+    <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30`, position: 'relative', zIndex: showDropdown ? 50 : 1 }}>
       <div className="card-top">
         <h4 className="deal-name">{lead.name}</h4>
       </div>
