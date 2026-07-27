@@ -44,7 +44,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     fetchLeads,
     handleSaveLead,
     handleDeleteLead,
-    handleConvertLead
+    handleConvertLead,
+    handleAssignLead
   } = useLeads();
 
   if (isInitializingFromUrl) {
@@ -89,6 +90,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
                   <LeadKanbanBoard 
                     leads={allLeads}
                     onView={(l) => setViewingLead(l)}
+                    onAssign={handleAssignLead}
                   />
                 </div>
               ) : (

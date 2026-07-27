@@ -3,9 +3,10 @@ import React from 'react';
 interface LoaderProps {
   message?: string;
   height?: string;
+  showLogo?: boolean;
 }
 
-const Loader: React.FC<LoaderProps> = ({ message, height = '300px' }) => {
+const Loader: React.FC<LoaderProps> = ({ message, height = '300px', showLogo = false }) => {
   return (
     <div style={{
       display: 'flex',
@@ -15,6 +16,13 @@ const Loader: React.FC<LoaderProps> = ({ message, height = '300px' }) => {
       flexDirection: 'column',
       gap: '20px'
     }}>
+      {showLogo && (
+        <img 
+          src="/nobg-logo.png" 
+          alt="KES Logo" 
+          style={{ height: '40px', width: 'auto', marginBottom: '8px' }} 
+        />
+      )}
       <div style={{
         display: 'flex',
         alignItems: 'center',

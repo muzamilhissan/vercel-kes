@@ -288,6 +288,35 @@ export const useLeads = () => {
     }
   };
 
+  const handleAssignLead = async (lead: Lead, userId: string) => {
+    try {
+      const currentAssigned = typeof lead.assigned_to === 'string' && lead.assigned_to ? lead.assigned_to.split(',') : [];
+      let newAssigned: string[];
+      if (currentAssigned.includes(userId)) {
+        newAssigned = currentAssigned.filter(id => id !== userId);
+      } else {
+        newAssigned = [...currentAssigned, userId];
+      }
+      const newAssignedStr = newAssigned.join(',');
+
+      // Optimistically update local state immediately
+      setAllLeads(prev => prev.map(l => l.id === lead.id ? { ...l, assigned_to: newAssignedStr } : l));
+      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, assigned_to: newAssignedStr } : l));
+
+      const res = await leadService.update(lead.id, { assigned_to: newAssignedStr });
+      if (res.success) {
+        showToast('Lead assigned successfully', 'success');
+      } else {
+        // Revert on failure by refetching
+        showToast(res.message || 'Failed to assign lead', 'error');
+        window.dispatchEvent(new CustomEvent('leadsUpdated'));
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error assigning lead', 'error');
+      window.dispatchEvent(new CustomEvent('leadsUpdated'));
+    }
+  };
+
   return {
     leads: filteredLeads,
     allLeads: filteredAllLeads,
@@ -321,6 +350,7 @@ export const useLeads = () => {
     fetchLeads,
     handleSaveLead,
     handleDeleteLead,
-    handleConvertLead
+    handleConvertLead,
+    handleAssignLead
   };
 };

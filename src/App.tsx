@@ -10,12 +10,14 @@ import SSOLogin from './pages/SSOLogin'
 import MainLayout from './components/layout/MainLayout'
 import { authService } from './api/authService'
 import LogoutModal from './components/layout/LogoutModal'
+import Loader from './components/ui/Loader'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [currentPath, setCurrentPath] = useState(() => localStorage.getItem('currentPath') || 'leads');
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isWorkspaceLoading, setIsWorkspaceLoading] = useState(false);
   const [isSSO, setIsSSO] = useState(() => {
     // Check if URL has SSO token
     const urlParams = new URLSearchParams(window.location.search);
@@ -37,7 +39,13 @@ function App() {
         if (user) {
           localStorage.setItem('user', JSON.stringify(user));
         }
+        setIsWorkspaceLoading(true);
         setIsAuthenticated(true);
+        
+        // Simulate global workspace initialization
+        setTimeout(() => {
+          setIsWorkspaceLoading(false);
+        }, 1500);
       } else {
         throw new Error('Login succeeded but no token was returned.');
       }
@@ -101,6 +109,14 @@ function App() {
   // Handle SSO login flow
   if (isSSO && !isAuthenticated) {
     return <SSOLogin onLogin={handleSSOLogin} />;
+  }
+
+  if (isWorkspaceLoading) {
+    return (
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc', zIndex: 9999 }}>
+        <Loader message="Preparing your workspace..." height="auto" showLogo={true} />
+      </div>
+    );
   }
 
   return (
