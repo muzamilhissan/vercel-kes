@@ -61,14 +61,14 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
         )}
       </div>
 
-      <div className="card-bottom" style={{ marginTop: '12px' }}>
-        <div className="card-meta">
-          <div className="meta-item" style={{ fontSize: '12px', color: '#64748b' }}>
+      <div className="card-bottom" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+        <div className="card-meta" style={{ flex: 1, minWidth: 0 }}>
+          <div className="meta-item" style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
             {lead.email}
           </div>
         </div>
         
-        <div className="assignee-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }} ref={dropdownRef}>
+        <div className="assignee-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} ref={dropdownRef}>
           <div className="avatar-group" style={{ display: 'flex', alignItems: 'center' }}>
             {assignedUsers.map((user, index) => (
               <img 

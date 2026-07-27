@@ -17,6 +17,8 @@ export interface Lead {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
+  assigned_to?: string | null;
+  assignee?: any | null;
 }
 
 interface LeadTableProps {
