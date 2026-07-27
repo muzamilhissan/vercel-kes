@@ -45,6 +45,17 @@ export const leadService = {
   },
 
   /**
+   * Update lead status.
+   * PUT /leads/update-status/:id
+   */
+  async updateStatus(id: string | number, status: string): Promise<ApiResponse<Lead>> {
+    return apiFetch<ApiResponse<Lead>>(`/leads/update/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  /**
    * Delete a lead by ID.
    * DELETE /leads/delete/:id
    */

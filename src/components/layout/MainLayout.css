@@ -1,6 +1,6 @@
 .main-layout {
   display: flex;
-  min-height: 100vh;
+  min-height: 111.111vh; /* Adjusted for zoom: 90% */
   background-color: #fff;
 }
 

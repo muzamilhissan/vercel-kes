@@ -41,6 +41,11 @@ export interface Lead {
   dateAdded?: string;
   industry?: string;
   province?: string;
+  website?: string;
+  source?: string;
+  expected_revenue?: number;
+  probability?: number;
+  notes?: string;
 }
 
 export interface CreateLeadInput {
@@ -50,6 +55,11 @@ export interface CreateLeadInput {
   phone: string;
   industry?: string;
   province?: string;
+  website?: string;
+  source?: string;
+  expected_revenue?: number;
+  probability?: number;
+  notes?: string;
 }
 
 export interface UpdateLeadInput {
@@ -60,6 +70,11 @@ export interface UpdateLeadInput {
   status?: string;
   industry?: string;
   province?: string;
+  website?: string;
+  source?: string;
+  expected_revenue?: number;
+  probability?: number;
+  notes?: string;
 }
 
 // Convert Lead Payload Modes

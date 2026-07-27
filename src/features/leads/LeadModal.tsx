@@ -4,6 +4,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Lead } from './LeadTable';
 import SearchableSelect from '../../components/ui/SearchableSelect';
+import { getLocalDateString } from './utils';
 import './LeadModal.css';
 
 interface LeadModalProps {
@@ -14,7 +15,20 @@ interface LeadModalProps {
 }
 
 const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
-  const [formData, setFormData] = useState<Partial<Lead>>({ name: '', company: '', email: '', phone: '', status: 'New', industry: '', province: '' });
+  const [formData, setFormData] = useState<Partial<Lead>>({ 
+    name: '', 
+    company: '', 
+    email: '', 
+    phone: '', 
+    status: 'New', 
+    industry: '', 
+    province: '',
+    website: '',
+    source: '',
+    expected_revenue: undefined,
+    probability: undefined,
+    notes: ''
+  });
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>('');
   const [phoneError, setPhoneError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +53,20 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
       setFormData(initialData);
       setPhoneNumber(initialData.phone || '');
     } else {
-      setFormData({ name: '', company: '', email: '', phone: '', status: 'New', industry: '', province: '' });
+      setFormData({ 
+        name: '', 
+        company: '', 
+        email: '', 
+        phone: '', 
+        status: 'New', 
+        industry: '', 
+        province: '',
+        website: '',
+        source: '',
+        expected_revenue: undefined,
+        probability: undefined,
+        notes: ''
+      });
       setPhoneNumber('');
     }
   }, [initialData, isOpen]);
@@ -73,7 +100,9 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
       await onSave({
         ...formData,
         id: initialData?.id || Math.random().toString(36).substr(2, 9),
-        dateAdded: initialData?.dateAdded || new Date().toLocaleDateString()
+        dateAdded: initialData?.dateAdded || getLocalDateString(),
+        expected_revenue: formData.expected_revenue !== undefined && (formData.expected_revenue as any) !== '' ? Number(formData.expected_revenue) : undefined,
+        probability: formData.probability !== undefined && (formData.probability as any) !== '' ? Number(formData.probability) : undefined,
       } as Lead);
     } catch (err) {
       console.error(err);
@@ -87,7 +116,9 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
   const statusOptions = [
     { value: 'New', label: 'New' },
     { value: 'Contacted', label: 'Contacted' },
-    { value: 'Qualified', label: 'Qualified' }
+    { value: 'Proposed', label: 'Proposed' },
+    { value: 'Qualified', label: 'Qualified' },
+    { value: 'Disqualified', label: 'Disqualified' }
   ];
   if (formData.status === 'Converted') {
     statusOptions.push({ value: 'Converted', label: 'Converted' });
@@ -108,7 +139,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 <label>Lead Name <span className="required-asterisk">*</span></label>
                 <input 
                   type="text" 
-                  value={formData.name} 
+                  value={formData.name || ''} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
                   maxLength={150} 
                   placeholder="Enter name"
@@ -119,7 +150,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 <label>Company <span className="required-asterisk">*</span></label>
                 <input 
                   type="text" 
-                  value={formData.company} 
+                  value={formData.company || ''} 
                   onChange={e => setFormData({...formData, company: e.target.value})} 
                   maxLength={150} 
                   placeholder="Enter company name"
@@ -141,7 +172,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
             </div>
             
             {/* Row 2: Two fields (Phone, Email) */}
-            <div className="lead-form-row-2">
+            <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
               <div className="form-group">
                 <label>Phone <span className="required-asterisk">*</span></label>
                 <PhoneInput
@@ -164,7 +195,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 <label>Email <span className="required-asterisk">*</span></label>
                 <input 
                   type="email" 
-                  value={formData.email} 
+                  value={formData.email || ''} 
                   onChange={e => setFormData({...formData, email: e.target.value})} 
                   placeholder="Enter email address"
                   required 
@@ -194,6 +225,63 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                   required
                 />
               </div>
+            </div>
+
+            {/* Row 4: Two fields (Website, Source) */}
+            <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
+              <div className="form-group">
+                <label>Website</label>
+                <input 
+                  type="text" 
+                  value={formData.website || ''} 
+                  onChange={e => setFormData({...formData, website: e.target.value})} 
+                  placeholder="e.g. http://example.com"
+                />
+              </div>
+              <div className="form-group">
+                <label>Source</label>
+                <input 
+                  type="text" 
+                  value={formData.source || ''} 
+                  onChange={e => setFormData({...formData, source: e.target.value})} 
+                  placeholder="e.g. Referral, Website"
+                />
+              </div>
+            </div>
+
+            {/* Row 5: Two fields (Expected Revenue, Probability) */}
+            <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
+              <div className="form-group">
+                <label>Expected Revenue</label>
+                <input 
+                  type="number" 
+                  value={formData.expected_revenue !== undefined ? formData.expected_revenue : ''} 
+                  onChange={e => setFormData({...formData, expected_revenue: e.target.value as any})} 
+                  placeholder="Enter expected revenue"
+                  min={0}
+                />
+              </div>
+              <div className="form-group">
+                <label>Probability (%)</label>
+                <input 
+                  type="number" 
+                  value={formData.probability !== undefined ? formData.probability : ''} 
+                  onChange={e => setFormData({...formData, probability: e.target.value as any})} 
+                  placeholder="Enter probability"
+                  min={0}
+                  max={100}
+                />
+              </div>
+            </div>
+
+            {/* Row 6: One field (Notes) */}
+            <div className="form-group" style={{ marginTop: '16px' }}>
+              <label>Notes</label>
+              <textarea 
+                value={formData.notes || ''} 
+                onChange={e => setFormData({...formData, notes: e.target.value})} 
+                placeholder="Enter notes..."
+              />
             </div>
           </div>
           <div className="modal-footer">

@@ -8,10 +8,15 @@ export interface Lead {
   company: string;
   email: string;
   phone: string;
-  status: 'New' | 'Contacted' | 'Qualified' | 'Converted';
+  status: 'New' | 'Contacted' | 'Proposed' | 'Qualified' | 'Disqualified' | 'Converted';
   dateAdded: string;
   industry?: string;
   province?: string;
+  website?: string;
+  source?: string;
+  expected_revenue?: number;
+  probability?: number;
+  notes?: string;
 }
 
 interface LeadTableProps {

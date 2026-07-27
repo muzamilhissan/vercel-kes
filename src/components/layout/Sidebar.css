@@ -1,6 +1,6 @@
 .sidebar {
   width: 280px;
-  height: 100vh;
+  height: 111.111vh; /* Adjusted for zoom: 90% on body */
   /* More visible professional indigo background */
   background: linear-gradient(180deg, #f1f4ff 0%, #e5eaff 100%);
   border-right: 1px solid #dbeafe;
@@ -9,6 +9,7 @@
   padding: 32px 20px;
   position: sticky;
   top: 0;
+  flex-shrink: 0; /* Prevent sidebar from shrinking and clipping menu items */
 }
 
 .sidebar-brand {
@@ -133,7 +134,7 @@
   background-color: #ffffff;
   color: #70309f;
   box-shadow: 0 10px 25px -5px rgba(112, 48, 159, 0.15);
-  border: 1px solid #ffffff;
+  border: 1px solid rgba(112, 48, 159, 0.15);
 }
 
 .nav-item-content {

@@ -15,8 +15,8 @@ interface KanbanColumnProps {
 const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, deals, color, onCardClick, onAddCard }) => {
   return (
     <div className="kanban-column">
-      <div className="column-header">
-        <div className="header-left">
+      <div className="column-header" style={{ borderTopColor: color }}>
+        <div className="column-header-left">
           <h3 className="column-title">{title}</h3>
           <span className="column-count" style={{ backgroundColor: `${color}20`, color: color }}>{count}</span>
         </div>

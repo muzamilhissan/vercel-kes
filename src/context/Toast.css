@@ -1,6 +1,6 @@
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@
 
 @keyframes toastSlideIn {
   from {
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(-20px) scale(0.95);
     opacity: 0;
   }
   to {

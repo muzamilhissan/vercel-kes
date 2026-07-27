@@ -84,6 +84,28 @@
   gap: 16px;
   position: relative;
   z-index: 10;
+  max-height: calc(85vh - 160px);
+  overflow-y: auto;
+}
+
+.lead-modal-compact .form-group textarea {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.lead-modal-compact .form-group textarea:focus {
+  background: #ffffff;
+  border-color: #70309f;
+  box-shadow: 0 0 0 4px rgba(112, 48, 159, 0.06);
+  outline: none;
 }
 
 .lead-modal-compact .lead-form-row-3 {
