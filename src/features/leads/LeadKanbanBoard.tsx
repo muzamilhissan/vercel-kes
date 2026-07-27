@@ -5,12 +5,7 @@ import '../kanban/KanbanColumn.css';
 import '../kanban/KanbanCard.css';
 import './LeadKanbanBoard.css';
 
-const MOCK_ASSIGNEES = [
-  { id: '1', name: 'Alice Smith', avatar: 'https://ui-avatars.com/api/?name=Alice+Smith&background=random' },
-  { id: '2', name: 'Bob Johnson', avatar: 'https://ui-avatars.com/api/?name=Bob+Johnson&background=random' },
-  { id: '3', name: 'Charlie Davis', avatar: 'https://ui-avatars.com/api/?name=Charlie+Davis&background=random' },
-];
-
+import { MOCK_ASSIGNEES } from './utils';
 interface LeadKanbanCardProps {
   lead: Lead;
   color: string;

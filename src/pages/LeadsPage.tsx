@@ -36,6 +36,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     totalItems,
     filterDate,
     setFilterDate,
+    filterAssignees,
+    setFilterAssignees,
     viewMode,
     setViewMode,
     viewingLead,
@@ -72,6 +74,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
             setViewMode={setViewMode}
             filterDate={filterDate}
             setFilterDate={setFilterDate}
+            filterAssignees={filterAssignees}
+            setFilterAssignees={setFilterAssignees}
             onAddLead={() => { setSelectedLead(null); setIsLeadModalOpen(true); }}
           />
 

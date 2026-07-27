@@ -1,12 +1,14 @@
-import React from 'react';
-import { Plus, Calendar, X, LayoutGrid, List } from 'lucide-react';
-import { getLocalDateString } from '../utils';
+import React, { useState, useRef, useEffect } from 'react';
+import { Plus, Calendar, X, LayoutGrid, List, Filter, Search } from 'lucide-react';
+import { getLocalDateString, MOCK_ASSIGNEES } from '../utils';
 
 interface LeadsPageHeaderProps {
   viewMode: 'kanban' | 'list';
   setViewMode: (mode: 'kanban' | 'list') => void;
   filterDate: string;
   setFilterDate: (date: string) => void;
+  filterAssignees: string[];
+  setFilterAssignees: (assignees: string[] | ((prev: string[]) => string[])) => void;
   onAddLead: () => void;
 }
 
@@ -15,8 +17,24 @@ const LeadsPageHeader: React.FC<LeadsPageHeaderProps> = ({
   setViewMode,
   filterDate,
   setFilterDate,
+  filterAssignees,
+  setFilterAssignees,
   onAddLead
 }) => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [assigneeSearchQuery, setAssigneeSearchQuery] = useState('');
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="page-header">
       <div className="page-header-title">
@@ -24,6 +42,94 @@ const LeadsPageHeader: React.FC<LeadsPageHeaderProps> = ({
         <p>Track and qualify your incoming sales opportunities.</p>
       </div>
       <div className="page-header-actions lead-header-actions">
+        <div className="filter-dropdown-container" ref={filterRef} style={{ position: 'relative', marginRight: '8px' }}>
+          <button 
+            className="btn-secondary" 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', color: '#64748b', fontWeight: 500 }}
+          >
+            <Filter size={16} /> 
+            <span>Filter</span>
+            {filterAssignees.length > 0 && (
+              <span style={{ background: '#3b82f6', color: '#fff', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', marginLeft: '4px' }}>
+                {filterAssignees.length}
+              </span>
+            )}
+          </button>
+
+          {isFilterOpen && (
+            <div className="filter-popover" style={{
+              position: 'absolute',
+              top: 'calc(100% + 8px)',
+              left: 0,
+              width: '280px',
+              background: '#fff',
+              borderRadius: '8px',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0',
+              zIndex: 50,
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <div style={{ padding: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input 
+                    type="text" 
+                    placeholder="Search assignee"
+                    value={assigneeSearchQuery}
+                    onChange={(e) => setAssigneeSearchQuery(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ maxHeight: '240px', overflowY: 'auto', padding: '8px 0' }}>
+                {MOCK_ASSIGNEES.filter(a => a.name.toLowerCase().includes(assigneeSearchQuery.toLowerCase())).map(assignee => (
+                  <label 
+                    key={assignee.id} 
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', cursor: 'pointer', transition: 'background 0.15s', margin: 0 }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <input 
+                      type="checkbox"
+                      checked={filterAssignees.includes(assignee.id)}
+                      onChange={() => {
+                        setFilterAssignees(prev => 
+                          prev.includes(assignee.id) 
+                            ? prev.filter(id => id !== assignee.id) 
+                            : [...prev, assignee.id]
+                        );
+                      }}
+                      style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                    />
+                    <img src={assignee.avatar} alt={assignee.name} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                    <span style={{ fontSize: '14px', color: '#334155' }}>{assignee.name}</span>
+                  </label>
+                ))}
+                {MOCK_ASSIGNEES.filter(a => a.name.toLowerCase().includes(assigneeSearchQuery.toLowerCase())).length === 0 && (
+                  <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                    No assignees found
+                  </div>
+                )}
+              </div>
+
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button 
+                  onClick={() => setFilterAssignees([])}
+                  style={{ background: 'transparent', border: 'none', color: filterAssignees.length > 0 ? '#3b82f6' : '#94a3b8', cursor: filterAssignees.length > 0 ? 'pointer' : 'default', fontSize: '13px', fontWeight: 500, padding: 0 }}
+                  disabled={filterAssignees.length === 0}
+                >
+                  Clear
+                </button>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  {filterAssignees.length > 0 ? `${filterAssignees.length} selected` : 'None selected'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
         <div className="view-controls" style={{ marginRight: '16px' }}>
           <div className="view-toggle" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '4px' }}>
             <div 
@@ -65,6 +171,8 @@ const LeadsPageHeader: React.FC<LeadsPageHeaderProps> = ({
             </button>
           )}
         </div>
+
+
         <button onClick={onAddLead} className={`btn-primary action-add-btn ${filterDate ? 'action-add-btn-collapsed' : ''}`}>
           <Plus size={16} /> <span className="action-add-btn-text">Add Lead</span>
         </button>

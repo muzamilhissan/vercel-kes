@@ -8,6 +8,12 @@ export const getLocalDateString = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+export const MOCK_ASSIGNEES = [
+  { id: '1', name: 'Alice Smith', avatar: 'https://ui-avatars.com/api/?name=Alice+Smith&background=random' },
+  { id: '2', name: 'Bob Johnson', avatar: 'https://ui-avatars.com/api/?name=Bob+Johnson&background=random' },
+  { id: '3', name: 'Charlie Davis', avatar: 'https://ui-avatars.com/api/?name=Charlie+Davis&background=random' },
+];
+
 export const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
   // Normalize status to match LeadTable status type
   let normalizedStatus: 'New' | 'Contacted' | 'Proposed' | 'Qualified' | 'Disqualified' | 'Converted' = 'New';

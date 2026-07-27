@@ -26,6 +26,7 @@ export const useLeads = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [filterDate, setFilterDate] = useState('');
+  const [filterAssignees, setFilterAssignees] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [viewingLead, setViewingLead] = useState<Lead | null>(null);
 
@@ -87,34 +88,52 @@ export const useLeads = () => {
   }, []);
 
   const filteredLeads = useMemo(() => {
-    if (!filterDate) return leads;
-    return leads.filter(lead => {
-      try {
-        const leadDate = new Date(lead.dateAdded);
-        const selectedDate = new Date(filterDate);
-        return leadDate.getFullYear() === selectedDate.getFullYear() &&
-               leadDate.getMonth() === selectedDate.getMonth() &&
-               leadDate.getDate() === selectedDate.getDate();
-      } catch {
-        return false;
-      }
-    });
-  }, [leads, filterDate]);
+    let result = leads;
+    if (filterDate) {
+      result = result.filter(lead => {
+        try {
+          const leadDate = new Date(lead.dateAdded);
+          const selectedDate = new Date(filterDate);
+          return leadDate.getFullYear() === selectedDate.getFullYear() &&
+                 leadDate.getMonth() === selectedDate.getMonth() &&
+                 leadDate.getDate() === selectedDate.getDate();
+        } catch {
+          return false;
+        }
+      });
+    }
+    if (filterAssignees.length > 0) {
+      result = result.filter(lead => {
+        const currentAssigned = typeof lead.assigned_to === 'string' && lead.assigned_to ? lead.assigned_to.split(',') : [];
+        return filterAssignees.some(id => currentAssigned.includes(id));
+      });
+    }
+    return result;
+  }, [leads, filterDate, filterAssignees]);
 
   const filteredAllLeads = useMemo(() => {
-    if (!filterDate) return allLeads;
-    return allLeads.filter(lead => {
-      try {
-        const leadDate = new Date(lead.dateAdded);
-        const selectedDate = new Date(filterDate);
-        return leadDate.getFullYear() === selectedDate.getFullYear() &&
-               leadDate.getMonth() === selectedDate.getMonth() &&
-               leadDate.getDate() === selectedDate.getDate();
-      } catch {
-        return false;
-      }
-    });
-  }, [allLeads, filterDate]);
+    let result = allLeads;
+    if (filterDate) {
+      result = result.filter(lead => {
+        try {
+          const leadDate = new Date(lead.dateAdded);
+          const selectedDate = new Date(filterDate);
+          return leadDate.getFullYear() === selectedDate.getFullYear() &&
+                 leadDate.getMonth() === selectedDate.getMonth() &&
+                 leadDate.getDate() === selectedDate.getDate();
+        } catch {
+          return false;
+        }
+      });
+    }
+    if (filterAssignees.length > 0) {
+      result = result.filter(lead => {
+        const currentAssigned = typeof lead.assigned_to === 'string' && lead.assigned_to ? lead.assigned_to.split(',') : [];
+        return filterAssignees.some(id => currentAssigned.includes(id));
+      });
+    }
+    return result;
+  }, [allLeads, filterDate, filterAssignees]);
 
   const fetchLeads = async (page?: number | any, query?: string) => {
     const pageNum = typeof page === 'number' ? page : currentPage;
@@ -342,6 +361,8 @@ export const useLeads = () => {
     totalItems,
     filterDate,
     setFilterDate,
+    filterAssignees,
+    setFilterAssignees,
     viewMode,
     setViewMode,
     viewingLead,
