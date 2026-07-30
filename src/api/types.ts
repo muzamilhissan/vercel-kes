@@ -193,3 +193,24 @@ export interface DealFile {
   updated_at?: string;
 }
 
+export interface ProposalAttachment {
+  id: string | number;
+  proposal_id: string | number;
+  file_name: string;
+  file_path: string;
+  file_size?: number;
+  mime_type?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Proposal {
+  id: string | number;
+  lead_id: string | number;
+  subject: string;
+  content: string;
+  created_at?: string;
+  updated_at?: string;
+  attachments?: ProposalAttachment[];
+}
+

@@ -43,9 +43,20 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
             <Send size={16} /> Send Proposal
           </button>
         ) : (
-          <button className="quick-action-btn primary" onClick={onContactClick}>
-            <Phone size={16} /> Contact Lead
-          </button>
+          <div title={['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status) ? 'Lead is already contacted' : undefined} style={{ display: 'inline-block', width: '100%' }}>
+            <button 
+              className="quick-action-btn primary" 
+              onClick={onContactClick}
+              disabled={['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status)}
+              style={{
+                opacity: ['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status) ? 0.6 : 1,
+                pointerEvents: ['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status) ? 'none' : 'auto',
+                width: '100%'
+              }}
+            >
+              <Phone size={16} /> Contact Lead
+            </button>
+          </div>
         )}
         
         {lead.status === 'New' && (

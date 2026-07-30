@@ -26,7 +26,15 @@ const LeadDetailsCard: React.FC<LeadDetailsCardProps> = ({ lead }) => {
       <div className="card-body highlighted-body">
         <div className="info-row">
           <span className="info-label">Stage:</span>
-          <span className="info-value">{lead.status}</span>
+          <span 
+            className="info-value"
+            style={{
+              color: lead.status === 'Disqualified' ? '#ef4444' : lead.status === 'Qualified' ? '#22c55e' : undefined,
+              fontWeight: (lead.status === 'Disqualified' || lead.status === 'Qualified') ? 600 : undefined
+            }}
+          >
+            {lead.status}
+          </span>
         </div>
         <div className="info-row">
           <span className="info-label">Expected Revenue:</span>

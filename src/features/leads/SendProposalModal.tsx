@@ -1,25 +1,84 @@
 import React, { useState } from 'react';
-import { X, FileText, Folder, Calendar, Info, Send, CheckCircle2 } from 'lucide-react';
+import { X, FileText, Info, Send, CheckCircle2, Loader2, Paperclip } from 'lucide-react';
 import './SendProposalModal.css';
 import { Lead } from './LeadTable';
+import { proposalService } from '../../api/proposalService';
+import { useToast } from '../../context/ToastContext';
 
 interface SendProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
   lead: Lead;
+  onSuccess?: () => void;
 }
 
-const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, lead }) => {
-  const [subject, setSubject] = useState('Business Proposal - kudon');
-  const [proposalContent, setProposalContent] = useState(`Hi ${lead.name.split(' ')[0]},\n\nThank you for taking the time to consider Kelesedi Accounting Services as your accounting, tax, and payroll partner in growth.\n\nWe offer three core services designed to simplify your business and strengthen your bottom line:\n\n1. Seamless Payroll Management (from R340 per employee/month) — full payroll administration, IRP5s, UIF, PAYE and SDL submissions, HR support, and leave/overtime tracking.`);
-  const [attachFromSystem, setAttachFromSystem] = useState(true); // default true to match screenshot
-  const [scheduleFollowUp, setScheduleFollowUp] = useState(false);
+const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, lead, onSuccess }) => {
+  const [subject, setSubject] = useState(`Business Proposal - ${lead.company || lead.name}`);
+  const [proposalContent, setProposalContent] = useState(`Hi ${lead.name.split(' ')[0]},\n\nThank you for taking the time to consider us as your partner in growth.\n\nWe offer core services designed to simplify your business and strengthen your bottom line.`);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { showToast } = useToast();
 
   if (!isOpen) return null;
 
-  const handleSend = () => {
-    // No API for now
-    onClose();
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      
+      // Basic validation: Check sizes (e.g., max 10MB per file)
+      const validFiles = selectedFiles.filter(file => file.size <= 10 * 1024 * 1024);
+      
+      if (validFiles.length !== selectedFiles.length) {
+        showToast('Some files exceed the 10MB limit and were removed.', 'error');
+      }
+
+      setFiles(prev => [...prev, ...validFiles]);
+    }
+    // reset input
+    e.target.value = '';
+  };
+
+  const removeFile = (indexToRemove: number) => {
+    setFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleSend = async () => {
+    if (!subject.trim()) {
+      showToast('Subject is required', 'error');
+      return;
+    }
+    if (!proposalContent.trim()) {
+      showToast('Proposal Content is required', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('subject', subject);
+      formData.append('content', proposalContent);
+      
+      files.forEach((file, index) => {
+        formData.append(`attachments[${index}]`, file);
+      });
+
+      const res = await proposalService.storeProposal(lead.id, formData);
+
+      if (res.success) {
+        showToast('Proposal sent successfully', 'success');
+        setSubject(`Business Proposal - ${lead.company || lead.name}`);
+        setFiles([]);
+        if (onSuccess) onSuccess();
+      } else {
+        showToast(res.message || 'Failed to send proposal', 'error');
+      }
+    } catch (error: any) {
+      console.error('Error sending proposal:', error);
+      showToast(error.message || 'An error occurred while sending the proposal.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -27,7 +86,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
       <div className="proposal-modal-container">
         <div className="proposal-modal-header">
           <h2><FileText size={20} className="header-icon" /> Send Proposal</h2>
-          <button className="close-btn" onClick={onClose}><X size={20} /></button>
+          <button className="close-btn" onClick={onClose} disabled={isSubmitting}><X size={20} /></button>
         </div>
         
         <div className="proposal-modal-body">
@@ -38,6 +97,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               value={subject} 
               onChange={(e) => setSubject(e.target.value)} 
               className="form-control"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -47,6 +107,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               value={proposalContent} 
               onChange={(e) => setProposalContent(e.target.value)}
               className="form-control proposal-textarea"
+              disabled={isSubmitting}
             />
             <div className="ready-to-send-text">
               <CheckCircle2 size={14} /> Ready to send.
@@ -54,17 +115,37 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
           </div>
 
           <div className="form-group">
-            <label>ATTACH DOCUMENT (OPTIONAL)</label>
+            <label>ATTACH DOCUMENTS (OPTIONAL)</label>
             <div className="file-input-wrapper">
-              <input type="file" id="proposal-file" className="file-input" />
-              <div className="file-input-display">
-                <button className="choose-file-btn">Choose File</button>
-                <span className="file-name">No file chosen</span>
+              <input 
+                type="file" 
+                id="proposal-file" 
+                className="file-input" 
+                multiple 
+                onChange={handleFileChange}
+                disabled={isSubmitting}
+              />
+              <div className="file-input-display" onClick={() => document.getElementById('proposal-file')?.click()}>
+                <button type="button" className="choose-file-btn" disabled={isSubmitting}>Choose Files</button>
+                <span className="file-name">{files.length > 0 ? `${files.length} file(s) selected` : 'No file chosen'}</span>
               </div>
             </div>
+            
+            {files.length > 0 && (
+              <div className="selected-files-list">
+                {files.map((file, idx) => (
+                  <div key={idx} className="selected-file-item">
+                    <Paperclip size={14} className="file-icon" />
+                    <span className="file-name-text">{file.name}</span>
+                    <span className="file-size-text">({(file.size / 1024).toFixed(1)} KB)</span>
+                    <button type="button" className="remove-file-btn" onClick={() => removeFile(idx)} disabled={isSubmitting}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
-
 
           <div className="info-alert">
             <Info size={16} style={{ flexShrink: 0 }} />
@@ -73,8 +154,14 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
         </div>
 
         <div className="proposal-modal-footer">
-          <button className="btn btn-primary" onClick={handleSend} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Send size={16} /> Send Proposal
+          <button 
+            className="btn btn-primary" 
+            onClick={handleSend} 
+            disabled={isSubmitting}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            {isSubmitting ? <Loader2 size={16} className="lucide-spin" /> : <Send size={16} />}
+            {isSubmitting ? 'Sending...' : 'Send Proposal'}
           </button>
         </div>
       </div>

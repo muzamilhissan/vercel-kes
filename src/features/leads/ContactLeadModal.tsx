@@ -81,17 +81,20 @@ const ContactLeadModal: React.FC<ContactLeadModalProps> = ({ isOpen, onClose, le
         </div>
 
         <div className="contact-modal-footer">
-          <button 
-            className="btn-premium-primary" 
-            onClick={handleMarkContacted}
-            disabled={isLoading || lead.status === 'Contacted'}
-            style={{ opacity: lead.status === 'Contacted' ? 0.6 : 1 }}
-          >
-            {lead.status === 'Contacted' ? 'Already Contacted' : isLoading ? 'Marking as Contacted...' : 'Mark as Contacted'}
-          </button>
-          <button className="btn-premium-secondary" onClick={onClose}>
-            Close
-          </button>
+          <div title={lead.status === 'Qualified' || lead.status === 'Disqualified' ? 'Lead already closed' : undefined} style={{ display: 'inline-block', width: '100%' }}>
+            <button 
+              className="btn-premium-primary" 
+              onClick={handleMarkContacted}
+              disabled={isLoading || lead.status === 'Contacted' || lead.status === 'Qualified' || lead.status === 'Disqualified'}
+              style={{ 
+                opacity: (lead.status === 'Contacted' || lead.status === 'Qualified' || lead.status === 'Disqualified') ? 0.6 : 1,
+                pointerEvents: (lead.status === 'Contacted' || lead.status === 'Qualified' || lead.status === 'Disqualified') ? 'none' : 'auto',
+                width: '100%'
+              }}
+            >
+              {lead.status === 'Contacted' ? 'Already Contacted' : isLoading ? 'Marking as Contacted...' : 'Mark as Contacted'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
