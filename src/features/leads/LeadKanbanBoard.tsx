@@ -14,26 +14,10 @@ interface LeadKanbanCardProps {
 }
 
 const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, onAssign }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const assignedUsers = MOCK_ASSIGNEES.filter(u => {
-    const currentAssigned = typeof lead.assigned_to === 'string' ? lead.assigned_to.split(',') : [];
-    return currentAssigned.includes(u.id);
-  });
+  // Removed assignee logic per requirements
 
   return (
-    <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30`, position: 'relative', zIndex: showDropdown ? 50 : 1 }}>
+    <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30`, position: 'relative' }}>
       <div className="card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h4 className="deal-name" style={{ flex: 1, paddingRight: '8px' }}>{lead.name}</h4>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -55,7 +39,9 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
       </div>
 
       <div className="card-tags">
-        <span className="id-tag">ID: {lead.id}</span>
+        {lead.industry && lead.industry.trim() !== '-' && lead.industry.trim() !== '' && (
+          <span className="id-tag">{lead.industry}</span>
+        )}
         {lead.company && (
           <span className="feature-tag" style={{ backgroundColor: '#3b82f612', color: '#3b82f6' }}>
             {lead.company}
@@ -72,67 +58,11 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
         )}
       </div>
 
-      <div className="card-bottom" style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+      <div className="card-bottom" style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
         <div className="card-meta" style={{ flex: 1, minWidth: 0 }}>
           <div className="meta-item" style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
             {lead.email}
           </div>
-        </div>
-        
-        <div className="assignee-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }} ref={dropdownRef}>
-          <div className="avatar-group" style={{ display: 'flex', alignItems: 'center' }}>
-            {assignedUsers.map((user, index) => (
-              <img 
-                key={user.id}
-                src={user.avatar} 
-                alt={user.name} 
-                className="stacked-avatar" 
-                title={`Assigned to ${user.name}`}
-                style={{ width: '24px', height: '24px', borderRadius: '50%', cursor: 'pointer', border: '1.5px solid #fff', zIndex: assignedUsers.length - index, position: 'relative' }}
-                onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }}
-              />
-            ))}
-          </div>
-
-          <div 
-            className="add-member-btn" 
-            onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }}
-            title="Assign someone"
-            style={{ width: '24px', height: '24px', border: '1px dashed #cbd5e1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8', zIndex: 0 }}
-          >
-            <UserPlus size={12} />
-          </div>
-
-          {showDropdown && (
-            <div className="assign-dropdown" style={{ 
-              position: 'absolute', right: 0, top: '30px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', width: '180px', zIndex: 9999, overflow: 'hidden'
-            }}>
-              <div style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>
-                Assign Lead To
-              </div>
-              {MOCK_ASSIGNEES.map(user => {
-                const isSelected = assignedUsers.some(u => u.id === user.id);
-                return (
-                  <div 
-                    key={user.id} 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', cursor: 'pointer', fontSize: '12px', backgroundColor: isSelected ? '#f1f5f9' : 'transparent' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#f1f5f9' : 'transparent'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAssign(lead, user.id);
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img src={user.avatar} alt={user.name} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
-                      <span>{user.name}</span>
-                    </div>
-                    {isSelected && <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>✓</span>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -168,7 +98,7 @@ const LeadKanbanColumn: React.FC<LeadKanbanColumnProps> = ({ title, count, leads
   const visibleLeads = leads.slice(0, visibleCount);
 
   return (
-    <div className="kanban-column" style={{ height: 'calc(100vh - 220px)' }}>
+    <div className="kanban-column">
       <div className="column-header" style={{ borderTop: `4px solid ${color}` }}>
         <div className="column-header-left">
           <h3 className="column-title">{title}</h3>

@@ -74,6 +74,11 @@ const EditProposalModal: React.FC<EditProposalModalProps> = ({ isOpen, onClose, 
       formData.append('subject', subject);
       formData.append('content', proposalContent);
       
+      // Send the IDs of attachments that should be kept
+      existingAttachments.forEach((att, index) => {
+        formData.append(`existing_attachments[${index}]`, att.id.toString());
+      });
+
       // Handle deleted attachments if API supports it
       deletedAttachmentIds.forEach((id, index) => {
         formData.append(`deleted_attachments[${index}]`, id.toString());

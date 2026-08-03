@@ -1,25 +1,26 @@
 .lead-kanban-board {
   display: flex;
   gap: 12px;
-  padding-bottom: 12px;
-  min-height: calc(100vh - 250px);
+  padding-bottom: 0px;
   min-width: max-content;
+  min-height: 100%;
+  align-items: stretch;
 }
 
 /* Slim Custom Scrollbars for Kanban Board and Columns */
 .kanban-view-wrapper::-webkit-scrollbar,
-.column-content::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+.kanban-board-scroll-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
 .kanban-view-wrapper::-webkit-scrollbar-track,
-.column-content::-webkit-scrollbar-track {
+.kanban-board-scroll-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .kanban-view-wrapper::-webkit-scrollbar-thumb,
-.column-content::-webkit-scrollbar-thumb {
+.kanban-board-scroll-container::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 10px;
   transition: background 0.3s;
@@ -27,25 +28,25 @@
 
 /* Only show scrollbars when hovering over the container */
 .kanban-view-wrapper:hover::-webkit-scrollbar-thumb,
-.column-content:hover::-webkit-scrollbar-thumb {
+.kanban-board-scroll-container:hover::-webkit-scrollbar-thumb {
   background: rgba(203, 213, 225, 0.8); /* #cbd5e1 with opacity */
 }
 
 /* Darken slightly when directly hovering the scrollbar thumb */
 .kanban-view-wrapper::-webkit-scrollbar-thumb:hover,
-.column-content::-webkit-scrollbar-thumb:hover {
+.kanban-board-scroll-container::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.9); /* #94a3b8 with opacity */
 }
 
 /* Firefox scrollbar support */
 .kanban-view-wrapper,
-.column-content {
+.kanban-board-scroll-container {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.3s;
 }
 
 .kanban-view-wrapper:hover,
-.column-content:hover {
+.kanban-board-scroll-container:hover {
   scrollbar-color: #cbd5e1 transparent;
 }

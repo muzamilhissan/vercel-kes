@@ -1,7 +1,8 @@
 .main-layout {
   display: flex;
-  min-height: 111.111vh; /* Adjusted for zoom: 90% */
+  height: 111.111vh; /* Adjusted for zoom: 90% */
   background-color: #fff;
+  overflow: hidden;
 }
 
 .content-wrapper {
@@ -15,7 +16,9 @@
   flex: 1;
   padding: 32px;
   background-color: #f8fafc;
-  overflow-y: auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-backdrop {

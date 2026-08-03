@@ -89,13 +89,15 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
           ) : (
             <>
               {viewMode === 'kanban' ? (
-                <div className="kanban-view-wrapper" style={{ overflowX: 'auto', paddingBottom: '12px' }}>
+                <div className="kanban-view-wrapper">
                   <LeadStatsCards allLeads={allLeads} totalItems={totalItems} viewMode={viewMode} />
-                  <LeadKanbanBoard 
-                    leads={allLeads}
-                    onView={(l) => setViewingLead(l)}
-                    onAssign={handleAssignLead}
-                  />
+                  <div className="kanban-board-scroll-container" style={{ overflow: 'visible', paddingBottom: '12px' }}>
+                    <LeadKanbanBoard 
+                      leads={allLeads}
+                      onView={(l) => setViewingLead(l)}
+                      onAssign={handleAssignLead}
+                    />
+                  </div>
                 </div>
               ) : (
                 <>
