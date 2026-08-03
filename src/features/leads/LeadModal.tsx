@@ -232,10 +232,10 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
               <div className="form-group">
                 <label>Website</label>
                 <input 
-                  type="text" 
+                  type="url" 
                   value={formData.website || ''} 
                   onChange={e => setFormData({...formData, website: e.target.value})} 
-                  placeholder="e.g. http://example.com"
+                  placeholder="e.g. https://example.com"
                 />
               </div>
               <div className="form-group">
