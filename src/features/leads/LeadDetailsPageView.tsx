@@ -10,6 +10,7 @@ import LeadQuickActions from './components/LeadQuickActions';
 import ContactLeadModal from './ContactLeadModal';
 import SendProposalModal from './SendProposalModal';
 import LeadProposalsList from './components/LeadProposalsList';
+import LeadFollowUpsList from './components/LeadFollowUpsList';
 import { leadService } from '../../api/leadService';
 import { useToast } from '../../context/ToastContext';
 import './LeadDetailsPageView.css';
@@ -25,7 +26,7 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
   const [localLead, setLocalLead] = React.useState(lead);
   const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
   const [isSendProposalModalOpen, setIsSendProposalModalOpen] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<'overview' | 'proposals'>('overview');
+  const [activeTab, setActiveTab] = React.useState<'overview' | 'proposals' | 'followups'>('overview');
   const [refreshProposals, setRefreshProposals] = React.useState(0);
   const { showToast } = useToast();
 
@@ -87,6 +88,12 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
         >
           Proposals
         </button>
+        <button 
+          className={`tab-btn ${activeTab === 'followups' ? 'active' : ''}`}
+          onClick={() => setActiveTab('followups')}
+        >
+          Follow-ups
+        </button>
       </div>
 
       {activeTab === 'overview' && (
@@ -113,6 +120,10 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
 
       {activeTab === 'proposals' && (
         <LeadProposalsList leadId={localLead.id} onRefreshTrigger={refreshProposals} />
+      )}
+      
+      {activeTab === 'followups' && (
+        <LeadFollowUpsList leadId={localLead.id} />
       )}
       
       <ContactLeadModal 

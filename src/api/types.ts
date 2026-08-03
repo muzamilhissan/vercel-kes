@@ -214,3 +214,27 @@ export interface Proposal {
   attachments?: ProposalAttachment[];
 }
 
+export interface LeadFollowUp {
+  id: string | number;
+  lead_id: string | number;
+  follow_up_date: string;
+  follow_up_time: string;
+  notes: string;
+  status: string; // 'Scheduled', 'Completed', 'Cancelled'
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateFollowUpInput {
+  date: string;
+  time: string;
+  notes?: string;
+}
+
+export interface UpdateFollowUpInput {
+  date?: string;
+  time?: string;
+  notes?: string;
+  status?: string;
+}
+

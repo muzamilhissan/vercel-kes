@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Coins } from 'lucide-react';
 import { Lead } from './LeadTable';
 import '../kanban/KanbanColumn.css';
 import '../kanban/KanbanCard.css';
@@ -34,8 +34,24 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
 
   return (
     <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30`, position: 'relative', zIndex: showDropdown ? 50 : 1 }}>
-      <div className="card-top">
-        <h4 className="deal-name">{lead.name}</h4>
+      <div className="card-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <h4 className="deal-name" style={{ flex: 1, paddingRight: '8px' }}>{lead.name}</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          {lead.dateAdded && (
+            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' }}>
+              {new Date(lead.dateAdded).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
+          {(lead.expected_revenue !== undefined || lead.probability !== undefined) && (
+            <div className="meta-item" style={{ fontSize: '11px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              <Coins size={12} />
+              <span>
+                {lead.expected_revenue ? `R ${lead.expected_revenue.toLocaleString()}` : 'R 0'} 
+                {lead.probability ? ` (${lead.probability}%)` : ''}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="card-tags">
@@ -63,7 +79,7 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
           </div>
         </div>
         
-        <div className="assignee-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} ref={dropdownRef}>
+        <div className="assignee-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }} ref={dropdownRef}>
           <div className="avatar-group" style={{ display: 'flex', alignItems: 'center' }}>
             {assignedUsers.map((user, index) => (
               <img 

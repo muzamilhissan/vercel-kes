@@ -1,5 +1,5 @@
 import { apiFetch } from './apiClient';
-import { ApiResponse, Lead, CreateLeadInput, UpdateLeadInput, ConvertLeadInput, ConvertLeadResponse } from './types';
+import { ApiResponse, Lead, CreateLeadInput, UpdateLeadInput, ConvertLeadInput, ConvertLeadResponse, LeadFollowUp, CreateFollowUpInput, UpdateFollowUpInput } from './types';
 
 export const leadService = {
   /**
@@ -76,4 +76,49 @@ export const leadService = {
       body: JSON.stringify(convertData),
     });
   },
+
+  // --------------------------------------------------------------------------
+  // Lead Follow-ups
+  // --------------------------------------------------------------------------
+
+  async getFollowUps(leadId: string | number): Promise<ApiResponse<LeadFollowUp[]>> {
+    return apiFetch<ApiResponse<LeadFollowUp[]>>(`/leads/${leadId}/follow-ups/list`);
+  },
+
+  async getFollowUpById(leadId: string | number, followUpId: string | number): Promise<ApiResponse<LeadFollowUp>> {
+    return apiFetch<ApiResponse<LeadFollowUp>>(`/leads/${leadId}/follow-ups/show/${followUpId}`);
+  },
+
+  async createFollowUp(leadId: string | number, data: CreateFollowUpInput): Promise<ApiResponse<LeadFollowUp>> {
+    return apiFetch<ApiResponse<LeadFollowUp>>(`/leads/${leadId}/follow-ups/store`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateFollowUp(leadId: string | number, followUpId: string | number, data: UpdateFollowUpInput): Promise<ApiResponse<LeadFollowUp>> {
+    return apiFetch<ApiResponse<LeadFollowUp>>(`/leads/${leadId}/follow-ups/update/${followUpId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteFollowUp(leadId: string | number, followUpId: string | number): Promise<ApiResponse<void>> {
+    return apiFetch<ApiResponse<void>>(`/leads/${leadId}/follow-ups/delete/${followUpId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async cancelFollowUp(leadId: string | number, followUpId: string | number): Promise<ApiResponse<LeadFollowUp>> {
+    return apiFetch<ApiResponse<LeadFollowUp>>(`/leads/${leadId}/follow-ups/cancel/${followUpId}`, {
+      method: 'POST',
+    });
+  },
+
+  async completeFollowUp(leadId: string | number, followUpId: string | number): Promise<ApiResponse<LeadFollowUp>> {
+    return apiFetch<ApiResponse<LeadFollowUp>>(`/leads/${leadId}/follow-ups/complete/${followUpId}`, {
+      method: 'POST',
+    });
+  },
 };
+

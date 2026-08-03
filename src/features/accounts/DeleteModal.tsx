@@ -1,16 +1,20 @@
 import React from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, Trash2 } from 'lucide-react';
 import './DeleteModal.css';
 
 interface DeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  itemName: string;
+  itemName?: string;
   isDeleting?: boolean;
+  title?: string;
+  message?: React.ReactNode;
+  confirmText?: string;
+  iconType?: 'alert' | 'trash';
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, itemName, isDeleting }) => {
+const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, itemName, isDeleting, title, message, confirmText, iconType = 'alert' }) => {
   if (!isOpen) return null;
 
   return (
@@ -21,18 +25,20 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, i
         </button>
         <div className="delete-body">
           <div className="delete-warning-icon">
-            <AlertCircle size={22} />
+            {iconType === 'trash' ? <Trash2 size={22} /> : <AlertCircle size={22} />}
           </div>
-          <h4 className="delete-title">Confirm Deletion</h4>
-          <p className="delete-desc">
-            Are you sure you want to delete {itemName ? <strong style={{ color: '#1e293b' }}>"{itemName}"</strong> : 'this item'}?
-          </p>
+          <h4 className="delete-title">{title || 'Confirm Deletion'}</h4>
+          <div className="delete-desc">
+            {message || (
+              <>Are you sure you want to delete {itemName ? <strong style={{ color: '#1e293b' }}>"{itemName}"</strong> : 'this item'}?</>
+            )}
+          </div>
           <div className="delete-footer-actions">
             <button onClick={onClose} className="btn-premium-secondary compact-btn" disabled={isDeleting}>
               Cancel
             </button>
             <button onClick={onConfirm} className="btn-premium-primary compact-btn delete-btn" disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete Now'}
+              {isDeleting ? 'Processing...' : (confirmText || 'Delete Now')}
             </button>
           </div>
         </div>
