@@ -54,7 +54,7 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
                 width: '100%'
               }}
             >
-              <Phone size={16} /> Contact Lead
+              <Phone size={16} /> {['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status) ? 'Lead Contacted' : 'Contact Lead'}
             </button>
           </div>
         )}
@@ -86,11 +86,11 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
 
         {lead.status !== 'Disqualified' && lead.status !== 'Qualified' && lead.status !== 'Converted' ? (
           <button className="quick-action-btn danger-outline" disabled={!!updatingStatus} onClick={() => handleStatusClick('Disqualified')} style={updatingStatus ? { opacity: 0.7, cursor: 'not-allowed' } : {}}>
-            {updatingStatus === 'Disqualified' ? <Loader2 size={16} className="lucide-spin" /> : <XOctagon size={16} />} Mark as Lost
+            {updatingStatus === 'Disqualified' ? <Loader2 size={16} className="lucide-spin" /> : <XOctagon size={16} />} Mark as Disqualified
           </button>
         ) : (
           <button className="quick-action-btn danger-outline" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
-            <XOctagon size={16} /> Lead is Closed
+            <XOctagon size={16} /> {lead.status === 'Disqualified' ? 'Lead is Disqualified' : 'Lead is Closed'}
           </button>
         )}
         

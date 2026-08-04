@@ -83,6 +83,7 @@ function App() {
     } else {
       setCurrentPath(path);
       localStorage.setItem('currentPath', path);
+      window.dispatchEvent(new CustomEvent('sidebarNavigate', { detail: { path } }));
     }
   };
 

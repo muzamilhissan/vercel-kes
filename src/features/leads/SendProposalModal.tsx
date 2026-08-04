@@ -13,8 +13,8 @@ interface SendProposalModalProps {
 }
 
 const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, lead, onSuccess }) => {
-  const [subject, setSubject] = useState(`Business Proposal - ${lead.company || lead.name}`);
-  const [proposalContent, setProposalContent] = useState(`Hi ${lead.name.split(' ')[0]},\n\nThank you for taking the time to consider us as your partner in growth.\n\nWe offer core services designed to simplify your business and strengthen your bottom line.`);
+  const [subject, setSubject] = useState('');
+  const [proposalContent, setProposalContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -67,7 +67,8 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
 
       if (res.success) {
         showToast('Proposal sent successfully', 'success');
-        setSubject(`Business Proposal - ${lead.company || lead.name}`);
+        setSubject('');
+        setProposalContent('');
         setFiles([]);
         if (onSuccess) onSuccess();
       } else {
@@ -98,6 +99,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               onChange={(e) => setSubject(e.target.value)} 
               className="form-control"
               disabled={isSubmitting}
+              placeholder="Enter proposal subject..."
             />
           </div>
 
@@ -108,10 +110,22 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               onChange={(e) => setProposalContent(e.target.value)}
               className="form-control proposal-textarea"
               disabled={isSubmitting}
+              maxLength={2000}
+              placeholder="Write your proposal content here..."
             />
-            <div className="ready-to-send-text">
-              <CheckCircle2 size={14} /> Ready to send.
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+              <div className="ready-to-send-text" style={{ margin: 0 }}>
+                <CheckCircle2 size={14} /> Ready to send.
+              </div>
+              <div className="character-counter" style={{ fontSize: '11px', color: proposalContent.length >= 2000 ? '#ef4444' : '#64748b', fontWeight: 500 }}>
+                {proposalContent.length}/2000
+              </div>
             </div>
+            {proposalContent.length >= 2000 && (
+              <div style={{ color: '#ef4444', fontSize: '11px', fontWeight: 500, marginTop: '4px', textAlign: 'left' }}>
+                Maximum character limit of 2,000 reached.
+              </div>
+            )}
           </div>
 
           <div className="form-group">

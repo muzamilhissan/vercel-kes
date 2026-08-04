@@ -57,19 +57,17 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
 
   return (
     <div className="lead-details-page">
-      <div className="lead-details-page-header">
-        <button className="back-btn" onClick={onBack}>
-          <ArrowLeft size={16} /> Back to Pipeline
+      <div className="lead-details-page-header" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
+        <button className="back-btn" onClick={onBack} style={{ flexShrink: 0 }}>
+          <ArrowLeft size={16} /> Back
         </button>
-      </div>
-
-      <div className="lead-profile-header">
-        <div className="lead-avatar">
+        <div style={{ height: '24px', width: '1px', backgroundColor: '#e2e8f0' }}></div>
+        <div className="lead-avatar" style={{ margin: 0 }}>
           {getInitials(localLead.name || 'L')}
         </div>
-        <div className="lead-profile-info">
-          <h2>{localLead.name}</h2>
-          <p>{localLead.email}</p>
+        <div className="lead-profile-info" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <h2 style={{ fontSize: '18px', margin: 0, lineHeight: 1.2 }}>{localLead.name}</h2>
+          <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>{localLead.email}</p>
         </div>
       </div>
 

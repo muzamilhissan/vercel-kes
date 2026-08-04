@@ -270,6 +270,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                   placeholder="Enter probability"
                   min={0}
                   max={100}
+                  step="any"
                 />
               </div>
             </div>

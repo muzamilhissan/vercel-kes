@@ -50,6 +50,17 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     handleAssignLead
   } = useLeads();
 
+  React.useEffect(() => {
+    const handleSidebarNav = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.path === 'leads') {
+        setViewingLead(null);
+      }
+    };
+    window.addEventListener('sidebarNavigate', handleSidebarNav);
+    return () => window.removeEventListener('sidebarNavigate', handleSidebarNav);
+  }, [setViewingLead]);
+
   if (isInitializingFromUrl) {
     return (
       <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
