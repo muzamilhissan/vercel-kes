@@ -10,6 +10,14 @@ interface LeadFollowUpFormModalProps {
   initialData?: LeadFollowUp;
 }
 
+const getTodayString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const LeadFollowUpFormModal: React.FC<LeadFollowUpFormModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -66,6 +74,7 @@ const LeadFollowUpFormModal: React.FC<LeadFollowUpFormModalProps> = ({ isOpen, o
                 id="followUpDate"
                 value={date} 
                 onChange={(e) => setDate(e.target.value)}
+                min={getTodayString()}
                 required
               />
             </div>

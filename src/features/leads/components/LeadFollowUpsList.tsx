@@ -11,6 +11,40 @@ interface LeadFollowUpsListProps {
   leadId: string | number;
 }
 
+const isFollowUpDatePassed = (followUp: LeadFollowUp) => {
+  const dateStr = (followUp as any).date || followUp.follow_up_date;
+  if (!dateStr) return false;
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  return dateStr < todayStr;
+};
+
+const formatFollowUpDate = (dateStr?: string) => {
+  if (!dateStr) return 'N/A';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  if (month < 0 || month > 11 || isNaN(day) || isNaN(year)) {
+    return dateStr;
+  }
+
+  return `${day} ${months[month]} ${year}`;
+};
+
 const LeadFollowUpsList: React.FC<LeadFollowUpsListProps> = ({ leadId }) => {
   const [followUps, setFollowUps] = useState<LeadFollowUp[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +103,7 @@ const LeadFollowUpsList: React.FC<LeadFollowUpsListProps> = ({ leadId }) => {
       }
     } catch (error) {
       console.error('Error saving follow-up:', error);
-      showToast('Error saving follow-up', 'error');
+      showToast(error instanceof Error ? error.message : 'Error saving follow-up', 'error');
       throw error; // Rethrow so modal doesn't close on error
     }
   };
@@ -166,7 +200,7 @@ const LeadFollowUpsList: React.FC<LeadFollowUpsListProps> = ({ leadId }) => {
                   <td>
                     <div className="datetime-item">
                       <Calendar size={16} />
-                      <span>{(followUp as any).date || followUp.follow_up_date || 'N/A'}</span>
+                      <span>{formatFollowUpDate((followUp as any).date || followUp.follow_up_date)}</span>
                     </div>
                   </td>
                   <td>
@@ -185,17 +219,17 @@ const LeadFollowUpsList: React.FC<LeadFollowUpsListProps> = ({ leadId }) => {
                     <div className="follow-up-table-actions">
                       <button 
                         className="follow-up-action-btn edit-btn" 
-                        title="Edit"
+                        title={isFollowUpDatePassed(followUp) ? "Cannot edit past follow-up" : "Edit"}
                         onClick={() => handleEditFollowUp(followUp)}
-                        disabled={followUp.status?.toLowerCase() === 'cancelled'}
+                        disabled={followUp.status?.toLowerCase() === 'cancelled' || isFollowUpDatePassed(followUp)}
                       >
                         <Edit2 size={16} />
                       </button>
                       <button 
                         className="follow-up-action-btn cancel-btn" 
-                        title="Cancel"
+                        title={isFollowUpDatePassed(followUp) ? "Cannot cancel past follow-up" : "Cancel"}
                         onClick={() => handleCancelClick(followUp)}
-                        disabled={followUp.status?.toLowerCase() === 'cancelled'}
+                        disabled={followUp.status?.toLowerCase() === 'cancelled' || isFollowUpDatePassed(followUp)}
                       >
                         <XCircle size={16} />
                       </button>
