@@ -74,18 +74,14 @@ const EditProposalModal: React.FC<EditProposalModalProps> = ({ isOpen, onClose, 
       formData.append('subject', subject);
       formData.append('content', proposalContent);
       
-      // Send the IDs of attachments that should be kept
-      existingAttachments.forEach((att, index) => {
-        formData.append(`existing_attachments[${index}]`, att.id.toString());
-      });
+      // Send the IDs of attachments that should be kept as a comma-separated string
+      formData.append('existing_attachments', existingAttachments.map(att => att.id).join(','));
+      
+      // Handle deleted attachments if API supports it as a comma-separated string
+      formData.append('deleted_attachments', deletedAttachmentIds.join(','));
 
-      // Handle deleted attachments if API supports it
-      deletedAttachmentIds.forEach((id, index) => {
-        formData.append(`deleted_attachments[${index}]`, id.toString());
-      });
-
-      newFiles.forEach((file, index) => {
-        formData.append(`attachments[${index}]`, file);
+      newFiles.forEach((file) => {
+        formData.append('attachments[]', file);
       });
 
       const res = await proposalService.updateProposal(leadId, proposal.id, formData);

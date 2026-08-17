@@ -59,8 +59,8 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
       formData.append('subject', subject);
       formData.append('content', proposalContent);
       
-      files.forEach((file, index) => {
-        formData.append(`attachments[${index}]`, file);
+      files.forEach((file) => {
+        formData.append('attachments[]', file);
       });
 
       const res = await proposalService.storeProposal(lead.id, formData);
