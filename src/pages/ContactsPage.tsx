@@ -5,7 +5,7 @@ import Loader from '../components/ui/Loader';
 import ContactModal from '../features/contacts/ContactModal';
 import ContactDetailsModal from '../features/contacts/ContactDetailsModal';
 import DeleteModal from '../features/leads/DeleteModal';
-import { Plus } from 'lucide-react';
+import { Plus, Calendar, X } from 'lucide-react';
 import { contactService } from '../api/contactService';
 import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
@@ -38,6 +38,7 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [filterDate, setFilterDate] = useState('');
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -54,7 +55,21 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     };
   }, []);
 
-  const filteredContacts = contacts;
+  const filteredContacts = React.useMemo(() => {
+    if (!filterDate) return contacts;
+    return contacts.filter(contact => {
+      if (!contact.createdAt) return false;
+      try {
+        const cDate = new Date(contact.createdAt);
+        const selectedDate = new Date(filterDate);
+        return cDate.getFullYear() === selectedDate.getFullYear() &&
+               cDate.getMonth() === selectedDate.getMonth() &&
+               cDate.getDate() === selectedDate.getDate();
+      } catch {
+        return false;
+      }
+    });
+  }, [contacts, filterDate]);
 
   // Load accounts list once on mount (only for dropdown in modal)
   useEffect(() => {
@@ -192,13 +207,33 @@ const ContactsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
           <h2>Contacts</h2>
           <p>Manage individual people and their business relationships.</p>
         </div>
-        <div className="page-header-actions">
+        <div className="page-header-actions lead-header-actions">
+          <div className="date-filter-container">
+            <div className={`date-filter-input-wrapper ${filterDate ? 'has-date' : ''}`}>
+              <Calendar size={16} className="date-filter-calendar-icon" />
+              <input 
+                type="date" 
+                value={filterDate} 
+                onChange={e => setFilterDate(e.target.value)} 
+                className="date-filter-input"
+              />
+            </div>
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')} 
+                className="date-filter-clear-btn"
+                title="Clear filter"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
           <button 
             onClick={() => { setSelectedContact(null); setIsModalOpen(true); }} 
-            className="btn-primary"
+            className={`btn-primary action-add-btn ${filterDate ? 'action-add-btn-collapsed' : ''}`}
           >
             <Plus size={16} /> 
-            <span>Add Contact</span>
+            <span className="action-add-btn-text">Add Contact</span>
           </button>
         </div>
       </div>

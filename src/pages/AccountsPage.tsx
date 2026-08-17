@@ -5,7 +5,7 @@ import Loader from '../components/ui/Loader';
 import AccountModal from '../features/accounts/AccountModal';
 import AccountDetails from '../features/accounts/AccountDetails';
 import DeleteModal from '../features/accounts/DeleteModal';
-import { Building, Plus } from 'lucide-react';
+import { Building, Plus, Calendar, X } from 'lucide-react';
 import { accountService } from '../api/accountService';
 import { useToast } from '../context/ToastContext';
 import { Account } from '../api/types';
@@ -25,6 +25,7 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [filterDate, setFilterDate] = useState('');
 
   useEffect(() => {
     const handleGlobalSearch = (e: Event) => {
@@ -163,7 +164,21 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
     }
   };
 
-  const filteredAccounts = accounts;
+  const filteredAccounts = React.useMemo(() => {
+    if (!filterDate) return accounts;
+    return accounts.filter(acc => {
+      if (!acc.created_at) return false;
+      try {
+        const accDate = new Date(acc.created_at);
+        const selectedDate = new Date(filterDate);
+        return accDate.getFullYear() === selectedDate.getFullYear() &&
+               accDate.getMonth() === selectedDate.getMonth() &&
+               accDate.getDate() === selectedDate.getDate();
+      } catch {
+        return false;
+      }
+    });
+  }, [accounts, filterDate]);
 
   return (
     <MainLayout currentPath={currentPath} onNavigate={onNavigate}>
@@ -172,13 +187,33 @@ const AccountsPage: React.FC<{currentPath: string; onNavigate: (path: string) =>
           <h2>Accounts</h2>
           <p>Manage company records and their related contacts and deals.</p>
         </div>
-        <div className="page-header-actions">
+        <div className="page-header-actions lead-header-actions">
+          <div className="date-filter-container">
+            <div className={`date-filter-input-wrapper ${filterDate ? 'has-date' : ''}`}>
+              <Calendar size={16} className="date-filter-calendar-icon" />
+              <input 
+                type="date" 
+                value={filterDate} 
+                onChange={e => setFilterDate(e.target.value)} 
+                className="date-filter-input"
+              />
+            </div>
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')} 
+                className="date-filter-clear-btn"
+                title="Clear filter"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
           <button 
             onClick={() => { setSelectedAccount(null); setIsModalOpen(true); }} 
-            className="btn-primary"
+            className={`btn-primary action-add-btn ${filterDate ? 'action-add-btn-collapsed' : ''}`}
           >
             <Plus size={16} /> 
-            <span>Add Account</span>
+            <span className="action-add-btn-text">Add Account</span>
           </button>
         </div>
       </div>
