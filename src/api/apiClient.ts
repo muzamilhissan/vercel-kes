@@ -35,6 +35,11 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
   const response = await fetch(url, config);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
     let errorMessage = `HTTP error! Status: ${response.status}`;
     try {
       const errorData = await response.json();
