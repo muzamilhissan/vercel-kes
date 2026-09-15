@@ -39,11 +39,136 @@
   font-size: 14px;
 }
 
+.proposals-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.proposals-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proposals-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proposals-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.proposals-count-pill {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.proposals-section-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.btn-repropose-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #70309f 0%, #5b2484 100%);
+  color: #ffffff;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(112, 48, 159, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-repropose-primary:hover {
+  box-shadow: 0 6px 18px rgba(112, 48, 159, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-repropose-primary:active {
+  transform: translateY(0);
+}
+
+.repropose-btn-icon {
+  transition: transform 0.3s ease;
+}
+
+.btn-repropose-primary:hover .repropose-btn-icon {
+  transform: rotate(-45deg);
+}
+
+.repropose-btn-badge {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-left: 2px;
+}
+
+.btn-draft-first-proposal {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #70309f 0%, #5b2484 100%);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(112, 48, 159, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-draft-first-proposal:hover {
+  box-shadow: 0 6px 18px rgba(112, 48, 159, 0.35);
+  transform: translateY(-1px);
+}
+
+.empty-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
 .proposals-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .proposal-card {
@@ -70,13 +195,54 @@
   margin-bottom: 12px;
 }
 
+.proposal-title-box {
+  flex: 1;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proposal-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proposal-num-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 1px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.proposal-latest-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  padding: 1px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .proposal-subject {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #0f172a;
-  flex: 1;
-  padding-right: 12px;
+  line-height: 1.35;
 }
 
 .proposal-actions {
@@ -102,6 +268,16 @@
   background: #f1f5f9;
   border-color: #e2e8f0;
   color: #1e293b;
+}
+
+.action-btn.repropose-btn {
+  color: #70309f;
+}
+
+.action-btn.repropose-btn:hover {
+  background: #f3e8ff;
+  border-color: #d8b4fe;
+  color: #5b2484;
 }
 
 .action-btn.delete-btn:hover {

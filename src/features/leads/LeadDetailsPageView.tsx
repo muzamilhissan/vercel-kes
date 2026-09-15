@@ -26,6 +26,8 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
   const [localLead, setLocalLead] = React.useState(lead);
   const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
   const [isSendProposalModalOpen, setIsSendProposalModalOpen] = React.useState(false);
+  const [isRepropose, setIsRepropose] = React.useState(false);
+  const [proposalNumber, setProposalNumber] = React.useState(1);
   const [activeTab, setActiveTab] = React.useState<'overview' | 'proposals' | 'followups'>('overview');
   const [refreshProposals, setRefreshProposals] = React.useState(0);
   const { showToast } = useToast();
@@ -33,6 +35,18 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
   React.useEffect(() => {
     setLocalLead(lead);
   }, [lead]);
+
+  const handleOpenSendProposal = () => {
+    setIsRepropose(false);
+    setProposalNumber(1);
+    setIsSendProposalModalOpen(true);
+  };
+
+  const handleOpenRepropose = (nextNum: number = 2) => {
+    setIsRepropose(true);
+    setProposalNumber(nextNum);
+    setIsSendProposalModalOpen(true);
+  };
 
   const handleStatusUpdate = async (newStatus: string) => {
     try {
@@ -107,7 +121,8 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
             <LeadQuickActions 
               lead={localLead}
               onContactClick={() => setIsContactModalOpen(true)} 
-              onSendProposalClick={() => setIsSendProposalModalOpen(true)}
+              onSendProposalClick={handleOpenSendProposal}
+              onReproposeClick={() => handleOpenRepropose(2)}
               onEditClick={() => onEdit(localLead)}
               onDeleteClick={() => onDelete(localLead)}
               onStatusUpdate={handleStatusUpdate}
@@ -117,7 +132,12 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
       )}
 
       {activeTab === 'proposals' && (
-        <LeadProposalsList leadId={localLead.id} onRefreshTrigger={refreshProposals} />
+        <LeadProposalsList 
+          leadId={localLead.id} 
+          onRefreshTrigger={refreshProposals}
+          onRepropose={handleOpenRepropose}
+          onSendProposal={handleOpenSendProposal}
+        />
       )}
       
       {activeTab === 'followups' && (
@@ -134,6 +154,8 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
         isOpen={isSendProposalModalOpen} 
         onClose={() => setIsSendProposalModalOpen(false)} 
         lead={localLead} 
+        isRepropose={isRepropose}
+        proposalNumber={proposalNumber}
         onSuccess={() => {
           setIsSendProposalModalOpen(false);
           setRefreshProposals(prev => prev + 1);

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Loader2, Zap, Phone, Check, Edit, XOctagon, Trash2, Send } from 'lucide-react';
+import { Loader2, Zap, Phone, Check, Edit, XOctagon, Trash2, Send, RotateCcw } from 'lucide-react';
 import { Lead } from '../LeadTable';
 
 interface LeadQuickActionsProps {
   lead: Lead;
   onContactClick: () => void;
   onSendProposalClick: () => void;
+  onReproposeClick?: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
   onStatusUpdate: (status: string) => Promise<void>;
@@ -15,6 +16,7 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
   lead, 
   onContactClick, 
   onSendProposalClick, 
+  onReproposeClick,
   onEditClick, 
   onDeleteClick,
   onStatusUpdate 
@@ -38,7 +40,11 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
         <h3>Quick Actions</h3>
       </div>
       <div className="card-body actions-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {lead.status === 'Contacted' ? (
+        {lead.status === 'Proposed' && onReproposeClick ? (
+          <button className="quick-action-btn primary" onClick={onReproposeClick}>
+            <RotateCcw size={16} /> Re-propose
+          </button>
+        ) : lead.status === 'Contacted' ? (
           <button className="quick-action-btn primary" onClick={onSendProposalClick}>
             <Send size={16} /> Send Proposal
           </button>

@@ -25,9 +25,18 @@ interface SendProposalModalProps {
   onClose: () => void;
   lead: Lead;
   onSuccess?: () => void;
+  isRepropose?: boolean;
+  proposalNumber?: number;
 }
 
-const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, lead, onSuccess }) => {
+const SendProposalModal: React.FC<SendProposalModalProps> = ({
+  isOpen,
+  onClose,
+  lead,
+  onSuccess,
+  isRepropose = false,
+  proposalNumber = 1,
+}) => {
   // Stepper state
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 
@@ -52,9 +61,15 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
 
   const { showToast } = useToast();
 
-  // Load options when modal opens
+  // Load options when modal opens & reset state cleanly
   useEffect(() => {
     if (isOpen) {
+      setCurrentStep(1);
+      setIsGenerating(false);
+      setSubject('');
+      setProposalContent('');
+      setFiles([]);
+      setGeneratedPdfUrl(null);
       if (!options) {
         fetchOptions();
       }
@@ -213,7 +228,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
       const res = await proposalService.storeProposal(lead.id, formData);
 
       if (res.success) {
-        showToast('Proposal sent successfully', 'success');
+        showToast(
+          isRepropose ? `Proposal #${proposalNumber} sent successfully!` : 'Proposal sent successfully',
+          'success'
+        );
         setSubject('');
         setProposalContent('');
         setFiles([]);
@@ -237,12 +255,23 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
         <div className="proposal-modal-header">
           <div className="header-title-area">
             <h2>
-              <FileText size={20} className="header-icon" />
-              Send Proposal
+              {isRepropose ? (
+                <RotateCcw size={20} className="header-icon repropose-header-icon" />
+              ) : (
+                <FileText size={20} className="header-icon" />
+              )}
+              {isRepropose ? 'Re-propose Lead' : 'Send Proposal'}
             </h2>
-            <span className="lead-tag">
-              Lead: {lead.name} {lead.company ? `(${lead.company})` : ''}
-            </span>
+            <div className="header-subtitle-row">
+              {isRepropose && (
+                <span className="proposal-version-badge">
+                  Proposal #{proposalNumber}
+                </span>
+              )}
+              <span className="lead-tag">
+                Lead: {lead.name} {lead.company ? `(${lead.company})` : ''}
+              </span>
+            </div>
           </div>
           <button
             className="close-btn"
@@ -266,7 +295,9 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               </div>
               <div className="stepper-texts">
                 <span className="step-name">Step 1: Requirements</span>
-                <span className="step-hint">Select scope & parameters</span>
+                <span className="step-hint">
+                  {isRepropose ? 'Adjust scope & parameters' : 'Select scope & parameters'}
+                </span>
               </div>
             </div>
 
@@ -276,7 +307,9 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               <div className="stepper-bubble">2</div>
               <div className="stepper-texts">
                 <span className="step-name">Step 2: Review & Send</span>
-                <span className="step-hint">Review generated content</span>
+                <span className="step-hint">
+                  {isRepropose ? `Review Proposal #${proposalNumber}` : 'Review generated content'}
+                </span>
               </div>
             </div>
           </div>
@@ -290,10 +323,14 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               <div className="ai-sparkle-halo">
                 <Sparkles size={38} className="ai-sparkle-icon" />
               </div>
-              <h3 className="ai-generating-title">Generating Proposal with AI...</h3>
+              <h3 className="ai-generating-title">
+                {isRepropose
+                  ? `Generating Proposal #${proposalNumber} with AI...`
+                  : 'Generating Proposal with AI...'}
+              </h3>
               <p className="ai-generating-desc">
                 Analyzing your requirements for <strong>{lead.company || lead.name}</strong> and
-                synthesizing a customized proposal letter and documentation.
+                synthesizing a customized {isRepropose ? 're-proposal' : 'proposal'} letter and documentation.
               </p>
               <div className="ai-progress-bar-wrap">
                 <div className="ai-progress-bar-fill" />
@@ -458,7 +495,11 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
               <div className="success-generated-banner">
                 <CheckCircle2 size={18} className="banner-icon" />
                 <div className="banner-text">
-                  <strong>Proposal content generated successfully!</strong>
+                  <strong>
+                    {isRepropose
+                      ? `Proposal #${proposalNumber} generated successfully!`
+                      : 'Proposal content generated successfully!'}
+                  </strong>
                   <span>
                     Review and tailor the subject line and content below. You can also attach
                     supporting files before sending.
@@ -643,7 +684,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
                   ) : (
                     <>
                       <Sparkles size={16} />
-                      <span>Generate Proposal</span>
+                      <span>{isRepropose ? `Generate Proposal #${proposalNumber}` : 'Generate Proposal'}</span>
                       <ArrowRight size={15} />
                     </>
                   )}
@@ -672,7 +713,13 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({ isOpen, onClose, 
                 ) : (
                   <Send size={16} />
                 )}
-                <span>{isSubmitting ? 'Sending...' : 'Send Proposal'}</span>
+                <span>
+                  {isSubmitting
+                    ? 'Sending...'
+                    : isRepropose
+                    ? `Send Proposal #${proposalNumber}`
+                    : 'Send Proposal'}
+                </span>
               </button>
             </div>
           )}

@@ -1,23 +1,44 @@
 import React from 'react';
-import { X, FileText, Download, Calendar, Paperclip } from 'lucide-react';
+import { X, FileText, Download, Calendar, Paperclip, RotateCcw } from 'lucide-react';
 import { Proposal } from '../../api/types';
 import './ViewProposalModal.css';
 
 interface ViewProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposal: Proposal | null;
+  proposal: (Proposal & { proposalNumber?: number }) | null;
+  onRepropose?: () => void;
 }
 
-const ViewProposalModal: React.FC<ViewProposalModalProps> = ({ isOpen, onClose, proposal }) => {
+const ViewProposalModal: React.FC<ViewProposalModalProps> = ({ isOpen, onClose, proposal, onRepropose }) => {
   if (!isOpen || !proposal) return null;
 
   return (
     <div className="proposal-modal-overlay">
       <div className="proposal-modal-container">
         <div className="proposal-modal-header">
-          <h2><FileText size={20} className="header-icon" /> View Proposal</h2>
-          <button className="close-btn" onClick={onClose}><X size={20} /></button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2><FileText size={20} className="header-icon" /> View Proposal</h2>
+            {proposal.proposalNumber && (
+              <span className="proposal-version-badge">
+                Proposal #{proposal.proposalNumber}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {onRepropose && (
+              <button
+                type="button"
+                className="view-modal-repropose-btn"
+                onClick={onRepropose}
+                title="Draft a new revision of this proposal"
+              >
+                <RotateCcw size={14} />
+                <span>Re-propose</span>
+              </button>
+            )}
+            <button className="close-btn" onClick={onClose}><X size={20} /></button>
+          </div>
         </div>
         
         <div className="proposal-modal-body view-mode">
