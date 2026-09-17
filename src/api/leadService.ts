@@ -66,7 +66,7 @@ export const leadService = {
   },
 
   /**
-   * Convert a lead to a contact.
+    * Convert a lead to a contact.
    * POST /leads/convert/:id
    * Supports Mode A (existing contact) or Mode B (new contact details).
    */
@@ -74,6 +74,25 @@ export const leadService = {
     return apiFetch<ApiResponse<ConvertLeadResponse>>(`/leads/convert/${id}`, {
       method: 'POST',
       body: JSON.stringify(convertData),
+    });
+  },
+
+  /**
+   * Get all assignable users.
+   * GET /leads/assignable-users
+   */
+  async getAssignableUsers(): Promise<ApiResponse<any>> {
+    return apiFetch<ApiResponse<any>>('/leads/assignable-users');
+  },
+
+  /**
+   * Assign or reassign users to a lead.
+   * PUT /leads/assign/:leadId
+   */
+  async assignLead(leadId: string | number, assignedTo: (number | string)[]): Promise<ApiResponse<any>> {
+    return apiFetch<ApiResponse<any>>(`/leads/assign/${leadId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ assigned_to: assignedTo }),
     });
   },
 

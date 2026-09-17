@@ -46,8 +46,10 @@ export interface Lead {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
-  assigned_to?: string | null;
+  assigned_to?: (number | string)[] | string | null;
   assignee?: User | null;
+  assigned_users?: User[];
+  assignees?: User[];
 }
 
 export interface CreateLeadInput {
@@ -62,6 +64,7 @@ export interface CreateLeadInput {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
+  assigned_to?: (number | string)[];
 }
 
 export interface UpdateLeadInput {
@@ -77,7 +80,11 @@ export interface UpdateLeadInput {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
-  assigned_to?: string | null;
+  assigned_to?: (number | string)[] | string | null;
+}
+
+export interface AssignLeadInput {
+  assigned_to: (number | string)[];
 }
 
 // Convert Lead Payload Modes

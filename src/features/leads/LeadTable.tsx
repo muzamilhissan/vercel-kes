@@ -1,6 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { MoreVertical, Edit2, Trash2, UserPlus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit2, Trash2, UserPlus, UserCheck, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { getAssigneeAvatar } from './utils';
 import './LeadTable.css';
+
+export interface LeadAssignee {
+  id: string | number;
+  name?: string;
+  fullName?: string;
+  email?: string;
+  avatar?: string;
+  designation?: string;
+}
 
 export interface Lead {
   id: string;
@@ -17,8 +27,10 @@ export interface Lead {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
-  assigned_to?: string | null;
-  assignee?: any | null;
+  assigned_to?: (string | number)[] | string | null;
+  assignee?: LeadAssignee | null;
+  assigned_users?: LeadAssignee[];
+  assignees?: LeadAssignee[];
 }
 
 interface LeadTableProps {
@@ -27,6 +39,8 @@ interface LeadTableProps {
   onDelete: (lead: Lead) => void;
   onConvert: (lead: Lead) => void;
   onView: (lead: Lead) => void;
+  onAssign?: (lead: Lead) => void;
+  isSuperAdmin?: boolean;
   currentPage: number;
   totalPages: number;
   totalItems: number;
@@ -39,6 +53,8 @@ const LeadTable: React.FC<LeadTableProps> = ({
   onDelete, 
   onConvert, 
   onView,
+  onAssign,
+  isSuperAdmin = false,
   currentPage,
   totalPages,
   totalItems,
@@ -180,47 +196,96 @@ const LeadTable: React.FC<LeadTableProps> = ({
                 </div>
               </th>
               <th>Status</th>
+              <th>Assigned To</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {displayedLeads.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: '#64748b', fontWeight: 500 }}>
                   No leads found. Click "Add Lead" to get started!
                 </td>
               </tr>
             ) : (
-              displayedLeads.map(lead => (
-                <tr key={lead.id} onClick={() => onView(lead)} style={{ cursor: 'pointer' }} className="clickable-row">
-                  <td>
-                    <span className="lead-name-value">{lead.name}</span>
-                  </td>
-                  <td className="lead-company-value">{lead.company}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
-                  <td>
-                    <span className={`status-badge status-${lead.status.toLowerCase()}`}>
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                    <div className="table-actions" style={{ justifyContent: 'center' }}>
-                      <button className="action-btn" title="Edit Lead" onClick={() => onEdit(lead)}><Edit2 size={16} /></button>
-                      <button className="action-btn" title="Delete Lead" style={{ color: '#ef4444' }} onClick={() => onDelete(lead)}><Trash2 size={16} /></button>
-                      <button 
-                        className="action-btn" 
-                        title={lead.status === 'Converted' ? "Already Converted to Contact" : "Convert to Contact"} 
-                        onClick={() => onConvert(lead)}
-                        disabled={lead.status === 'Converted'}
-                        style={lead.status !== 'Converted' ? { color: '#10b981' } : undefined}
-                      >
-                        <UserPlus size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              displayedLeads.map(lead => {
+                const assignees = lead.assigned_users || lead.assignees || (lead.assignee ? [lead.assignee] : []);
+                return (
+                  <tr key={lead.id} onClick={() => onView(lead)} style={{ cursor: 'pointer' }} className="clickable-row">
+                    <td>
+                      <span className="lead-name-value">{lead.name}</span>
+                    </td>
+                    <td className="lead-company-value">{lead.company}</td>
+                    <td>{lead.email}</td>
+                    <td>{lead.phone}</td>
+                    <td>
+                      <span className={`status-badge status-${lead.status.toLowerCase()}`}>
+                        {lead.status}
+                      </span>
+                    </td>
+                    <td onClick={(e) => {
+                      if (isSuperAdmin && onAssign) {
+                        e.stopPropagation();
+                        onAssign(lead);
+                      }
+                    }}>
+                      <div className="assignees-cell">
+                        {assignees.length > 0 ? (
+                          <div 
+                            className={`assignee-pill ${isSuperAdmin ? 'clickable' : ''}`}
+                            title={isSuperAdmin ? "Click to assign / reassign" : assignees.map(a => a.fullName || a.name).join(', ')}
+                          >
+                            <div className="assignee-avatar-stack">
+                              {assignees.slice(0, 3).map((a, i) => (
+                                <img
+                                  key={a.id || i}
+                                  src={a.avatar || getAssigneeAvatar(a.name || a.fullName || 'User')}
+                                  alt={a.name || 'User'}
+                                />
+                              ))}
+                            </div>
+                            <span style={{ marginLeft: assignees.length > 1 ? '4px' : '0' }}>
+                              {assignees[0]?.fullName || assignees[0]?.name || 'User'}
+                              {assignees.length > 1 && ` +${assignees.length - 1}`}
+                            </span>
+                          </div>
+                        ) : (
+                          <div 
+                            className={`unassigned-badge ${isSuperAdmin ? 'clickable' : ''}`}
+                            title={isSuperAdmin ? "Click to assign lead" : "Unassigned"}
+                          >
+                            {isSuperAdmin ? '+ Assign' : 'Unassigned'}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="table-actions" style={{ justifyContent: 'center' }}>
+                        {isSuperAdmin && onAssign && (
+                          <button 
+                            className="action-btn btn-assign" 
+                            title="Assign / Reassign Lead" 
+                            onClick={() => onAssign(lead)}
+                          >
+                            <UserCheck size={16} />
+                          </button>
+                        )}
+                        <button className="action-btn" title="Edit Lead" onClick={() => onEdit(lead)}><Edit2 size={16} /></button>
+                        <button className="action-btn" title="Delete Lead" style={{ color: '#ef4444' }} onClick={() => onDelete(lead)}><Trash2 size={16} /></button>
+                        <button 
+                          className="action-btn" 
+                          title={lead.status === 'Converted' ? "Already Converted to Contact" : "Convert to Contact"} 
+                          onClick={() => onConvert(lead)}
+                          disabled={lead.status === 'Converted'}
+                          style={lead.status !== 'Converted' ? { color: '#10b981' } : undefined}
+                        >
+                          <UserPlus size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -280,5 +345,3 @@ const LeadTable: React.FC<LeadTableProps> = ({
 };
 
 export default LeadTable;
-
-

@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
-import { Loader2, Zap, Phone, Check, Edit, XOctagon, Trash2, Send, RotateCcw } from 'lucide-react';
+import { Loader2, Zap, Phone, Check, Edit, XOctagon, Trash2, Send, RotateCcw, UserPlus } from 'lucide-react';
 import { Lead } from '../LeadTable';
 
 interface LeadQuickActionsProps {
   lead: Lead;
+  isSuperAdmin?: boolean;
   onContactClick: () => void;
   onSendProposalClick: () => void;
   onReproposeClick?: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
+  onAssignClick?: () => void;
   onStatusUpdate: (status: string) => Promise<void>;
 }
 
 const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({ 
   lead, 
+  isSuperAdmin = false,
   onContactClick, 
   onSendProposalClick, 
   onReproposeClick,
   onEditClick, 
   onDeleteClick,
+  onAssignClick,
   onStatusUpdate 
 }) => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
@@ -63,6 +67,17 @@ const LeadQuickActions: React.FC<LeadQuickActionsProps> = ({
               <Phone size={16} /> {['Proposed', 'Qualified', 'Disqualified', 'Converted'].includes(lead.status) ? 'Lead Contacted' : 'Contact Lead'}
             </button>
           </div>
+        )}
+
+        {/* Superadmin Assign To Button */}
+        {isSuperAdmin && onAssignClick && (
+          <button 
+            className="quick-action-btn outline" 
+            onClick={onAssignClick}
+            style={{ borderColor: '#d8b4fe', color: '#70309f', background: '#faf5ff' }}
+          >
+            <UserPlus size={16} /> Assign / Reassign
+          </button>
         )}
         
         {lead.status === 'New' && (

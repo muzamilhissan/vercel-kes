@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, UserPlus, Check } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { Lead } from './LeadTable';
+import { Lead, LeadAssignee } from './LeadTable';
 import SearchableSelect from '../../components/ui/SearchableSelect';
-import { getLocalDateString } from './utils';
+import { getLocalDateString, normalizeAssignee, getAssigneeAvatar } from './utils';
 import './LeadModal.css';
 
 interface LeadModalProps {
@@ -12,9 +12,18 @@ interface LeadModalProps {
   onClose: () => void;
   onSave: (lead: Lead) => Promise<void>;
   initialData?: Lead | null;
+  isSuperAdmin?: boolean;
+  assignableUsers?: any[];
 }
 
-const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
+const LeadModal: React.FC<LeadModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  initialData,
+  isSuperAdmin = false,
+  assignableUsers = []
+}) => {
   const [formData, setFormData] = useState<Partial<Lead>>({ 
     name: '', 
     company: '', 
@@ -27,8 +36,10 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
     source: '',
     expected_revenue: undefined,
     probability: undefined,
-    notes: ''
+    notes: '',
+    assigned_to: ''
   });
+  const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>('');
   const [phoneError, setPhoneError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -52,6 +63,12 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
     if (initialData) {
       setFormData(initialData);
       setPhoneNumber(initialData.phone || '');
+      const assigned = typeof initialData.assigned_to === 'string' && initialData.assigned_to 
+        ? initialData.assigned_to.split(',').map(s => s.trim()).filter(Boolean)
+        : Array.isArray(initialData.assigned_to) 
+          ? initialData.assigned_to.map(String)
+          : [];
+      setSelectedAssigneeIds(assigned);
     } else {
       setFormData({ 
         name: '', 
@@ -65,9 +82,11 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
         source: '',
         expected_revenue: undefined,
         probability: undefined,
-        notes: ''
+        notes: '',
+        assigned_to: ''
       });
       setPhoneNumber('');
+      setSelectedAssigneeIds([]);
     }
   }, [initialData, isOpen]);
 
@@ -90,6 +109,12 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
     }
   };
 
+  const toggleAssignee = (userId: string) => {
+    setSelectedAssigneeIds(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isPhoneValid = handleValidate();
@@ -97,12 +122,20 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
     
     setIsSaving(true);
     try {
+      const assignedUsersNormalized: LeadAssignee[] = assignableUsers
+        .map(normalizeAssignee)
+        .filter((u): u is LeadAssignee => u !== null && selectedAssigneeIds.includes(String(u.id)));
+
       await onSave({
         ...formData,
         id: initialData?.id || Math.random().toString(36).substr(2, 9),
         dateAdded: initialData?.dateAdded || getLocalDateString(),
         expected_revenue: formData.expected_revenue !== undefined && (formData.expected_revenue as any) !== '' ? Number(formData.expected_revenue) : undefined,
         probability: formData.probability !== undefined && (formData.probability as any) !== '' ? Number(formData.probability) : undefined,
+        assigned_to: selectedAssigneeIds.join(','),
+        assigned_users: assignedUsersNormalized,
+        assignees: assignedUsersNormalized,
+        assignee: assignedUsersNormalized[0] || null
       } as Lead);
     } catch (err) {
       console.error(err);
@@ -123,6 +156,8 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
   if (formData.status === 'Converted') {
     statusOptions.push({ value: 'Converted', label: 'Converted' });
   }
+
+  const normalizedUsers: LeadAssignee[] = assignableUsers.map(normalizeAssignee).filter(Boolean) as LeadAssignee[];
 
   return (
     <div className="modal-overlay">
@@ -274,6 +309,62 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSave, initialD
                 />
               </div>
             </div>
+
+            {/* Superadmin Assign To Field */}
+            {isSuperAdmin && normalizedUsers.length > 0 && (
+              <div className="form-group" style={{ marginTop: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <UserPlus size={14} color="#70309f" />
+                  <span>Assign To</span>
+                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 400 }}>
+                    ({selectedAssigneeIds.length} selected)
+                  </span>
+                </label>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  padding: '10px',
+                  background: '#f8fafc',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '10px',
+                  maxHeight: '130px',
+                  overflowY: 'auto'
+                }}>
+                  {normalizedUsers.map(user => {
+                    const isSelected = selectedAssigneeIds.includes(String(user.id));
+                    return (
+                      <div
+                        key={user.id}
+                        onClick={() => toggleAssignee(String(user.id))}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          background: isSelected ? '#70309f' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#334155',
+                          border: `1px solid ${isSelected ? '#70309f' : '#cbd5e1'}`,
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <img
+                          src={user.avatar || getAssigneeAvatar(user.name || user.fullName || 'User')}
+                          alt={user.name}
+                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <span>{user.fullName || user.name}</span>
+                        {isSelected && <Check size={12} strokeWidth={3} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Row 6: One field (Notes) */}
             <div className="form-group" style={{ marginTop: '16px' }}>

@@ -1,4 +1,4 @@
-import { Lead } from './LeadTable';
+import { Lead, LeadAssignee } from './LeadTable';
 
 export const getLocalDateString = () => {
   const today = new Date();
@@ -8,17 +8,36 @@ export const getLocalDateString = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-export const MOCK_ASSIGNEES = [
-  { id: '1', name: 'Alice Smith', avatar: 'https://ui-avatars.com/api/?name=Alice+Smith&background=random' },
-  { id: '2', name: 'Bob Johnson', avatar: 'https://ui-avatars.com/api/?name=Bob+Johnson&background=random' },
-  { id: '3', name: 'Charlie Davis', avatar: 'https://ui-avatars.com/api/?name=Charlie+Davis&background=random' },
-];
+export const getAssigneeAvatar = (name: string, bg: string = '70309f') => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=${bg}&color=fff&bold=true`;
+};
+
+export const normalizeAssignee = (raw: any): LeadAssignee | null => {
+  if (!raw) return null;
+  if (typeof raw === 'number' || typeof raw === 'string') {
+    return {
+      id: String(raw),
+      name: `User #${raw}`,
+      avatar: getAssigneeAvatar(`User ${raw}`)
+    };
+  }
+  const id = String(raw.id || raw.userId || raw.user_id || '');
+  const name = raw.fullName || raw.name || raw.email || (id ? `User #${id}` : 'Assigned User');
+  return {
+    id,
+    name,
+    fullName: raw.fullName || raw.name || '',
+    email: raw.email || '',
+    designation: raw.designation || (raw.roles && raw.roles[0]?.name) || '',
+    avatar: raw.avatar || getAssigneeAvatar(name)
+  };
+};
 
 export const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
   // Normalize status to match LeadTable status type
   let normalizedStatus: 'New' | 'Contacted' | 'Proposed' | 'Qualified' | 'Disqualified' | 'Converted' = 'New';
   if (apiLead.status) {
-    const statusLower = apiLead.status.toLowerCase();
+    const statusLower = String(apiLead.status).toLowerCase();
     if (statusLower === 'contacted') normalizedStatus = 'Contacted';
     else if (statusLower === 'proposed') normalizedStatus = 'Proposed';
     else if (statusLower === 'qualified') normalizedStatus = 'Qualified';
@@ -48,6 +67,49 @@ export const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
     });
   }
 
+  // Parse assigned users/assignees
+  let assignedUsersList: LeadAssignee[] = [];
+  let assignedIds: string[] = [];
+
+  const rawUsers = apiLead.assigned_users || apiLead.assignees || apiLead.users || (apiLead.assignee ? [apiLead.assignee] : []);
+  if (Array.isArray(rawUsers) && rawUsers.length > 0) {
+    assignedUsersList = rawUsers.map(normalizeAssignee).filter(Boolean) as LeadAssignee[];
+    assignedIds = assignedUsersList.map(u => String(u.id));
+  }
+
+  if (apiLead.assigned_to !== undefined && apiLead.assigned_to !== null) {
+    if (Array.isArray(apiLead.assigned_to)) {
+      apiLead.assigned_to.forEach((item: any) => {
+        if (typeof item === 'object' && item !== null) {
+          const u = normalizeAssignee(item);
+          if (u) {
+            if (!assignedIds.includes(String(u.id))) {
+              assignedUsersList.push(u);
+              assignedIds.push(String(u.id));
+            }
+          }
+        } else {
+          const strId = String(item);
+          if (strId && !assignedIds.includes(strId)) {
+            assignedIds.push(strId);
+          }
+        }
+      });
+    } else if (typeof apiLead.assigned_to === 'string') {
+      const parts = apiLead.assigned_to.split(',').map((s: string) => s.trim()).filter(Boolean);
+      parts.forEach((p: string) => {
+        if (!assignedIds.includes(p)) {
+          assignedIds.push(p);
+        }
+      });
+    } else if (typeof apiLead.assigned_to === 'number') {
+      const strId = String(apiLead.assigned_to);
+      if (!assignedIds.includes(strId)) {
+        assignedIds.push(strId);
+      }
+    }
+  }
+
   return {
     id: String(apiLead.id),
     name: apiLead.name || '',
@@ -60,8 +122,12 @@ export const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
     province: apiLead.province || '',
     website: apiLead.website || '',
     source: apiLead.source || '',
-    expected_revenue: apiLead.expected_revenue !== undefined ? Number(apiLead.expected_revenue) : undefined,
-    probability: apiLead.probability !== undefined ? Number(apiLead.probability) : undefined,
+    expected_revenue: apiLead.expected_revenue !== undefined && apiLead.expected_revenue !== null ? Number(apiLead.expected_revenue) : undefined,
+    probability: apiLead.probability !== undefined && apiLead.probability !== null ? Number(apiLead.probability) : undefined,
     notes: apiLead.notes || '',
+    assigned_to: assignedIds.length > 0 ? assignedIds.join(',') : '',
+    assigned_users: assignedUsersList,
+    assignees: assignedUsersList,
+    assignee: assignedUsersList[0] || null
   };
 };

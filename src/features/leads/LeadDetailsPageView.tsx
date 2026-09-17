@@ -17,12 +17,21 @@ import './LeadDetailsPageView.css';
 
 interface LeadDetailsPageViewProps {
   lead: Lead;
+  isSuperAdmin?: boolean;
   onBack: () => void;
   onEdit: (lead: Lead) => void;
   onDelete: (lead: Lead) => void;
+  onAssign?: (lead: Lead) => void;
 }
 
-const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack, onEdit, onDelete }) => {
+const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ 
+  lead, 
+  isSuperAdmin = false, 
+  onBack, 
+  onEdit, 
+  onDelete, 
+  onAssign 
+}) => {
   const [localLead, setLocalLead] = React.useState(lead);
   const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
   const [isSendProposalModalOpen, setIsSendProposalModalOpen] = React.useState(false);
@@ -117,14 +126,20 @@ const LeadDetailsPageView: React.FC<LeadDetailsPageViewProps> = ({ lead, onBack,
           </div>
           
           <div className="lead-details-right-col">
-            <LeadDetailsCard lead={localLead} />
+            <LeadDetailsCard 
+              lead={localLead} 
+              isSuperAdmin={isSuperAdmin}
+              onAssignClick={onAssign ? () => onAssign(localLead) : undefined}
+            />
             <LeadQuickActions 
               lead={localLead}
+              isSuperAdmin={isSuperAdmin}
               onContactClick={() => setIsContactModalOpen(true)} 
               onSendProposalClick={handleOpenSendProposal}
               onReproposeClick={() => handleOpenRepropose(2)}
               onEditClick={() => onEdit(localLead)}
               onDeleteClick={() => onDelete(localLead)}
+              onAssignClick={onAssign ? () => onAssign(localLead) : undefined}
               onStatusUpdate={handleStatusUpdate}
             />
           </div>
