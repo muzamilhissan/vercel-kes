@@ -1,20 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { UserPlus, Coins } from 'lucide-react';
+import React from 'react';
+import { Coins, UserCheck, UserPlus } from 'lucide-react';
 import { Lead } from './LeadTable';
+import { getAssigneeAvatar } from './utils';
 import '../kanban/KanbanColumn.css';
 import '../kanban/KanbanCard.css';
 import './LeadKanbanBoard.css';
 
-import { MOCK_ASSIGNEES } from './utils';
 interface LeadKanbanCardProps {
   lead: Lead;
   color: string;
+  isSuperAdmin?: boolean;
   onClick: (lead: Lead) => void;
-  onAssign: (lead: Lead, userId: string) => void;
+  onAssign?: (lead: Lead) => void;
 }
 
-const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, onAssign }) => {
-  // Removed assignee logic per requirements
+const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, isSuperAdmin = false, onClick, onAssign }) => {
+  const assignees = lead.assigned_users || lead.assignees || (lead.assignee ? [lead.assignee] : []);
 
   return (
     <div className="kanban-card" onClick={() => onClick(lead)} style={{ backgroundColor: `${color}08`, border: `1px solid ${color}30`, position: 'relative' }}>
@@ -58,11 +59,71 @@ const LeadKanbanCard: React.FC<LeadKanbanCardProps> = ({ lead, color, onClick, o
         )}
       </div>
 
-      <div className="card-bottom" style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+      <div className="card-bottom" style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
         <div className="card-meta" style={{ flex: 1, minWidth: 0 }}>
-          <div className="meta-item" style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+          <div className="meta-item" style={{ fontSize: '11.5px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
             {lead.email}
           </div>
+        </div>
+
+        {/* Assignee Badge / Avatars */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
+          onClick={(e) => {
+            if (isSuperAdmin && onAssign) {
+              e.stopPropagation();
+              onAssign(lead);
+            }
+          }}
+        >
+          {assignees.length > 0 ? (
+            <div 
+              style={{ display: 'flex', alignItems: 'center', cursor: isSuperAdmin ? 'pointer' : 'default' }}
+              title={assignees.map(a => a.fullName || a.name).join(', ') + (isSuperAdmin ? ' (Click to reassign)' : '')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {assignees.slice(0, 2).map((a, i) => (
+                  <img
+                    key={a.id || i}
+                    src={a.avatar || getAssigneeAvatar(a.name || a.fullName || 'User')}
+                    alt={a.name || 'User'}
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      border: '1.5px solid #ffffff',
+                      marginLeft: i > 0 ? '-6px' : '0',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ))}
+              </div>
+              {assignees.length > 2 && (
+                <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, marginLeft: '3px' }}>
+                  +{assignees.length - 2}
+                </span>
+              )}
+            </div>
+          ) : isSuperAdmin && onAssign ? (
+            <button
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: '#f3e8ff',
+                border: '1px dashed #c084fc',
+                borderRadius: '12px',
+                padding: '2px 6px',
+                fontSize: '10.5px',
+                color: '#70309f',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+              title="Assign lead to user"
+            >
+              <UserPlus size={11} /> Assign
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -74,11 +135,12 @@ interface LeadKanbanColumnProps {
   count: number;
   leads: Lead[];
   color: string;
+  isSuperAdmin?: boolean;
   onCardClick: (lead: Lead) => void;
-  onAssign: (lead: Lead, userId: string) => void;
+  onAssign?: (lead: Lead) => void;
 }
 
-const LeadKanbanColumn: React.FC<LeadKanbanColumnProps> = ({ title, count, leads, color, onCardClick, onAssign }) => {
+const LeadKanbanColumn: React.FC<LeadKanbanColumnProps> = ({ title, count, leads, color, isSuperAdmin = false, onCardClick, onAssign }) => {
   const [visibleCount, setVisibleCount] = React.useState(20);
   const observer = React.useRef<IntersectionObserver | null>(null);
 
@@ -111,7 +173,14 @@ const LeadKanbanColumn: React.FC<LeadKanbanColumnProps> = ({ title, count, leads
         style={{ overflowY: 'auto', flex: 1 }}
       >
         {visibleLeads.map(lead => (
-          <LeadKanbanCard key={lead.id} lead={lead} color={color} onClick={onCardClick} onAssign={onAssign} />
+          <LeadKanbanCard 
+            key={lead.id} 
+            lead={lead} 
+            color={color} 
+            isSuperAdmin={isSuperAdmin}
+            onClick={onCardClick} 
+            onAssign={onAssign} 
+          />
         ))}
         {leads.length > visibleCount && (
           <div ref={loadMoreRef} style={{ padding: '12px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
@@ -130,11 +199,12 @@ const LeadKanbanColumn: React.FC<LeadKanbanColumnProps> = ({ title, count, leads
 
 interface LeadKanbanBoardProps {
   leads: Lead[];
+  isSuperAdmin?: boolean;
   onView: (lead: Lead) => void;
-  onAssign?: (lead: Lead, userId: string) => void;
+  onAssign?: (lead: Lead) => void;
 }
 
-const LeadKanbanBoard: React.FC<LeadKanbanBoardProps> = ({ leads, onView, onAssign }) => {
+const LeadKanbanBoard: React.FC<LeadKanbanBoardProps> = ({ leads, isSuperAdmin = false, onView, onAssign }) => {
   const getLeadsForColumn = (status: string) => {
     if (status === 'Closed') {
       return leads.filter(lead => lead.status === 'Qualified' || lead.status === 'Disqualified');
@@ -160,8 +230,9 @@ const LeadKanbanBoard: React.FC<LeadKanbanBoardProps> = ({ leads, onView, onAssi
             count={columnLeads.length} 
             leads={columnLeads} 
             color={col.color}
+            isSuperAdmin={isSuperAdmin}
             onCardClick={onView}
-            onAssign={onAssign || (() => {})}
+            onAssign={onAssign}
           />
         );
       })}

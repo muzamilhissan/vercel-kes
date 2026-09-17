@@ -13,7 +13,9 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
     url += `?${searchParams.toString()}`;
   }
 
-  const defaultHeaders: Record<string, string> = {};
+  const defaultHeaders: Record<string, string> = {
+    'Accept': 'application/json'
+  };
   if (!(customConfig.body instanceof FormData)) {
     defaultHeaders['Content-Type'] = 'application/json';
   }

@@ -8,16 +8,20 @@ import LeadModal from '../features/leads/LeadModal';
 import DeleteModal from '../features/leads/DeleteModal';
 import ConvertModal from '../features/leads/ConvertModal';
 import LeadDetailsModal from '../features/leads/LeadDetailsModal';
+import AssignLeadModal from '../features/leads/components/AssignLeadModal';
 import LeadStatsCards from '../features/leads/components/LeadStatsCards';
 import LeadsPageHeader from '../features/leads/components/LeadsPageHeader';
 import { useLeads } from '../features/leads/hooks/useLeads';
 
 const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => void}> = ({ currentPath, onNavigate }) => {
   const {
+    isSuperAdmin,
     leads,
     allLeads,
+    assignableUsers,
     selectedLead,
     setSelectedLead,
+    leadToAssign,
     isLeadModalOpen,
     setIsLeadModalOpen,
     isDeleteModalOpen,
@@ -26,6 +30,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     setIsConvertModalOpen,
     isDetailsModalOpen,
     setIsDetailsModalOpen,
+    isAssignModalOpen,
+    setIsAssignModalOpen,
     loading,
     error,
     isDeletingLead,
@@ -47,7 +53,8 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
     handleSaveLead,
     handleDeleteLead,
     handleConvertLead,
-    handleAssignLead
+    handleAssignLead,
+    openAssignModal
   } = useLeads();
 
   React.useEffect(() => {
@@ -74,9 +81,11 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
       {viewingLead ? (
         <LeadDetailsPageView 
           lead={viewingLead} 
+          isSuperAdmin={isSuperAdmin}
           onBack={() => setViewingLead(null)} 
           onEdit={(l) => { setSelectedLead(l); setIsLeadModalOpen(true); }}
           onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }}
+          onAssign={isSuperAdmin ? openAssignModal : undefined}
         />
       ) : (
         <>
@@ -87,6 +96,7 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
             setFilterDate={setFilterDate}
             filterAssignees={filterAssignees}
             setFilterAssignees={setFilterAssignees}
+            assignableUsers={assignableUsers}
             onAddLead={() => { setSelectedLead(null); setIsLeadModalOpen(true); }}
           />
 
@@ -105,8 +115,9 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
                   <div className="kanban-board-scroll-container" style={{ overflow: 'visible', paddingBottom: '12px' }}>
                     <LeadKanbanBoard 
                       leads={allLeads}
+                      isSuperAdmin={isSuperAdmin}
                       onView={(l) => setViewingLead(l)}
-                      onAssign={handleAssignLead}
+                      onAssign={isSuperAdmin ? openAssignModal : undefined}
                     />
                   </div>
                 </div>
@@ -114,16 +125,18 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
                 <>
                   <LeadStatsCards allLeads={allLeads} totalItems={totalItems} viewMode={viewMode} />
                   <LeadTable 
-                  leads={leads} 
-                  onEdit={(l) => { setSelectedLead(l); setIsLeadModalOpen(true); }} 
-                  onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }} 
-                  onConvert={(l) => { setSelectedLead(l); setIsConvertModalOpen(true); }} 
-                  onView={(l) => setViewingLead(l)}
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalItems={totalItems}
-                  onPageChange={setCurrentPage}
-                />
+                    leads={leads} 
+                    isSuperAdmin={isSuperAdmin}
+                    onEdit={(l) => { setSelectedLead(l); setIsLeadModalOpen(true); }} 
+                    onDelete={(l) => { setSelectedLead(l); setIsDeleteModalOpen(true); }} 
+                    onConvert={(l) => { setSelectedLead(l); setIsConvertModalOpen(true); }} 
+                    onView={(l) => setViewingLead(l)}
+                    onAssign={isSuperAdmin ? openAssignModal : undefined}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    onPageChange={setCurrentPage}
+                  />
                 </>
               )}
             </>
@@ -131,10 +144,44 @@ const LeadsPage: React.FC<{currentPath: string; onNavigate: (path: string) => vo
         </>
       )}
 
-      <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} onSave={handleSaveLead} initialData={selectedLead} />
-      <DeleteModal isOpen={isDeleteModalOpen} onClose={() => !isDeletingLead && setIsDeleteModalOpen(false)} onConfirm={handleDeleteLead} itemName={selectedLead?.name || ''} isDeleting={isDeletingLead} />
-      <ConvertModal isOpen={isConvertModalOpen} onClose={() => !isConvertingLead && setIsConvertModalOpen(false)} onConfirm={handleConvertLead} leadName={selectedLead?.name || ''} isConverting={isConvertingLead} />
-      <LeadDetailsModal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} lead={selectedLead} />
+      <LeadModal 
+        isOpen={isLeadModalOpen} 
+        onClose={() => setIsLeadModalOpen(false)} 
+        onSave={handleSaveLead} 
+        initialData={selectedLead}
+        isSuperAdmin={isSuperAdmin}
+        assignableUsers={assignableUsers}
+      />
+      
+      <DeleteModal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => !isDeletingLead && setIsDeleteModalOpen(false)} 
+        onConfirm={handleDeleteLead} 
+        itemName={selectedLead?.name || ''} 
+        isDeleting={isDeletingLead} 
+      />
+      
+      <ConvertModal 
+        isOpen={isConvertModalOpen} 
+        onClose={() => !isConvertingLead && setIsConvertModalOpen(false)} 
+        onConfirm={handleConvertLead} 
+        leadName={selectedLead?.name || ''} 
+        isConverting={isConvertingLead} 
+      />
+      
+      <LeadDetailsModal 
+        isOpen={isDetailsModalOpen} 
+        onClose={() => setIsDetailsModalOpen(false)} 
+        lead={selectedLead} 
+      />
+
+      <AssignLeadModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        lead={leadToAssign}
+        assignableUsers={assignableUsers}
+        onAssign={handleAssignLead}
+      />
     </MainLayout>
   );
 };
