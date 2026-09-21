@@ -54,3 +54,86 @@ export const getUserId = (user?: User | null): string => {
   if (!targetUser || targetUser.id === undefined || targetUser.id === null) return '';
   return String(targetUser.id);
 };
+
+/**
+ * Extract all unique permission names assigned to the user
+ * (from both user.roles[].permissions and direct user.permissions).
+ */
+export const getUserPermissions = (user?: User | null): string[] => {
+  const targetUser = user !== undefined ? user : getCurrentUser();
+  if (!targetUser) return [];
+
+  const permissionsSet = new Set<string>();
+
+  // Extract from roles
+  if (Array.isArray(targetUser.roles)) {
+    targetUser.roles.forEach(role => {
+      if (Array.isArray(role.permissions)) {
+        role.permissions.forEach(perm => {
+          if (perm && perm.name) {
+            permissionsSet.add(perm.name.trim());
+          }
+        });
+      }
+    });
+  }
+
+  // Extract from direct permissions
+  if (Array.isArray(targetUser.permissions)) {
+    targetUser.permissions.forEach(perm => {
+      if (perm && perm.name) {
+        permissionsSet.add(perm.name.trim());
+      }
+    });
+  }
+
+  return Array.from(permissionsSet);
+};
+
+/**
+ * Check if the current user has a specific permission.
+ * Admins/Superadmins automatically have access.
+ */
+export const hasPermission = (permissionName: string, user?: User | null): boolean => {
+  const targetUser = user !== undefined ? user : getCurrentUser();
+  if (!targetUser) return false;
+
+  // Superadmin / Admin bypass
+  if (isSuperAdmin(targetUser)) return true;
+
+  const permissions = getUserPermissions(targetUser);
+  const normalizedTarget = permissionName.toLowerCase().replace(/[\s\-_]/g, '');
+  
+  return permissions.some(p => p.toLowerCase().replace(/[\s\-_]/g, '') === normalizedTarget);
+};
+
+/**
+ * Check if the user has any of the given permissions.
+ */
+export const hasAnyPermission = (permissionNames: string[], user?: User | null): boolean => {
+  const targetUser = user !== undefined ? user : getCurrentUser();
+  if (!targetUser) return false;
+
+  if (isSuperAdmin(targetUser)) return true;
+
+  const permissions = getUserPermissions(targetUser);
+  const normalizedTargets = permissionNames.map(p => p.toLowerCase().replace(/[\s\-_]/g, ''));
+
+  return permissions.some(p => normalizedTargets.includes(p.toLowerCase().replace(/[\s\-_]/g, '')));
+};
+
+/**
+ * Check if the user has all of the given permissions.
+ */
+export const hasAllPermissions = (permissionNames: string[], user?: User | null): boolean => {
+  const targetUser = user !== undefined ? user : getCurrentUser();
+  if (!targetUser) return false;
+
+  if (isSuperAdmin(targetUser)) return true;
+
+  const permissions = getUserPermissions(targetUser);
+  const normalizedPerms = new Set(permissions.map(p => p.toLowerCase().replace(/[\s\-_]/g, '')));
+
+  return permissionNames.every(p => normalizedPerms.has(p.toLowerCase().replace(/[\s\-_]/g, '')));
+};
+

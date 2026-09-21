@@ -9,14 +9,26 @@ export interface LoginCredentials {
   password?: string;
 }
 
+export interface Permission {
+  id?: number | string;
+  name: string;
+  guard_name?: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
 export interface Role {
   id?: number | string;
   name: string;
+  description?: string | null;
+  guard_name?: string;
+  permissions?: Permission[];
 }
 
 export interface User {
   id: number | string;
-  fullName: string;
+  name?: string;
+  fullName?: string;
   email: string;
   designation?: string;
   phoneNumber?: string;
@@ -24,6 +36,7 @@ export interface User {
   created_at?: string;
   updated_at?: string;
   roles?: Role[];
+  permissions?: Permission[];
 }
 
 export interface LoginResponse {
