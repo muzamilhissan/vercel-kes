@@ -2,10 +2,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
+  permission?: string;
 }
 
 export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { params, headers, ...customConfig } = options;
+  const { params, headers, permission, ...customConfig } = options;
   
   let url = `${API_BASE_URL}${endpoint}`;
   if (params) {
@@ -23,6 +24,11 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
   const token = localStorage.getItem('token');
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
+  }
+
+  if (permission) {
+    defaultHeaders['Permission'] = permission;
+    defaultHeaders['X-Permission'] = permission;
   }
 
   const config: RequestInit = {
