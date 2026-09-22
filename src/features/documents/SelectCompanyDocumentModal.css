@@ -1,0 +1,146 @@
+.select-doc-modal-overlay {
+  z-index: 10001; /* Above standard modals */
+}
+
+.select-doc-modal-container {
+  max-width: 600px;
+}
+
+.select-doc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.select-doc-toolbar .search-box {
+  position: relative;
+  flex: 1;
+}
+
+.select-doc-toolbar .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.select-doc-toolbar .search-box input {
+  padding-left: 36px;
+}
+
+.select-doc-toolbar .selection-count {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.select-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.select-doc-list::-webkit-scrollbar {
+  width: 6px;
+}
+.select-doc-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.select-doc-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.select-doc-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.select-doc-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.select-doc-item.selected {
+  border-color: #70309f;
+  background: #faf5ff;
+}
+
+.doc-item-icon {
+  color: #70309f;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.doc-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-item-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-item-info p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.doc-item-check {
+  margin-left: 16px;
+}
+
+.checkbox-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s;
+}
+
+.checkbox-circle.active {
+  background-color: #70309f;
+  border-color: #70309f;
+}
+
+.select-doc-list .loading-state,
+.select-doc-list .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: #64748b;
+}
+
+.select-doc-list .loading-state p {
+  margin-top: 12px;
+}

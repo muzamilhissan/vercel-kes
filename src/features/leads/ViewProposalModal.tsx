@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, Download, Calendar, Paperclip, RotateCcw } from 'lucide-react';
+import { X, FileText, Download, Calendar, Paperclip, RotateCcw, Eye } from 'lucide-react';
 import { Proposal } from '../../api/types';
 import './ViewProposalModal.css';
 
@@ -67,11 +67,23 @@ const ViewProposalModal: React.FC<ViewProposalModalProps> = ({ isOpen, onClose, 
                       <span className="att-name">{att.file_name}</span>
                       <span className="att-size">{att.file_size ? (att.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
                     </div>
-                    {(att.signedUrl || att.file_path) && (
-                      <a href={att.signedUrl || att.file_path} target="_blank" rel="noopener noreferrer" className="att-download" title="Download">
-                        <Download size={16} />
-                      </a>
-                    )}
+                    {(() => {
+                      let url = att.signedUrl || att.signed_url || att.file_path;
+                      if (url && !url.startsWith('http')) {
+                        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/api$/, '') || '';
+                        url = `${baseUrl}/${url.replace(/^\//, '')}`;
+                      }
+                      return url ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="att-download" title="View">
+                            <Eye size={16} />
+                          </a>
+                          <a href={url} download={att.file_name} className="att-download" title="Download">
+                            <Download size={16} />
+                          </a>
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                 ))}
               </div>

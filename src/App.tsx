@@ -6,6 +6,7 @@ import DealsPage from './pages/DealsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import ContactsPage from './pages/ContactsPage'
 import AccountsPage from './pages/AccountsPage'
+import CompanyDocumentsPage from './pages/CompanyDocumentsPage'
 import SSOLogin from './pages/SSOLogin'
 import MainLayout from './components/layout/MainLayout'
 import { authService } from './api/authService'
@@ -100,6 +101,8 @@ function App() {
         return <ContactsPage currentPath={currentPath} onNavigate={handleNavigate} />;
       case 'accounts':
         return <AccountsPage currentPath={currentPath} onNavigate={handleNavigate} />;
+      case 'documents':
+        return <CompanyDocumentsPage currentPath={currentPath} onNavigate={handleNavigate} />;
       case 'reporting':
         return <AnalyticsPage currentPath={currentPath} onNavigate={handleNavigate} />;
       default:

@@ -17,8 +17,9 @@ import {
 import './SendProposalModal.css';
 import { Lead } from './LeadTable';
 import { proposalService } from '../../api/proposalService';
-import { ProposalOptionsData, CreateProposalRequestInput } from '../../api/types';
+import { ProposalOptionsData, CreateProposalRequestInput, CompanyDocument } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
+import SelectCompanyDocumentModal from '../documents/SelectCompanyDocumentModal';
 
 interface SendProposalModalProps {
   isOpen: boolean;
@@ -43,8 +44,6 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
   // Questionnaire state
   const [options, setOptions] = useState<ProposalOptionsData | null>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
-  const [selectedOperationId, setSelectedOperationId] = useState<number | null>(null);
-  const [plantName, setPlantName] = useState('');
   const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>([]);
   const [selectedMainPurposeId, setSelectedMainPurposeId] = useState<number | null>(null);
   const [selectedCommercialApproachId, setSelectedCommercialApproachId] = useState<number | null>(null);
@@ -58,6 +57,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
   const [proposalContent, setProposalContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Library Document State
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
+  const [selectedLibraryDocs, setSelectedLibraryDocs] = useState<CompanyDocument[]>([]);
 
   const { showToast } = useToast();
 
@@ -99,23 +102,6 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Sorting PPC operations so "A specific PPC plant" comes last (like screenshot)
-  const sortedOperations = options?.ppc_operations
-    ? [...options.ppc_operations].sort((a, b) => {
-        const aIsSpecific = a.name.toLowerCase().includes('specific');
-        const bIsSpecific = b.name.toLowerCase().includes('specific');
-        if (aIsSpecific && !bIsSpecific) return 1;
-        if (!aIsSpecific && bIsSpecific) return -1;
-        return a.id - b.id;
-      })
-    : [];
-
-  const isSpecificPlantSelected = Boolean(
-    options?.ppc_operations.find(
-      (op) => op.id === selectedOperationId && op.name.toLowerCase().includes('specific')
-    )
-  );
-
   const toggleService = (serviceId: number) => {
     setSelectedServiceIds((prev) =>
       prev.includes(serviceId)
@@ -134,8 +120,6 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
   };
 
   const isStep1Valid = Boolean(
-    selectedOperationId &&
-    (!isSpecificPlantSelected || plantName.trim().length > 0) &&
     selectedServiceIds.length > 0 &&
     selectedMainPurposeId &&
     selectedCommercialApproachId
@@ -143,11 +127,7 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
 
   const handleGenerateProposal = async () => {
     if (!isStep1Valid) {
-      if (!selectedOperationId) {
-        showToast('Please select a PPC operation', 'error');
-      } else if (isSpecificPlantSelected && !plantName.trim()) {
-        showToast('Please enter the specific plant name', 'error');
-      } else if (selectedServiceIds.length === 0) {
+      if (selectedServiceIds.length === 0) {
         showToast('Please select at least one service', 'error');
       } else if (!selectedMainPurposeId) {
         showToast('Please select the main purpose', 'error');
@@ -160,8 +140,6 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
     setIsGenerating(true);
     try {
       const payload: CreateProposalRequestInput = {
-        ppc_operation_id: selectedOperationId!,
-        ...(isSpecificPlantSelected ? { plant_name: plantName.trim() } : {}),
         service_ids: selectedServiceIds,
         main_purpose_id: selectedMainPurposeId!,
         commercial_approach_id: selectedCommercialApproachId!,
@@ -205,6 +183,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
     setFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
+  const removeLibraryDoc = (docId: string | number) => {
+    setSelectedLibraryDocs((prev) => prev.filter((doc) => doc.id !== docId));
+  };
+
   const handleSend = async () => {
     if (!subject.trim()) {
       showToast('Subject is required', 'error');
@@ -223,6 +205,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
 
       files.forEach((file) => {
         formData.append('attachments[]', file);
+      });
+      
+      selectedLibraryDocs.forEach((doc) => {
+        formData.append('company_document_ids[]', doc.id.toString());
       });
 
       const res = await proposalService.storeProposal(lead.id, formData);
@@ -347,53 +333,11 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
                 </div>
               ) : options ? (
                 <div className="questionnaire-grid">
-                  {/* Column 1: Which PPC operation? */}
-                  <div className="question-col">
-                    <div className="question-col-header">
-                      <h4 className="question-heading">1. Which PPC operation?</h4>
-                    </div>
-                    <div className="options-list">
-                      {sortedOperations.map((op) => {
-                        const isSpecific = op.name.toLowerCase().includes('specific');
-                        const isChecked = selectedOperationId === op.id;
-                        return (
-                          <div key={op.id} className="option-row-wrapper">
-                            <label className={`option-label radio-label ${isChecked ? 'selected' : ''}`}>
-                              <input
-                                type="radio"
-                                name="ppc_operation"
-                                value={op.id}
-                                checked={isChecked}
-                                onChange={() => setSelectedOperationId(op.id)}
-                              />
-                              <span className="option-text">{op.name}</span>
-                            </label>
-
-                            {/* Specific plant text input */}
-                            {isSpecific && isChecked && (
-                              <div className="plant-name-input-block">
-                                <label className="plant-input-label">Plant name, if applicable</label>
-                                <input
-                                  type="text"
-                                  className="form-control plant-name-input"
-                                  placeholder="Enter the PPC plant or location..."
-                                  value={plantName}
-                                  onChange={(e) => setPlantName(e.target.value)}
-                                  autoFocus
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Column 2: Which services? (Multiselect) */}
+                  {/* Column 1: Which services? (Multiselect) */}
                   <div className="question-col">
                     <div className="question-col-header">
                       <h4 className="question-heading">
-                        2. Which services?{' '}
+                        1. Which services?{' '}
                         <span className="question-subtext">Select all that apply</span>
                       </h4>
                       <button
@@ -426,10 +370,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Column 3: What is the main purpose? */}
+                  {/* Column 2: What is the main purpose? */}
                   <div className="question-col">
                     <div className="question-col-header">
-                      <h4 className="question-heading">3. What is the main purpose?</h4>
+                      <h4 className="question-heading">2. What is the main purpose?</h4>
                     </div>
                     <div className="options-list">
                       {options.main_purposes.map((purpose) => {
@@ -453,10 +397,10 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Column 4: Which commercial approach? */}
+                  {/* Column 3: Which commercial approach? */}
                   <div className="question-col">
                     <div className="question-col-header">
-                      <h4 className="question-heading">4. Which commercial approach?</h4>
+                      <h4 className="question-heading">3. Which commercial approach?</h4>
                     </div>
                     <div className="options-list">
                       {options.commercial_approaches.map((approach) => {
@@ -605,23 +549,36 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
                     onChange={handleFileChange}
                     disabled={isSubmitting}
                   />
-                  <div
-                    className="file-input-display"
-                    onClick={() => document.getElementById('proposal-file')?.click()}
-                  >
-                    <button type="button" className="choose-file-btn" disabled={isSubmitting}>
-                      Choose Files
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div
+                      className="file-input-display"
+                      onClick={() => document.getElementById('proposal-file')?.click()}
+                      style={{ flex: 1 }}
+                    >
+                      <button type="button" className="choose-file-btn" disabled={isSubmitting}>
+                        Choose Files
+                      </button>
+                      <span className="file-name">
+                        {files.length > 0 ? `${files.length} file(s) selected` : 'No file chosen'}
+                      </span>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => setIsLibraryModalOpen(true)}
+                      disabled={isSubmitting}
+                      style={{ height: '100%', padding: '0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <FileText size={16} />
+                      Browse Library
                     </button>
-                    <span className="file-name">
-                      {files.length > 0 ? `${files.length} file(s) selected` : 'No file chosen'}
-                    </span>
                   </div>
                 </div>
 
-                {files.length > 0 && (
+                {(files.length > 0 || selectedLibraryDocs.length > 0) && (
                   <div className="selected-files-list">
                     {files.map((file, idx) => (
-                      <div key={idx} className="selected-file-item">
+                      <div key={`file-${idx}`} className="selected-file-item">
                         <Paperclip size={14} className="file-icon" />
                         <span className="file-name-text">{file.name}</span>
                         <span className="file-size-text">
@@ -637,9 +594,27 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
                         </button>
                       </div>
                     ))}
+                    {selectedLibraryDocs.map((doc, idx) => (
+                      <div key={`lib-${doc.id}`} className="selected-file-item" style={{ background: '#f8fafc' }}>
+                        <FileText size={14} className="file-icon" style={{ color: '#70309f' }} />
+                        <span className="file-name-text">{doc.file_name} (Library)</span>
+                        <span className="file-size-text">
+                          {doc.file_size ? `(${(doc.file_size / 1024).toFixed(1)} KB)` : ''}
+                        </span>
+                        <button
+                          type="button"
+                          className="remove-file-btn"
+                          onClick={() => removeLibraryDoc(doc.id)}
+                          disabled={isSubmitting}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
+
 
               <div className="info-alert">
                 <Info size={16} style={{ flexShrink: 0 }} />
@@ -725,6 +700,20 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
           )}
         </div>
       </div>
+
+      <SelectCompanyDocumentModal
+        isOpen={isLibraryModalOpen}
+        onClose={() => setIsLibraryModalOpen(false)}
+        onSelectDocuments={(docs) => {
+          setSelectedLibraryDocs((prev) => {
+            const newDocs = [...prev];
+            docs.forEach(d => {
+              if (!newDocs.find(x => x.id === d.id)) newDocs.push(d);
+            });
+            return newDocs;
+          });
+        }}
+      />
     </div>
   );
 };
