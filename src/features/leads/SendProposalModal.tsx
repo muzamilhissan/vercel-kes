@@ -20,6 +20,8 @@ import { proposalService } from '../../api/proposalService';
 import { ProposalOptionsData, CreateProposalRequestInput, CompanyDocument } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
 import SelectCompanyDocumentModal from '../documents/SelectCompanyDocumentModal';
+import ProposalQuestionnaireStep from './components/ProposalQuestionnaireStep';
+import ProposalReviewStep from './components/ProposalReviewStep';
 
 interface SendProposalModalProps {
   isOpen: boolean;
@@ -324,303 +326,35 @@ const SendProposalModal: React.FC<SendProposalModalProps> = ({
               <span className="ai-progress-hint">This usually takes about 10–15 seconds...</span>
             </div>
           ) : currentStep === 1 ? (
-            /* STEP 1: Questionnaire */
-            <div className="questionnaire-step-container">
-              {isLoadingOptions ? (
-                <div className="loading-options-state">
-                  <Loader2 size={32} className="lucide-spin" />
-                  <span>Loading proposal options...</span>
-                </div>
-              ) : options ? (
-                <div className="questionnaire-grid">
-                  {/* Column 1: Which services? (Multiselect) */}
-                  <div className="question-col">
-                    <div className="question-col-header">
-                      <h4 className="question-heading">
-                        1. Which services?{' '}
-                        <span className="question-subtext">Select all that apply</span>
-                      </h4>
-                      <button
-                        type="button"
-                        className="select-all-btn"
-                        onClick={handleSelectAllServices}
-                      >
-                        {selectedServiceIds.length === options.services.length
-                          ? 'Clear all'
-                          : 'Select all'}
-                      </button>
-                    </div>
-                    <div className="options-list">
-                      {options.services.map((service) => {
-                        const isChecked = selectedServiceIds.includes(service.id);
-                        return (
-                          <label
-                            key={service.id}
-                            className={`option-label checkbox-label ${isChecked ? 'selected' : ''}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleService(service.id)}
-                            />
-                            <span className="option-text">{service.name}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Column 2: What is the main purpose? */}
-                  <div className="question-col">
-                    <div className="question-col-header">
-                      <h4 className="question-heading">2. What is the main purpose?</h4>
-                    </div>
-                    <div className="options-list">
-                      {options.main_purposes.map((purpose) => {
-                        const isChecked = selectedMainPurposeId === purpose.id;
-                        return (
-                          <label
-                            key={purpose.id}
-                            className={`option-label radio-label ${isChecked ? 'selected' : ''}`}
-                          >
-                            <input
-                              type="radio"
-                              name="main_purpose"
-                              value={purpose.id}
-                              checked={isChecked}
-                              onChange={() => setSelectedMainPurposeId(purpose.id)}
-                            />
-                            <span className="option-text">{purpose.name}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Column 3: Which commercial approach? */}
-                  <div className="question-col">
-                    <div className="question-col-header">
-                      <h4 className="question-heading">3. Which commercial approach?</h4>
-                    </div>
-                    <div className="options-list">
-                      {options.commercial_approaches.map((approach) => {
-                        const isChecked = selectedCommercialApproachId === approach.id;
-                        return (
-                          <label
-                            key={approach.id}
-                            className={`option-label radio-label ${isChecked ? 'selected' : ''}`}
-                          >
-                            <input
-                              type="radio"
-                              name="commercial_approach"
-                              value={approach.id}
-                              checked={isChecked}
-                              onChange={() => setSelectedCommercialApproachId(approach.id)}
-                            />
-                            <span className="option-text">{approach.name}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="options-error-state">
-                  <p>Unable to load options.</p>
-                  <button className="btn btn-secondary" onClick={fetchOptions}>
-                    <RotateCcw size={14} /> Retry
-                  </button>
-                </div>
-              )}
-            </div>
+          <ProposalQuestionnaireStep
+            isLoadingOptions={isLoadingOptions}
+            options={options}
+            selectedServiceIds={selectedServiceIds}
+            toggleService={toggleService}
+            handleSelectAllServices={handleSelectAllServices}
+            selectedMainPurposeId={selectedMainPurposeId}
+            setSelectedMainPurposeId={setSelectedMainPurposeId}
+            selectedCommercialApproachId={selectedCommercialApproachId}
+            setSelectedCommercialApproachId={setSelectedCommercialApproachId}
+            fetchOptions={fetchOptions}
+          />
           ) : (
-            /* STEP 2: Review & Send Form */
-            <div className="review-step-container">
-              <div className="success-generated-banner">
-                <CheckCircle2 size={18} className="banner-icon" />
-                <div className="banner-text">
-                  <strong>
-                    {isRepropose
-                      ? `Proposal #${proposalNumber} generated successfully!`
-                      : 'Proposal content generated successfully!'}
-                  </strong>
-                  <span>
-                    Review and tailor the subject line and content below. You can also attach
-                    supporting files before sending.
-                  </span>
-                </div>
-              </div>
-
-              {/* Subject */}
-              <div className="form-group">
-                <label>SUBJECT *</label>
-                <input
-                  type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="form-control"
-                  disabled={isSubmitting}
-                  placeholder="Enter proposal subject..."
-                />
-              </div>
-
-              {/* Proposal Content */}
-              <div className="form-group">
-                <label>PROPOSAL CONTENT *</label>
-                <textarea
-                  value={proposalContent}
-                  onChange={(e) => setProposalContent(e.target.value)}
-                  className="form-control proposal-textarea"
-                  disabled={isSubmitting}
-                  maxLength={2000}
-                  placeholder="Write your proposal content here..."
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: '4px',
-                  }}
-                >
-                  <div className="ready-to-send-text" style={{ margin: 0 }}>
-                    <CheckCircle2 size={14} /> Ready to send.
-                  </div>
-                  <div
-                    className="character-counter"
-                    style={{
-                      fontSize: '11px',
-                      color: proposalContent.length >= 2000 ? '#ef4444' : '#64748b',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {proposalContent.length}/2000
-                  </div>
-                </div>
-                {proposalContent.length >= 2000 && (
-                  <div
-                    style={{
-                      color: '#ef4444',
-                      fontSize: '11px',
-                      fontWeight: 500,
-                      marginTop: '4px',
-                      textAlign: 'left',
-                    }}
-                  >
-                    Maximum character limit of 2,000 reached.
-                  </div>
-                )}
-              </div>
-
-              {/* Generated PDF Document Card if available */}
-              {generatedPdfUrl && (
-                <div className="generated-doc-card">
-                  <div className="doc-card-left">
-                    <div className="doc-icon-badge">
-                      <FileText size={20} />
-                    </div>
-                    <div className="doc-card-info">
-                      <span className="doc-card-title">Generated Proposal Document (PDF)</span>
-                      <span className="doc-card-sub">
-                        Automated proposal synthesized from requirements
-                      </span>
-                    </div>
-                  </div>
-                  <a
-                    href={generatedPdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="doc-preview-link"
-                  >
-                    <ExternalLink size={14} /> View / Download PDF
-                  </a>
-                </div>
-              )}
-
-              {/* Additional Attachments */}
-              <div className="form-group">
-                <label>ATTACH ADDITIONAL DOCUMENTS (OPTIONAL)</label>
-                <div className="file-input-wrapper">
-                  <input
-                    type="file"
-                    id="proposal-file"
-                    className="file-input"
-                    multiple
-                    onChange={handleFileChange}
-                    disabled={isSubmitting}
-                  />
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div
-                      className="file-input-display"
-                      onClick={() => document.getElementById('proposal-file')?.click()}
-                      style={{ flex: 1 }}
-                    >
-                      <button type="button" className="choose-file-btn" disabled={isSubmitting}>
-                        Choose Files
-                      </button>
-                      <span className="file-name">
-                        {files.length > 0 ? `${files.length} file(s) selected` : 'No file chosen'}
-                      </span>
-                    </div>
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => setIsLibraryModalOpen(true)}
-                      disabled={isSubmitting}
-                      style={{ height: '100%', padding: '0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <FileText size={16} />
-                      Browse Library
-                    </button>
-                  </div>
-                </div>
-
-                {(files.length > 0 || selectedLibraryDocs.length > 0) && (
-                  <div className="selected-files-list">
-                    {files.map((file, idx) => (
-                      <div key={`file-${idx}`} className="selected-file-item">
-                        <Paperclip size={14} className="file-icon" />
-                        <span className="file-name-text">{file.name}</span>
-                        <span className="file-size-text">
-                          ({(file.size / 1024).toFixed(1)} KB)
-                        </span>
-                        <button
-                          type="button"
-                          className="remove-file-btn"
-                          onClick={() => removeFile(idx)}
-                          disabled={isSubmitting}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                    {selectedLibraryDocs.map((doc, idx) => (
-                      <div key={`lib-${doc.id}`} className="selected-file-item" style={{ background: '#f8fafc' }}>
-                        <FileText size={14} className="file-icon" style={{ color: '#70309f' }} />
-                        <span className="file-name-text">{doc.file_name} (Library)</span>
-                        <span className="file-size-text">
-                          {doc.file_size ? `(${(doc.file_size / 1024).toFixed(1)} KB)` : ''}
-                        </span>
-                        <button
-                          type="button"
-                          className="remove-file-btn"
-                          onClick={() => removeLibraryDoc(doc.id)}
-                          disabled={isSubmitting}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-
-              <div className="info-alert">
-                <Info size={16} style={{ flexShrink: 0 }} />
-                <span>This email will be tracked. Lead will automatically move to Proposed stage.</span>
-              </div>
-            </div>
+            <ProposalReviewStep
+              isRepropose={isRepropose}
+              proposalNumber={proposalNumber}
+              subject={subject}
+              setSubject={setSubject}
+              proposalContent={proposalContent}
+              setProposalContent={setProposalContent}
+              isSubmitting={isSubmitting}
+              generatedPdfUrl={generatedPdfUrl}
+              files={files}
+              handleFileChange={handleFileChange}
+              removeFile={removeFile}
+              setIsLibraryModalOpen={setIsLibraryModalOpen}
+              selectedLibraryDocs={selectedLibraryDocs}
+              removeLibraryDoc={removeLibraryDoc}
+            />
           )}
         </div>
 
