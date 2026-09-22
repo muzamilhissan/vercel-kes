@@ -218,6 +218,7 @@ export interface ProposalAttachment {
   proposal_id: string | number;
   file_name: string;
   file_path: string;
+  signedUrl?: string;
   file_size?: number;
   mime_type?: string;
   created_at?: string;

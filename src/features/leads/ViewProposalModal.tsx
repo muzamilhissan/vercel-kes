@@ -67,8 +67,8 @@ const ViewProposalModal: React.FC<ViewProposalModalProps> = ({ isOpen, onClose, 
                       <span className="att-name">{att.file_name}</span>
                       <span className="att-size">{att.file_size ? (att.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
                     </div>
-                    {att.file_path && (
-                      <a href={att.file_path} target="_blank" rel="noopener noreferrer" className="att-download" title="Download">
+                    {(att.signedUrl || att.file_path) && (
+                      <a href={att.signedUrl || att.file_path} target="_blank" rel="noopener noreferrer" className="att-download" title="Download">
                         <Download size={16} />
                       </a>
                     )}
