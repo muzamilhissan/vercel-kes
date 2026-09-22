@@ -123,13 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             active={currentPath === 'accounts'} 
             onClick={onNavigate}
           />
-          <NavItem 
-            icon={<Folder size={20} />} 
-            label="Company Documents" 
-            path="documents"
-            active={currentPath === 'documents'} 
-            onClick={onNavigate}
-          />
+
           {/* <NavItem 
             icon={<BarChart3 size={20} />} 
             label="Reporting" 
