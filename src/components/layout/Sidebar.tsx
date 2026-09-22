@@ -9,7 +9,8 @@ import {
   Contact,
   Building,
   X,
-  ExternalLink
+  ExternalLink,
+  Folder
 } from 'lucide-react';
 import './Sidebar.css';
 import { redirectToKudonPOMS } from '../../utils/ssoService';
@@ -120,6 +121,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, isOpen, onCl
             label="Accounts" 
             path="accounts"
             active={currentPath === 'accounts'} 
+            onClick={onNavigate}
+          />
+          <NavItem 
+            icon={<Folder size={20} />} 
+            label="Company Documents" 
+            path="documents"
+            active={currentPath === 'documents'} 
             onClick={onNavigate}
           />
           {/* <NavItem 

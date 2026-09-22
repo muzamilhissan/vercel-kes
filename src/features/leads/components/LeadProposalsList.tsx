@@ -160,15 +160,7 @@ const LeadProposalsList: React.FC<LeadProposalsListProps> = ({
                 <h4 className="proposal-subject">{proposal.subject}</h4>
               </div>
               <div className="proposal-actions">
-                {onRepropose && (
-                  <button
-                    className="action-btn repropose-btn"
-                    title={`Re-propose (Proposal #${nextProposalNumber})`}
-                    onClick={() => onRepropose(nextProposalNumber)}
-                  >
-                    <RotateCcw size={14} />
-                  </button>
-                )}
+
                 <button
                   className="action-btn view-btn"
                   title="View Proposal"

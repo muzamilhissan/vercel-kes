@@ -291,9 +291,13 @@ export const useLeads = () => {
           // If superadmin assigned users upon update, call assignLead
           if (superAdmin && assignedIdsArray.length >= 0) {
             try {
-              await leadService.assignLead(selectedLead.id, assignedIdsArray.map(Number).filter(n => !isNaN(n)).length > 0 ? assignedIdsArray.map(Number) : assignedIdsArray);
+              const assignRes = await leadService.assignLead(selectedLead.id, assignedIdsArray.map(Number).filter(n => !isNaN(n)).length > 0 ? assignedIdsArray.map(Number) : assignedIdsArray) as any;
+              if (assignRes && assignRes.success === false) {
+                showToast(assignRes.message || 'Lead updated, but failed to assign users', 'warning');
+              }
             } catch (assignErr) {
               console.warn('Assign on update:', assignErr);
+              showToast('Lead updated, but failed to assign users', 'warning');
             }
           }
 
@@ -321,13 +325,19 @@ export const useLeads = () => {
         };
         const res = await leadService.store(payload) as any;
         if (res.success) {
-          const newLeadId = res.data?.id || res.id;
+          const newLeadId = res.data?.id || res.data?.lead?.id || res.lead?.id || res.id;
           if (newLeadId && superAdmin && assignedIdsArray.length > 0) {
             try {
-              await leadService.assignLead(newLeadId, assignedIdsArray.map(Number).filter(n => !isNaN(n)).length > 0 ? assignedIdsArray.map(Number) : assignedIdsArray);
+              const assignRes = await leadService.assignLead(newLeadId, assignedIdsArray.map(Number).filter(n => !isNaN(n)).length > 0 ? assignedIdsArray.map(Number) : assignedIdsArray) as any;
+              if (assignRes && assignRes.success === false) {
+                showToast(assignRes.message || 'Lead created, but failed to assign users', 'warning');
+              }
             } catch (assignErr) {
               console.warn('Assign on create:', assignErr);
+              showToast('Lead created, but failed to assign users', 'warning');
             }
+          } else if (!newLeadId && superAdmin && assignedIdsArray.length > 0) {
+            showToast('Lead created, but could not determine ID for assignment', 'warning');
           }
           window.dispatchEvent(new CustomEvent('leadsUpdated'));
           showToast('Lead created successfully', 'success');

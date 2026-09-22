@@ -97,10 +97,41 @@ const LeadFollowUpFormModal: React.FC<LeadFollowUpFormModalProps> = ({ isOpen, o
                 value={notes} 
                 onChange={(e) => setNotes(e.target.value)}
                 rows={5}
-                maxLength={255}
+                maxLength={500}
                 style={{ resize: 'vertical' }}
                 placeholder="Add details about this follow-up..."
               />
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  marginTop: '4px',
+                }}
+              >
+                <div
+                  className="character-counter"
+                  style={{
+                    fontSize: '11px',
+                    color: notes.length >= 500 ? '#ef4444' : '#64748b',
+                    fontWeight: 500,
+                  }}
+                >
+                  {notes.length}/500
+                </div>
+              </div>
+              {notes.length >= 500 && (
+                <div
+                  style={{
+                    color: '#ef4444',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    marginTop: '4px',
+                    textAlign: 'right'
+                  }}
+                >
+                  Maximum character limit reached
+                </div>
+              )}
             </div>
           </div>
 
