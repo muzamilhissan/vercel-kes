@@ -43,6 +43,8 @@ const LeadModal: React.FC<LeadModalProps> = ({
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>('');
   const [phoneError, setPhoneError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isCustomPosition, setIsCustomPosition] = useState(false);
+  const predefinedPositions = ['Procurement', 'Engineering', 'Maintenance Manager', 'Plant Manager', 'Operations Manager'];
 
   const handleValidate = (): boolean => {
     if (!phoneNumber) {
@@ -69,6 +71,12 @@ const LeadModal: React.FC<LeadModalProps> = ({
           ? initialData.assigned_to.map(String)
           : [];
       setSelectedAssigneeIds(assigned);
+      
+      if (initialData.representative_position && !predefinedPositions.includes(initialData.representative_position)) {
+        setIsCustomPosition(true);
+      } else {
+        setIsCustomPosition(false);
+      }
     } else {
       setFormData({ 
         name: '', 
@@ -80,6 +88,7 @@ const LeadModal: React.FC<LeadModalProps> = ({
         province: '',
         website: '',
         source: '',
+        representative_position: '',
         expected_revenue: undefined,
         probability: undefined,
         notes: '',
@@ -87,6 +96,7 @@ const LeadModal: React.FC<LeadModalProps> = ({
       });
       setPhoneNumber('');
       setSelectedAssigneeIds([]);
+      setIsCustomPosition(false);
     }
   }, [initialData, isOpen]);
 
@@ -168,8 +178,8 @@ const LeadModal: React.FC<LeadModalProps> = ({
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {/* Row 1: Three fields (Lead Name, Company, Status) */}
-            <div className="lead-form-row-3">
+            {/* Row 1: Two fields (Lead Name, Company) */}
+            <div className="lead-form-row-2">
               <div className="form-group">
                 <label>Lead Name <span className="required-asterisk">*</span></label>
                 <input 
@@ -192,6 +202,10 @@ const LeadModal: React.FC<LeadModalProps> = ({
                   required 
                 />
               </div>
+            </div>
+
+            {/* Row 2: Two fields (Status, Representative's Position) */}
+            <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
               <div className="form-group">
                 <label>Status</label>
                 <SearchableSelect
@@ -204,9 +218,59 @@ const LeadModal: React.FC<LeadModalProps> = ({
                   placement="bottom"
                 />
               </div>
+              <div className="form-group">
+                <label>Representative's Position</label>
+                {!isCustomPosition ? (
+                  <SearchableSelect
+                    options={[
+                      ...predefinedPositions.map(pos => ({ value: pos, label: pos })),
+                      { value: 'Other', label: 'Other' }
+                    ]}
+                    value={
+                      formData.representative_position && !predefinedPositions.includes(formData.representative_position)
+                        ? 'Other'
+                        : formData.representative_position || ''
+                    }
+                    onChange={(val) => {
+                      if (val === 'Other') {
+                        setIsCustomPosition(true);
+                        setFormData({ ...formData, representative_position: '' });
+                      } else {
+                        setFormData({ ...formData, representative_position: val as string });
+                      }
+                    }}
+                    placeholder="Select position"
+                    searchable={false}
+                    variant="compact"
+                    placement="bottom"
+                  />
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={formData.representative_position || ''}
+                      onChange={(e) => setFormData({ ...formData, representative_position: e.target.value })}
+                      placeholder="Enter custom position"
+                      style={{ flex: 1 }}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomPosition(false);
+                        setFormData({ ...formData, representative_position: '' });
+                      }}
+                      className="btn-premium-secondary"
+                      style={{ padding: '0 12px', fontSize: '12px' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             
-            {/* Row 2: Two fields (Phone, Email) */}
+            {/* Row 3: Two fields (Phone, Email) */}
             <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
               <div className="form-group">
                 <label>Phone <span className="required-asterisk">*</span></label>
@@ -238,7 +302,7 @@ const LeadModal: React.FC<LeadModalProps> = ({
               </div>
             </div>
 
-            {/* Row 3: Two fields (Industry, Province) */}
+            {/* Row 4: Two fields (Industry, Province) */}
             <div className="lead-form-row-2" style={{ marginTop: '16px' }}>
               <div className="form-group">
                 <label>Industry <span className="required-asterisk">*</span></label>

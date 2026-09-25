@@ -122,6 +122,7 @@ export const mapApiLeadToFrontendLead = (apiLead: any): Lead => {
     province: apiLead.province || '',
     website: apiLead.website || '',
     source: apiLead.source || '',
+    representative_position: apiLead.representative_position || '',
     expected_revenue: apiLead.expected_revenue !== undefined && apiLead.expected_revenue !== null ? Number(apiLead.expected_revenue) : undefined,
     probability: apiLead.probability !== undefined && apiLead.probability !== null ? Number(apiLead.probability) : undefined,
     notes: apiLead.notes || '',

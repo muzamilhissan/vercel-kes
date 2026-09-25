@@ -15,9 +15,19 @@ const LeadContactInfo: React.FC<LeadContactInfoProps> = ({ lead }) => {
       </div>
       <div className="card-body highlighted-body">
         <div className="info-row">
+          <span className="info-label">Client Name:</span>
+          <span className="info-value">Kudon Engineering Services</span>
+        </div>
+        <div className="info-row">
           <span className="info-label">Contact Person:</span>
           <span className="info-value">{lead.name}</span>
         </div>
+        {lead.representative_position && (
+          <div className="info-row">
+            <span className="info-label">Position:</span>
+            <span className="info-value">{lead.representative_position}</span>
+          </div>
+        )}
         <div className="info-row">
           <span className="info-label">Email:</span>
           <a href={`mailto:${lead.email}`} className="info-value link">{lead.email}</a>

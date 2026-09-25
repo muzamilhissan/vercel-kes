@@ -22,9 +22,19 @@ const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ isOpen, onClose, le
         <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '32px 32px 24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 32px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client Name</span>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b' }}>Kudon Engineering Services</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name</span>
               <span style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b', textTransform: 'capitalize' }}>{lead.name}</span>
             </div>
+            {lead.representative_position && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position</span>
+                <span style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b', textTransform: 'capitalize' }}>{lead.representative_position}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Company</span>
               <span style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b', textTransform: 'capitalize' }}>{lead.company}</span>

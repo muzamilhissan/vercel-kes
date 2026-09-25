@@ -24,6 +24,7 @@ export interface Lead {
   province?: string;
   website?: string;
   source?: string;
+  representative_position?: string;
   expected_revenue?: number;
   probability?: number;
   notes?: string;

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ChevronDown } from 'lucide-react';
 
 export interface SelectOption {
@@ -33,6 +34,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
@@ -40,7 +42,12 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // The dropdown is portalled to document.body, so it is NOT inside containerRef.
+      // Both the trigger and the portalled dropdown must count as "inside".
+      const insideTrigger = containerRef.current?.contains(target);
+      const insideDropdown = dropdownRef.current?.contains(target);
+      if (!insideTrigger && !insideDropdown) {
         setIsOpen(false);
       }
     };
@@ -48,7 +55,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  // Measure before paint so the dropdown never renders at a stale position.
+  useLayoutEffect(() => {
     if (isOpen && containerRef.current) {
       setTriggerRect(containerRef.current.getBoundingClientRect());
     } else if (!isOpen) {
@@ -91,6 +99,55 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const handleSelect = (val: string) => {
     onChange(val);
     setIsOpen(false);
+  };
+
+  // The dropdown is portalled into document.body, which carries `zoom: 90%`
+  // (see index.css). getBoundingClientRect() reports VISUAL pixels (already
+  // multiplied by the zoom), but a length set on a child of body is interpreted
+  // in the ZOOMED space and multiplied by the zoom again. Dividing by the
+  // effective zoom cancels that out. Returns 1 when body is not zoomed.
+  const getPortalScale = (): number => {
+    const body = document.body;
+    if (!body || !body.offsetWidth) return 1;
+    const scale = body.getBoundingClientRect().width / body.offsetWidth;
+    return Number.isFinite(scale) && scale > 0 ? scale : 1;
+  };
+
+  // Position the portalled dropdown: keep it aligned to the trigger, inside the
+  // viewport horizontally, and flipped above the trigger when there is no room below.
+  const getDropdownPosition = (rect: DOMRect): React.CSSProperties => {
+    const GAP = 6;
+    const EDGE = 8;
+    const scale = getPortalScale();
+    const estimatedHeight = ((isPremium ? 200 : 160) + (searchable ? 48 : 0) + 12) * scale;
+
+    // All of the maths below is done in viewport (visual) pixels, then divided
+    // by `scale` at the very end to convert into the portal's own space.
+    const width = rect.width;
+    const left = Math.max(EDGE, Math.min(rect.left, window.innerWidth - width - EDGE));
+
+    const spaceBelow = window.innerHeight - rect.bottom - GAP - EDGE;
+    const spaceAbove = rect.top - GAP - EDGE;
+    const openUp = placement === 'top'
+      ? spaceAbove >= estimatedHeight || spaceAbove > spaceBelow
+      : spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+
+    const px = (n: number) => `${n / scale}px`;
+
+    return openUp
+      ? {
+          left: px(left),
+          width: px(width),
+          top: px(rect.top - GAP),
+          transform: 'translateY(-100%)',
+          maxHeight: px(Math.max(spaceAbove, 120))
+        }
+      : {
+          left: px(left),
+          width: px(width),
+          top: px(rect.bottom + GAP),
+          maxHeight: px(Math.max(spaceBelow, 120))
+        };
   };
 
   return (
@@ -146,18 +203,17 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         />
       </div>
 
-      {isOpen && (
+      {isOpen && triggerRect && createPortal(
         <div 
+          ref={dropdownRef}
           className="custom-select-dropdown" 
           style={{
             position: 'fixed',
-            left: triggerRect ? `${triggerRect.left}px` : '0px',
-            width: triggerRect ? `${triggerRect.width}px` : '100%',
-            ...(placement === 'top' 
-              ? { top: triggerRect ? `${triggerRect.top - 6}px` : '0px', transform: 'translateY(-100%)' } 
-              : { top: triggerRect ? `${triggerRect.bottom + 6}px` : '0px' }
-            ),
-            visibility: triggerRect ? 'visible' : 'hidden',
+            ...getDropdownPosition(triggerRect),
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            visibility: 'visible',
             background: '#ffffff',
             border: isPremium ? '2px solid #70309f' : '1.5px solid #70309f',
             borderRadius: isPremium ? '16px' : '12px',
@@ -169,7 +225,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         >
           {/* Search container */}
           {searchable && (
-            <div style={{ position: 'relative', marginBottom: '6px' }}>
+            <div style={{ position: 'relative', marginBottom: '6px', flexShrink: 0 }}>
               <Search 
                 size={isPremium ? 16 : 14} 
                 style={{ 
@@ -215,6 +271,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
               display: 'flex', 
               flexDirection: 'column', 
               gap: '2px', 
+              flex: 1,
+              minHeight: 0,
               maxHeight: isPremium ? '200px' : '160px' 
             }}
           >
@@ -269,7 +327,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

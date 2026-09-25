@@ -58,9 +58,21 @@ const ContactLeadModal: React.FC<ContactLeadModalProps> = ({ isOpen, onClose, le
           
           <div className="contact-info-section">
             <div className="contact-field">
+              <span className="contact-label">Client Name:</span>
+              <span className="contact-value">Kudon Engineering Services</span>
+            </div>
+            
+            <div className="contact-field">
               <span className="contact-label">Contact Person:</span>
               <span className="contact-value">{lead.name}</span>
             </div>
+
+            {lead.representative_position && (
+              <div className="contact-field">
+                <span className="contact-label">Position:</span>
+                <span className="contact-value">{lead.representative_position}</span>
+              </div>
+            )}
             
             <div className="contact-field">
               <span className="contact-label">Email:</span>
