@@ -1,13 +1,13 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import { ToastProvider } from './context/ToastContext'
-import './index.css'
-import './Modals.css'
-import './Tables.css'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './app/App';
+import { AppProviders } from './app/providers';
+import './styles/globals.css';
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <ToastProvider>
-    <App />
-  </ToastProvider>,
-)
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <AppProviders>
+      <App />
+    </AppProviders>
+  </StrictMode>,
+);

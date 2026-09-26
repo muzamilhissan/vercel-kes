@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+@import 'tailwindcss';
+@import 'react-phone-number-input/style.css';
+
+/* Design tokens — mirrors the palette the app shipped with. */
+@theme {
+  --color-brand-50: #f7f1fb;
+  --color-brand-100: #ecdff5;
+  --color-brand-200: #d9bfeb;
+  --color-brand-300: #bd92db;
+  --color-brand-400: #9a5fc4;
+  --color-brand: #70309f;
+  --color-brand-600: #5b2484;
+  --color-brand-700: #4a1d6c;
+
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-canvas: #f0f2f5;
+  --color-field: #f1f5f9;
+  --color-line: #e2e8f0;
+
+  --color-ink: #1e293b;
+  --color-ink-muted: #64748b;
+  --color-ink-subtle: #94a3b8;
+
+  /* Two sizes the UI leans on constantly; named so they scale with the root. */
+  --text-2xs: 0.6875rem;
+  --text-label: 0.8125rem;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', serif;
+
+  --radius-field: 10px;
+  --radius-control: 12px;
+  --radius-panel: 16px;
+
+  --shadow-brand: 0 4px 6px -1px rgb(112 48 159 / 0.2);
+  --shadow-brand-lg: 0 10px 15px -3px rgb(112 48 159 / 0.3);
+  --shadow-panel: 0 4px 24px rgb(15 23 42 / 0.08);
+
+  --ease-control: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer base {
+  /*
+   * The desktop design is drawn at 90% of browser default. Every size in the app
+   * is expressed in rem, so this single value scales the whole UI. A CSS `zoom`
+   * would look the same but breaks getBoundingClientRect, which popovers position
+   * with. Phones stay at 100% so tap targets keep their full size.
+   */
+  @media (width >= 48rem) {
+    html {
+      font-size: 90%;
+    }
+  }
+
+  html,
+  body,
+  #root {
+    @apply h-full w-full overflow-hidden;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased leading-normal;
+  }
+
+  button {
+    @apply cursor-pointer transition-all duration-200;
+  }
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--color-line);
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+@theme {
+  --animate-dot-bounce: dot-bounce 1.4s infinite ease-in-out both;
+}
+
+@keyframes dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7) translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1.15) translateY(-12px);
+    opacity: 1;
+  }
+}
+
+/*
+ * react-phone-number-input renders its own markup, so its country-select and
+ * input are matched to the Field control styles here rather than inline.
+ */
+@layer components {
+  .phone-field {
+    @apply flex items-center gap-2 rounded-xl border border-line bg-surface-muted px-3.5 py-2.5 transition-all;
+
+    &:focus-within {
+      @apply border-brand bg-surface shadow-[0_0_0_3px_rgb(112_48_159_/_0.1)];
+    }
+
+    .PhoneInputInput {
+      @apply w-full border-none bg-transparent text-sm font-medium text-ink outline-none placeholder:text-ink-subtle;
+    }
+
+    .PhoneInputCountry {
+      @apply flex shrink-0 items-center gap-1;
+    }
+
+    .PhoneInputCountrySelect {
+      @apply absolute inset-0 size-full cursor-pointer opacity-0;
+    }
+
+    .PhoneInputCountryIcon {
+      @apply h-4 w-6 overflow-hidden rounded-[3px];
+    }
+
+    .PhoneInputCountrySelectArrow {
+      @apply size-1.5 rotate-45 border-b-[1.5px] border-r-[1.5px] border-ink-subtle;
+    }
+  }
+
+  .phone-field-invalid {
+    @apply border-red-300;
+
+    &:focus-within {
+      @apply border-red-500 shadow-[0_0_0_3px_rgb(239_68_68_/_0.1)];
+    }
+  }
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
