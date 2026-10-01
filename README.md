@@ -1,16 +1,66 @@
-# React + Vite
+# KES CRM Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the frontend repository for KES CRM. This project is built using modern web technologies to provide a fast, responsive, and robust customer relationship management interface.
 
-Currently, two official plugins are available:
+## 🚀 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework**: [React 19](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
+- **Bundler**: [Vite](https://vitejs.dev/)
+- **Routing**: [React Router DOM](https://reactrouter.com/)
+- **State/Data Management**: [TanStack React Query](https://tanstack.com/query/latest)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [Radix UI](https://www.radix-ui.com/) primitives
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) validation
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-## React Compiler
+## 📋 Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Before you begin, ensure you have met the following requirements:
 
-## Expanding the ESLint configuration
+- **Node.js**: `v22.18.0` or higher (matching your local environment)
+- **npm**: Included with Node.js
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Getting Started
+
+Follow these steps to set up the project locally:
+
+1. **Clone the repository** (if you haven't already):
+   ```bash
+   git clone <repository-url>
+   cd kes-crm-frontend
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+   The application will be available at `http://localhost:5173` (or the port specified by Vite in your terminal).
+
+## 📜 Available Scripts
+
+In the project directory, you can run:
+
+- `npm run dev`: Starts the Vite development server with Hot Module Replacement (HMR).
+- `npm run build`: Builds the app for production to the `dist` folder.
+- `npm run lint`: Lints the codebase using ESLint to ensure code quality.
+- `npm run preview`: Bootstraps a local static web server that serves the production build from the `dist` folder.
+
+## 📁 Project Structure
+
+This project follows a modular structure. Some of the key directories include:
+- `src/` - The core application source code.
+  - `features/` - Feature-based modules (e.g., leads).
+  - `app/` - App-wide configurations like routes.
+  - `components/` - Reusable UI components.
+- `public/` - Static assets.
+- `package.json` - Project metadata, dependencies, and npm scripts.
+- `vite.config.ts` - Configuration file for the Vite bundler.
+
+## ⚙️ Linting and Formatting
+
+The project uses ESLint with TypeScript plugins to maintain code quality. Run `npm run lint` before committing to catch any potential issues.
