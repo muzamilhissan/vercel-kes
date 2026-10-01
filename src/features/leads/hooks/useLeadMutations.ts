@@ -8,7 +8,14 @@ import { leadKeys, useCreateLead, useUpdateLead } from './useLeadQueries';
 
 /** Strip the assignee list, which the API takes on its own endpoint. */
 function toLeadPayload({ assigned_to: _assigned, ...values }: LeadFormOutput): CreateLeadInput {
-  return { ...values, representative_position: values.representative_position || undefined };
+  return {
+    ...values,
+    representative_position: values.representative_position || undefined,
+    vat_number: values.vat_number || undefined,
+    vendor_number: values.vendor_number || undefined,
+    registration_no: values.registration_no || undefined,
+    enduser_name: values.enduser_name || undefined,
+  };
 }
 
 const sameMembers = (a: string[], b: string[]) =>

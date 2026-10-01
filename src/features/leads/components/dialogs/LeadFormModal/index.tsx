@@ -2,12 +2,22 @@ import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Combobox, Field, Input, Modal, ModalGrid, PhoneField, Textarea } from '@/shared/ui';
+import { cn } from '@/shared/lib/cn';
 import { LEAD_STATUSES } from '../../../constants';
 import { assigneesOf, normalizeAssignee, type LeadAssignee } from '../../../lib/assignees';
 import type { Lead } from '../../../types';
 import { AssigneePicker } from './AssigneePicker';
 import { PositionField } from './PositionField';
-import { EMPTY_LEAD_FORM, LOCKED_STATUSES, leadFormSchema, type LeadFormOutput, type LeadFormValues } from './schema';
+import { WebsiteField } from './WebsiteField';
+import {
+  EMPTY_LEAD_FORM,
+  LOCKED_STATUSES,
+  NOTES_MAX_LENGTH,
+  leadFormSchema,
+  stripScheme,
+  type LeadFormOutput,
+  type LeadFormValues,
+} from './schema';
 import type { User } from '@/shared/types/api';
 
 const STATUS_OPTIONS = LEAD_STATUSES.map((status) => ({ value: status, label: status }));
@@ -35,7 +45,10 @@ export function LeadFormModal({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    watch,
   } = useForm<LeadFormValues, unknown, LeadFormOutput>({ resolver: zodResolver(leadFormSchema) });
+
+  const notesLength = (watch('notes') ?? '').length;
 
   const users = useMemo(
     () => assignableUsers.map(normalizeAssignee).filter((user): user is LeadAssignee => user !== null),
@@ -56,8 +69,15 @@ export function LeadFormModal({
             email: lead.email,
             industry: lead.industry ?? '',
             province: lead.province ?? '',
-            website: lead.website ?? '',
+            website: stripScheme(lead.website ?? ''),
             source: lead.source ?? '',
+            vat_number: lead.vat_number ?? '',
+            vendor_number: lead.vendor_number ?? '',
+            registration_no: lead.registration_no ?? '',
+            finance_email: lead.finance_email ?? '',
+            enduser_name: lead.enduser_name ?? '',
+            billing_statement_email: lead.billing_statement_email ?? '',
+            address: lead.address ?? '',
             expected_revenue: lead.expected_revenue ?? '',
             probability: lead.probability ?? '',
             notes: lead.notes ?? '',
@@ -180,7 +200,21 @@ export function LeadFormModal({
         <ModalGrid>
           <Field label="Website" error={errors.website?.message}>
             {(field) => (
-              <Input {...field} {...register('website')} type="url" placeholder="e.g. https://example.com" disabled={isSubmitting} />
+              <Controller
+                control={control}
+                name="website"
+                render={({ field: control }) => (
+                  <WebsiteField
+                    id={field.id}
+                    aria-describedby={field['aria-describedby']}
+                    invalid={field['aria-invalid']}
+                    value={control.value ?? ''}
+                    onChange={control.onChange}
+                    onBlur={control.onBlur}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
             )}
           </Field>
           <Field label="Source" error={errors.source?.message}>
@@ -203,6 +237,57 @@ export function LeadFormModal({
           </Field>
         </ModalGrid>
 
+        <ModalGrid>
+          <Field label="VAT Number" error={errors.vat_number?.message}>
+            {(field) => (
+              <Input {...field} {...register('vat_number')} placeholder="Enter VAT number" disabled={isSubmitting} />
+            )}
+          </Field>
+          <Field label="Vendor Number" error={errors.vendor_number?.message}>
+            {(field) => (
+              <Input {...field} {...register('vendor_number')} placeholder="Enter vendor number" disabled={isSubmitting} />
+            )}
+          </Field>
+        </ModalGrid>
+
+        <ModalGrid>
+          <Field label="Registration No." error={errors.registration_no?.message}>
+            {(field) => (
+              <Input {...field} {...register('registration_no')} placeholder="Enter registration number" disabled={isSubmitting} />
+            )}
+          </Field>
+          <Field label="Enduser Name" error={errors.enduser_name?.message}>
+            {(field) => (
+              <Input {...field} {...register('enduser_name')} placeholder="Enter enduser name" disabled={isSubmitting} />
+            )}
+          </Field>
+        </ModalGrid>
+
+        <ModalGrid>
+          <Field label="Finance Email Address" required error={errors.finance_email?.message}>
+            {(field) => (
+              <Input {...field} {...register('finance_email')} type="email" placeholder="Enter finance email address" disabled={isSubmitting} />
+            )}
+          </Field>
+          <Field label="Billing Statement Email" required error={errors.billing_statement_email?.message}>
+            {(field) => (
+              <Input {...field} {...register('billing_statement_email')} type="email" placeholder="Enter billing statement email" disabled={isSubmitting} />
+            )}
+          </Field>
+        </ModalGrid>
+
+        <Field label="Address" required error={errors.address?.message}>
+          {(field) => (
+            <Textarea
+              {...field}
+              {...register('address')}
+              rows={2}
+              placeholder="Head office address or PO Box"
+              disabled={isSubmitting}
+            />
+          )}
+        </Field>
+
         {isSuperAdmin && users.length > 0 && (
           <Controller
             control={control}
@@ -219,7 +304,26 @@ export function LeadFormModal({
         )}
 
         <Field label="Notes" error={errors.notes?.message}>
-          {(field) => <Textarea {...field} {...register('notes')} placeholder="Enter notes..." disabled={isSubmitting} />}
+          {(field) => (
+            <>
+              <Textarea
+                {...field}
+                {...register('notes')}
+                maxLength={NOTES_MAX_LENGTH}
+                placeholder="Enter notes..."
+                disabled={isSubmitting}
+              />
+              <span
+                aria-live="polite"
+                className={cn(
+                  'mt-1.5 text-right text-xs tabular-nums',
+                  notesLength >= NOTES_MAX_LENGTH ? 'font-semibold text-red-600' : 'text-ink-muted',
+                )}
+              >
+                {notesLength}/{NOTES_MAX_LENGTH}
+              </span>
+            </>
+          )}
         </Field>
       </form>
     </Modal>

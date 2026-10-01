@@ -16,6 +16,13 @@ export interface Lead {
   website?: string;
   source?: string;
   representative_position?: string;
+  vat_number?: string;
+  vendor_number?: string;
+  registration_no?: string;
+  finance_email?: string;
+  enduser_name?: string;
+  billing_statement_email?: string;
+  address?: string;
   expected_revenue?: number;
   probability?: number;
   notes?: string;
@@ -35,6 +42,13 @@ export interface CreateLeadInput {
   website?: string;
   source?: string;
   representative_position?: string;
+  vat_number?: string;
+  vendor_number?: string;
+  registration_no?: string;
+  finance_email?: string;
+  enduser_name?: string;
+  billing_statement_email?: string;
+  address?: string;
   expected_revenue?: number;
   probability?: number;
   notes?: string;

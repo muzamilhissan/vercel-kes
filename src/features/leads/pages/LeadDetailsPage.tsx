@@ -4,9 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, ConfirmDialog, ErrorState, Loader, initialsOf } from '@/shared/ui';
 import { SendProposalModal } from '@/features/proposals/components/SendProposalModal';
 import { LeadProposalsList } from '@/features/proposals/components/LeadProposalsList';
+import { CreatePOModal } from '@/features/quotes/components/CreatePOModal';
+import { useLeadPurchaseOrders } from '@/features/quotes/hooks/useLeadPurchaseOrders';
 import { AssignLeadModal } from '../components/dialogs/AssignLeadModal';
 import { ContactLeadModal } from '../components/dialogs/ContactLeadModal';
 import { LeadActivityTimeline } from '../components/detail/LeadActivityTimeline';
+import { LeadBillingDetails } from '../components/detail/LeadBillingDetails';
 import { LeadContactInfo } from '../components/detail/LeadContactInfo';
 import { LeadDetailsCard } from '../components/detail/LeadDetailsCard';
 import { LeadDetailsStepper } from '../components/detail/LeadDetailsStepper';
@@ -15,6 +18,7 @@ import { LeadEngagementStats } from '../components/detail/LeadEngagementStats';
 import { FollowUpsList } from '@/features/follow-ups/components/FollowUpsList';
 import { LeadFormModal } from '../components/dialogs/LeadFormModal';
 import { LeadQuickActions } from '../components/detail/LeadQuickActions';
+import { LeadQuoteCard } from '../components/detail/LeadQuoteCard';
 import { useLeadTab } from '../hooks/useLeadTab';
 import { useSaveLead } from '../hooks/useLeadMutations';
 import {
@@ -26,9 +30,11 @@ import {
 } from '../hooks/useLeadQueries';
 import { useVisibleLeads } from '../hooks/useVisibleLeads';
 
-type OpenDialog = 'edit' | 'delete' | 'assign' | 'contact' | 'proposal' | null;
+type OpenDialog = 'edit' | 'delete' | 'assign' | 'contact' | 'proposal' | 'createPO' | null;
 
 const NO_FILTERS = { date: '', assignees: [] };
+
+const QUOTE_READY_STATUSES = ['Qualified', 'Converted'];
 
 export default function LeadDetailsPage() {
   const { leadId } = useParams<{ leadId: string }>();
@@ -47,6 +53,15 @@ export default function LeadDetailsPage() {
   const assignLead = useAssignLead();
   const deleteLead = useDeleteLead();
   const updateStatus = useUpdateLeadStatus();
+
+  const canCreateQuote = QUOTE_READY_STATUSES.includes(leadQuery.data?.data?.status ?? '');
+  const {
+    query: poQuery,
+    purchaseOrders,
+    hasPurchaseOrder,
+    create: createPO,
+    refreshStatus: refreshPOStatus,
+  } = useLeadPurchaseOrders(leadId ?? '', canCreateQuote);
 
   if (leadQuery.isPending) return <Loader message="Loading lead details..." />;
   if (leadQuery.isError || !leadQuery.data?.data) {
@@ -86,13 +101,14 @@ export default function LeadDetailsPage() {
         </div>
       </header>
 
-      <LeadDetailsStepper currentStatus={lead.status} />
+      <LeadDetailsStepper currentStatus={lead.status} hasQuote={hasPurchaseOrder} />
       <LeadDetailsTabs active={tab} onChange={setTab} />
 
       {tab === 'overview' && (
         <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
           <div className="flex flex-col gap-3">
             <LeadContactInfo lead={lead} />
+            <LeadBillingDetails lead={lead} />
             <LeadEngagementStats />
             <LeadActivityTimeline lead={lead} />
           </div>
@@ -102,12 +118,22 @@ export default function LeadDetailsPage() {
               canAssign={isSuperAdmin}
               onAssignClick={() => setDialog('assign')}
             />
+            <LeadQuoteCard
+              purchaseOrders={purchaseOrders}
+              isLoading={canCreateQuote && poQuery.isPending}
+              canCreate={canCreateQuote}
+              isRefreshing={refreshPOStatus.isPending}
+              onCreateClick={() => setDialog('createPO')}
+              onRefreshClick={(id) => refreshPOStatus.mutate(id)}
+            />
             <LeadQuickActions
               lead={lead}
               canAssign={isSuperAdmin}
               onContactClick={() => setDialog('contact')}
               onSendProposalClick={() => openProposal(false, 1)}
               onReproposeClick={() => openProposal(true, 2)}
+              onCreateQuoteClick={() => setDialog('createPO')}
+              hasPurchaseOrder={hasPurchaseOrder}
               onEditClick={() => setDialog('edit')}
               onDeleteClick={() => setDialog('delete')}
               onAssignClick={() => setDialog('assign')}
@@ -155,6 +181,14 @@ export default function LeadDetailsPage() {
         isSuperAdmin={isSuperAdmin}
         assignableUsers={assignableUsers}
         onSubmit={(values) => save(values, lead)}
+      />
+
+      <CreatePOModal
+        open={dialog === 'createPO'}
+        onOpenChange={(open) => !open && setDialog(null)}
+        clientName={lead.name}
+        clientCompany={lead.company}
+        onSubmit={(input) => createPO.mutateAsync(input)}
       />
 
       <AssignLeadModal

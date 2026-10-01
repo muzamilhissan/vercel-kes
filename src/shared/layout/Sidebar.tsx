@@ -2,6 +2,7 @@ import { ExternalLink, LogOut, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { POMS_ALLOWED_EMAIL, redirectToKudonPOMS } from '@/features/auth/sso';
 import { session } from '@/shared/auth/session';
+import { isSuperAdmin } from '@/shared/auth/permissions';
 import { cn } from '@/shared/lib/cn';
 import { NAV_ITEMS } from './navigation';
 import { SidebarProfile } from './SidebarProfile';
@@ -17,7 +18,9 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose, onSignOut }: SidebarProps) {
-  const canSwitchToPoms = session.getUser()?.email === POMS_ALLOWED_EMAIL;
+  const user = session.getUser();
+  const canSwitchToPoms = user?.email === POMS_ALLOWED_EMAIL;
+  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || isSuperAdmin(user));
 
   return (
     <aside
@@ -45,7 +48,7 @@ export function Sidebar({ isOpen, onClose, onSignOut }: SidebarProps) {
 
       <nav className="flex flex-1 flex-col">
         <p className="mb-3 px-3 text-2xs font-extrabold uppercase tracking-[1.5px] text-ink-muted">Menu</p>
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

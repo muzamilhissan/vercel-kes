@@ -19,6 +19,12 @@ const optionalNumber = z
   .optional()
   .transform((value) => (value === '' || value === undefined ? undefined : Number(value)));
 
+export const WEBSITE_PREFIX = 'https://';
+
+export const stripScheme = (value: string) => value.trim().replace(/^https?:\/\//i, '');
+
+export const NOTES_MAX_LENGTH = 500;
+
 export const leadFormSchema = z.object({
   name: z.string().trim().min(1, 'Lead name is required.').max(150),
   company: z.string().trim().min(1, 'Company is required.').max(150),
@@ -31,14 +37,37 @@ export const leadFormSchema = z.object({
   email: z.string().trim().min(1, 'Email is required.').email('Enter a valid email address.'),
   industry: z.string().trim().min(1, 'Industry is required.'),
   province: z.string().trim().min(1, 'Province is required.'),
-  website: z.union([z.literal(''), z.string().url('Enter a valid URL (e.g. https://example.com).')]).optional(),
+  website: z
+    .string()
+    .optional()
+    .transform((value) => stripScheme(value ?? ''))
+    .refine(
+      (value) => value === '' || z.string().url().safeParse(WEBSITE_PREFIX + value).success,
+      'Enter a valid website (e.g. example.com).',
+    )
+    .transform((value) => (value ? WEBSITE_PREFIX + value : '')),
   source: z.string().trim().optional(),
+  vat_number: z.string().trim().max(50).optional(),
+  vendor_number: z.string().trim().max(50).optional(),
+  registration_no: z.string().trim().max(50).optional(),
+  finance_email: z
+    .string()
+    .trim()
+    .min(1, 'Finance email address is required.')
+    .email('Enter a valid email address.'),
+  enduser_name: z.string().trim().max(150).optional(),
+  billing_statement_email: z
+    .string()
+    .trim()
+    .min(1, 'Billing statement email is required.')
+    .email('Enter a valid email address.'),
+  address: z.string().trim().min(1, 'Address is required.').max(500),
   expected_revenue: optionalNumber,
   probability: optionalNumber.refine(
     (value) => value === undefined || (value >= 0 && value <= 100),
     'Probability must be between 0 and 100.',
   ),
-  notes: z.string().optional(),
+  notes: z.string().max(NOTES_MAX_LENGTH, `Notes cannot exceed ${NOTES_MAX_LENGTH} characters.`).optional(),
   assigned_to: z.array(z.string()).default([]),
 });
 
@@ -56,6 +85,13 @@ export const EMPTY_LEAD_FORM: LeadFormValues = {
   province: '',
   website: '',
   source: '',
+  vat_number: '',
+  vendor_number: '',
+  registration_no: '',
+  finance_email: '',
+  enduser_name: '',
+  billing_statement_email: '',
+  address: '',
   expected_revenue: '',
   probability: '',
   notes: '',

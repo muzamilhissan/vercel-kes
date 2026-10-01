@@ -4,6 +4,8 @@ import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SSOLoginPage } from '@/features/auth/pages/SSOLoginPage';
 import type { SessionState } from '@/features/auth/hooks/useSession';
 import { AppLayout } from '@/shared/layout/AppLayout';
+import { isSuperAdmin } from '@/shared/auth/permissions';
+import { session as sessionStore } from '@/shared/auth/session';
 import { Loader } from '@/shared/ui/feedback/Loader';
 
 // Feature pages are split out so the initial bundle only carries the shell.
@@ -13,6 +15,7 @@ const DealsPage = lazy(() => import('@/features/deals/pages/DealsPage'));
 const ContactsPage = lazy(() => import('@/features/contacts/pages/ContactsPage'));
 const AccountsPage = lazy(() => import('@/features/accounts/pages/AccountsPage'));
 const DocumentsPage = lazy(() => import('@/features/documents/pages/DocumentsPage'));
+const AdminConfigurationsPage = lazy(() => import('@/features/admin/pages/AdminConfigurationsPage'));
 
 /** POMS hands the session over as `/?token=...`, so the root doubles as the SSO callback. */
 function RootEntry({ signIn }: { signIn: SessionState['signIn'] }) {
@@ -23,6 +26,7 @@ function RootEntry({ signIn }: { signIn: SessionState['signIn'] }) {
 
 export function AppRoutes({ session }: { session: SessionState }) {
   const { isAuthenticated, signIn, signOut } = session;
+  const isAdmin = isSuperAdmin(sessionStore.getUser());
 
   if (!isAuthenticated) {
     return (
@@ -44,6 +48,7 @@ export function AppRoutes({ session }: { session: SessionState }) {
           <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          {isAdmin && <Route path="/admin-configurations" element={<AdminConfigurationsPage />} />}
         </Route>
         <Route path="*" element={<Navigate to="/leads" replace />} />
       </Routes>

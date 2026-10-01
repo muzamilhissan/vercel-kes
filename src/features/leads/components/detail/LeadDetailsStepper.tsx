@@ -2,20 +2,32 @@ import { Fragment } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
-const TERMINAL_STATUSES = ['Qualified', 'Disqualified', 'Converted'];
+const QUALIFIED_STATUSES = ['Qualified', 'Converted'];
 
-/** How many of the four stages are complete, and which one is currently active. */
-function stepperProgress(status: string): { activeIndex: number; completedCount: number } {
-  if (TERMINAL_STATUSES.includes(status)) return { activeIndex: 3, completedCount: 4 };
+function stepsFor(status: string): string[] {
+  const head = ['New', 'Contacted', 'Proposed'];
+  if (status === 'Disqualified') return [...head, 'Disqualified'];
+  return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified', 'Create Quote'];
+}
+
+function stepperProgress(status: string, hasQuote: boolean): { activeIndex: number; completedCount: number } {
+  if (status === 'Disqualified') return { activeIndex: 3, completedCount: 4 };
+  if (QUALIFIED_STATUSES.includes(status)) {
+    return hasQuote ? { activeIndex: 5, completedCount: 5 } : { activeIndex: 4, completedCount: 4 };
+  }
   if (status === 'Proposed') return { activeIndex: 3, completedCount: 3 };
   if (status === 'Contacted') return { activeIndex: 2, completedCount: 2 };
   return { activeIndex: 0, completedCount: 0 };
 }
 
-export function LeadDetailsStepper({ currentStatus = 'New' }: { currentStatus?: string }) {
-  const finalStage = TERMINAL_STATUSES.includes(currentStatus) ? currentStatus : 'Closed';
-  const stages = ['New', 'Contacted', 'Proposed', finalStage];
-  const { activeIndex, completedCount } = stepperProgress(currentStatus);
+interface LeadDetailsStepperProps {
+  currentStatus?: string;
+  hasQuote?: boolean;
+}
+
+export function LeadDetailsStepper({ currentStatus = 'New', hasQuote = false }: LeadDetailsStepperProps) {
+  const stages = stepsFor(currentStatus);
+  const { activeIndex, completedCount } = stepperProgress(currentStatus, hasQuote);
 
   return (
     <ol className="mb-4 flex items-center justify-between rounded-2xl border border-field bg-surface px-4 py-3 shadow-[0_4px_20px_rgb(0_0_0_/_0.03)]">
