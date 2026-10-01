@@ -162,7 +162,7 @@ export function SendProposalModal({
         ) : step === 1 ? (
           <ProposalQuestionnaireStep
             options={options.data}
-            isLoading={options.isPending}
+            isLoading={options.isFetching}
             isError={options.isError}
             onRetry={() => options.refetch()}
             value={questionnaire}

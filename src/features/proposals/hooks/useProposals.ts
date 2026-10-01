@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/shared/toast';
 import { unwrapList } from '@/shared/api/unwrap';
-import { proposalApi, proposalRequestApi } from '../api/proposalApi';
+import {
+  PROPOSAL_REQUESTS_API_PENDING_MESSAGE,
+  PROPOSAL_REQUESTS_API_READY,
+  proposalApi,
+  proposalRequestApi,
+} from '../api/proposalApi';
 import type { CreateProposalRequestInput, Proposal } from '../types';
 
 const proposalsKey = (leadId: string | number) => ['leads', String(leadId), 'proposals'] as const;
@@ -10,7 +15,9 @@ const proposalsKey = (leadId: string | number) => ['leads', String(leadId), 'pro
 export function useProposalOptions() {
   return useQuery({
     queryKey: ['proposal-options'],
+    enabled: PROPOSAL_REQUESTS_API_READY,
     queryFn: async () => {
+      if (!PROPOSAL_REQUESTS_API_READY) throw new Error(PROPOSAL_REQUESTS_API_PENDING_MESSAGE);
       const response = await proposalRequestApi.options();
       if (!response.success || !response.options) {
         throw new Error(response.message || 'Failed to load proposal options');
@@ -62,6 +69,7 @@ export function useProposals(leadId: string | number) {
 export function useGenerateProposal(leadId: string | number) {
   return useMutation({
     mutationFn: async (input: CreateProposalRequestInput) => {
+      if (!PROPOSAL_REQUESTS_API_READY) throw new Error(PROPOSAL_REQUESTS_API_PENDING_MESSAGE);
       const response = await proposalRequestApi.create(leadId, input);
       const generated = response.proposal_request?.generated_content;
       if (!response.success || !generated) {

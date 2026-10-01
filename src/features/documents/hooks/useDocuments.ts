@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/shared/toast';
 import { unwrapList } from '@/shared/api/unwrap';
-import { documentApi } from '../api/documentApi';
+import {
+  DOCUMENTS_API_PENDING_MESSAGE,
+  DOCUMENTS_API_READY,
+  documentApi,
+} from '../api/documentApi';
 import type { CompanyDocument } from '../types';
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -28,12 +32,16 @@ export function useDocuments(enabled = true) {
 
   const query = useQuery({
     queryKey: documentsKey,
-    queryFn: async () => unwrapList<CompanyDocument>(await documentApi.list(), 'documents'),
-    enabled,
+    queryFn: async () => {
+      if (!DOCUMENTS_API_READY) throw new Error(DOCUMENTS_API_PENDING_MESSAGE);
+      return unwrapList<CompanyDocument>(await documentApi.list(), 'documents');
+    },
+    enabled: DOCUMENTS_API_READY && enabled,
   });
 
   const upload = useMutation({
     mutationFn: (file: File) => {
+      if (!DOCUMENTS_API_READY) throw new Error(DOCUMENTS_API_PENDING_MESSAGE);
       if (file.size > MAX_UPLOAD_BYTES) throw new Error('File exceeds the 10MB limit.');
       const body = new FormData();
       body.append('document', file);
@@ -47,7 +55,10 @@ export function useDocuments(enabled = true) {
   });
 
   const remove = useMutation({
-    mutationFn: (document: CompanyDocument) => documentApi.remove(document.id),
+    mutationFn: (document: CompanyDocument) => {
+      if (!DOCUMENTS_API_READY) throw new Error(DOCUMENTS_API_PENDING_MESSAGE);
+      return documentApi.remove(document.id);
+    },
     onSuccess: () => {
       toast.success('Document deleted successfully');
       invalidate();
@@ -55,5 +66,5 @@ export function useDocuments(enabled = true) {
     onError: (error: Error) => toast.error(error.message || 'Error deleting document'),
   });
 
-  return { query, upload, remove };
+  return { query, isLoading: query.isFetching, upload, remove };
 }

@@ -10,7 +10,7 @@ import type { CompanyDocument } from '../types';
 
 export default function DocumentsPage() {
   const { query: search } = useGlobalSearch();
-  const { query, upload, remove } = useDocuments();
+  const { query, isLoading, upload, remove } = useDocuments();
   const inputRef = useRef<HTMLInputElement>(null);
   const [pendingDelete, setPendingDelete] = useState<CompanyDocument | null>(null);
 
@@ -58,7 +58,7 @@ export default function DocumentsPage() {
         }
       />
 
-      {query.isPending ? (
+      {isLoading ? (
         <Loader message="Loading documents..." />
       ) : query.isError ? (
         <ErrorState message={query.error.message || 'Failed to load documents.'} onRetry={() => query.refetch()} />

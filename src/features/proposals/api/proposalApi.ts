@@ -8,6 +8,11 @@ import type {
   StoreProposalRequestResponse,
 } from '../types';
 
+export const PROPOSAL_REQUESTS_API_READY = false;
+
+export const PROPOSAL_REQUESTS_API_PENDING_MESSAGE =
+  'Proposal generation is not connected to the backend yet.';
+
 const base = (leadId: string | number) => `/leads/${leadId}/proposals`;
 const requestBase = (leadId: string | number) => `/leads/${leadId}/proposal-requests`;
 

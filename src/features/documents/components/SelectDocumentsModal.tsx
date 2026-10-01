@@ -21,7 +21,7 @@ export function SelectDocumentsModal({
   onSelect,
   maxSelections = 5,
 }: SelectDocumentsModalProps) {
-  const { query } = useDocuments(open);
+  const { query, isLoading } = useDocuments(open);
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
 
@@ -89,7 +89,7 @@ export function SelectDocumentsModal({
         </span>
       </div>
 
-      {query.isPending ? (
+      {isLoading ? (
         <Loader message="Loading library..." className="h-[12.5rem]" />
       ) : filtered.length === 0 ? (
         <p className="py-16 text-center text-sm text-ink-muted">No documents found.</p>

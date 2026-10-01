@@ -3,11 +3,12 @@ import { DataTable, IconButton, useSortable, type Column } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/text';
 import type { Contact } from '../types';
 
-type SortKey = 'name' | 'job_title' | 'email' | 'phone';
+type SortKey = 'name' | 'job_title' | 'company' | 'email' | 'phone';
 
 const ACCESSORS: Record<SortKey, (contact: Contact) => string> = {
   name: (contact) => (contact.name ?? '').toLowerCase(),
   job_title: (contact) => (contact.job_title ?? '').toLowerCase(),
+  company: (contact) => (contact.company ?? '').toLowerCase(),
   email: (contact) => (contact.email ?? '').toLowerCase(),
   phone: (contact) => contact.phone ?? '',
 };
@@ -46,6 +47,13 @@ export function ContactTable({
       sortable: true,
       className: 'text-ink-muted',
       cell: (contact) => (contact.job_title ? capitalize(contact.job_title) : 'N/A'),
+    },
+    {
+      id: 'company',
+      header: 'Company',
+      sortable: true,
+      className: 'text-ink-muted',
+      cell: (contact) => (contact.company ? capitalize(contact.company) : 'N/A'),
     },
     {
       id: 'account',

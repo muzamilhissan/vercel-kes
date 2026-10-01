@@ -19,6 +19,7 @@ export function ContactDetailsModal({ open, onOpenChange, contact, accountName }
         items={[
           { label: 'Full Name', value: capitalize(contact.name) },
           { label: 'Job Title', value: contact.job_title ? capitalize(contact.job_title) : 'N/A' },
+          { label: 'Company', value: contact.company ? capitalize(contact.company) : 'N/A' },
           { label: 'Linked Account', value: accountName || 'No Account' },
           { label: 'Email', value: contact.email, breakAll: true },
           { label: 'Phone Number', value: contact.phone },

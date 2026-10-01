@@ -26,7 +26,6 @@ export const KANBAN_STATUSES: LeadStatus[] = [
   'Proposed',
   'Qualified',
   'Disqualified',
-  'Converted',
 ];
 
 export function toLeadStatus(value: unknown): LeadStatus {

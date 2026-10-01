@@ -20,6 +20,7 @@ export function useLeadPurchaseOrders(leadId: string | number, enabled = true) {
     queryKey,
     enabled: PURCHASE_ORDERS_API_READY && Boolean(leadId) && enabled,
     queryFn: async () => {
+      if (!PURCHASE_ORDERS_API_READY) throw new Error(PURCHASE_ORDERS_API_PENDING_MESSAGE);
       const items = unwrapList<PurchaseOrder>(
         await purchaseOrderApi.list(leadId),
         'purchase_orders',
