@@ -56,7 +56,7 @@ export default function LeadDetailsPage() {
 
   const canCreateQuote = QUOTE_READY_STATUSES.includes(leadQuery.data?.data?.status ?? '');
   const {
-    query: poQuery,
+    isLoading: isLoadingPOs,
     purchaseOrders,
     hasPurchaseOrder,
     create: createPO,
@@ -120,7 +120,7 @@ export default function LeadDetailsPage() {
             />
             <LeadQuoteCard
               purchaseOrders={purchaseOrders}
-              isLoading={canCreateQuote && poQuery.isPending}
+              isLoading={isLoadingPOs}
               canCreate={canCreateQuote}
               isRefreshing={refreshPOStatus.isPending}
               onCreateClick={() => setDialog('createPO')}
