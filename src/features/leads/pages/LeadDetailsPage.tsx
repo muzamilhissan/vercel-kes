@@ -4,9 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, ConfirmDialog, ErrorState, Loader, initialsOf } from '@/shared/ui';
 import { SendProposalModal } from '@/features/proposals/components/SendProposalModal';
 import { LeadProposalsList } from '@/features/proposals/components/LeadProposalsList';
-// PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-// import { CreatePOModal } from '@/features/quotes/components/CreatePOModal';
-// import { useLeadPurchaseOrders } from '@/features/quotes/hooks/useLeadPurchaseOrders';
+import { CreatePOModal } from '@/features/quotes/components/CreatePOModal';
+import { useCreatePurchaseOrder } from '@/features/quotes/hooks/useLeadPurchaseOrders';
 import { AssignLeadModal } from '../components/dialogs/AssignLeadModal';
 import { ContactLeadModal } from '../components/dialogs/ContactLeadModal';
 import { LeadActivityTimeline } from '../components/detail/LeadActivityTimeline';
@@ -19,8 +18,6 @@ import { LeadEngagementStats } from '../components/detail/LeadEngagementStats';
 import { FollowUpsList } from '@/features/follow-ups/components/FollowUpsList';
 import { LeadFormModal } from '../components/dialogs/LeadFormModal';
 import { LeadQuickActions } from '../components/detail/LeadQuickActions';
-// PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-// import { LeadQuoteCard } from '../components/detail/LeadQuoteCard';
 import { useLeadTab } from '../hooks/useLeadTab';
 import { useSaveLead } from '../hooks/useLeadMutations';
 import {
@@ -32,14 +29,9 @@ import {
 } from '../hooks/useLeadQueries';
 import { useVisibleLeads } from '../hooks/useVisibleLeads';
 
-// PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-// type OpenDialog = 'edit' | 'delete' | 'assign' | 'contact' | 'proposal' | 'createPO' | null;
-type OpenDialog = 'edit' | 'delete' | 'assign' | 'contact' | 'proposal' | null;
+type OpenDialog = 'edit' | 'delete' | 'assign' | 'contact' | 'proposal' | 'createPO' | null;
 
 const NO_FILTERS = { date: '', assignees: [] };
-
-// PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-// const QUOTE_READY_STATUSES = ['Qualified', 'Converted'];
 
 export default function LeadDetailsPage() {
   const { leadId } = useParams<{ leadId: string }>();
@@ -59,15 +51,7 @@ export default function LeadDetailsPage() {
   const deleteLead = useDeleteLead();
   const updateStatus = useUpdateLeadStatus();
 
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // const canCreateQuote = QUOTE_READY_STATUSES.includes(leadQuery.data?.data?.status ?? '');
-  // const {
-  //   isLoading: isLoadingPOs,
-  //   purchaseOrders,
-  //   hasPurchaseOrder,
-  //   create: createPO,
-  //   refreshStatus: refreshPOStatus,
-  // } = useLeadPurchaseOrders(leadId ?? '', canCreateQuote);
+  const createPO = useCreatePurchaseOrder(leadId ?? '');
 
   if (leadQuery.isPending) return <Loader message="Loading lead details..." />;
   if (leadQuery.isError || !leadQuery.data?.data) {
@@ -107,7 +91,6 @@ export default function LeadDetailsPage() {
         </div>
       </header>
 
-      {/* PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist. hasQuote={hasPurchaseOrder} */}
       <LeadDetailsStepper currentStatus={lead.status} />
       <LeadDetailsTabs active={tab} onChange={setTab} />
 
@@ -125,26 +108,13 @@ export default function LeadDetailsPage() {
               canAssign={isSuperAdmin}
               onAssignClick={() => setDialog('assign')}
             />
-            {/* PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-            <LeadQuoteCard
-              purchaseOrders={purchaseOrders}
-              isLoading={isLoadingPOs}
-              canCreate={canCreateQuote}
-              isRefreshing={refreshPOStatus.isPending}
-              onCreateClick={() => setDialog('createPO')}
-              onRefreshClick={(id) => refreshPOStatus.mutate(id)}
-            />
-            */}
-            {/* PO-PENDING-BACKEND: restore these two props when the purchase-order endpoints exist.
-              onCreateQuoteClick={() => setDialog('createPO')}
-              hasPurchaseOrder={hasPurchaseOrder}
-            */}
             <LeadQuickActions
               lead={lead}
               canAssign={isSuperAdmin}
               onContactClick={() => setDialog('contact')}
               onSendProposalClick={() => openProposal(false, 1)}
               onReproposeClick={() => openProposal(true, 2)}
+              onCreateQuoteClick={() => setDialog('createPO')}
               onEditClick={() => setDialog('edit')}
               onDeleteClick={() => setDialog('delete')}
               onAssignClick={() => setDialog('assign')}
@@ -194,15 +164,14 @@ export default function LeadDetailsPage() {
         onSubmit={(values) => save(values, lead)}
       />
 
-      {/* PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
       <CreatePOModal
         open={dialog === 'createPO'}
         onOpenChange={(open) => !open && setDialog(null)}
         clientName={lead.name}
         clientCompany={lead.company}
+        clientId={lead.client_id}
         onSubmit={(input) => createPO.mutateAsync(input)}
       />
-      */}
 
       <AssignLeadModal
         open={dialog === 'assign'}

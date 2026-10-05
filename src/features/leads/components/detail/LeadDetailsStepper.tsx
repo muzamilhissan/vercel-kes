@@ -7,17 +7,11 @@ const QUALIFIED_STATUSES = ['Qualified', 'Converted'];
 function stepsFor(status: string): string[] {
   const head = ['New', 'Contacted', 'Proposed'];
   if (status === 'Disqualified') return [...head, 'Disqualified'];
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified', 'Create Quote'];
-  return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified'];
+  return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified', 'Create Quote'];
 }
 
 function stepperProgress(status: string): { activeIndex: number; completedCount: number } {
   if (status === 'Disqualified') return { activeIndex: 3, completedCount: 4 };
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // if (QUALIFIED_STATUSES.includes(status)) {
-  //   return hasQuote ? { activeIndex: 5, completedCount: 5 } : { activeIndex: 4, completedCount: 4 };
-  // }
   if (QUALIFIED_STATUSES.includes(status)) return { activeIndex: 4, completedCount: 4 };
   if (status === 'Proposed') return { activeIndex: 3, completedCount: 3 };
   if (status === 'Contacted') return { activeIndex: 2, completedCount: 2 };
@@ -26,8 +20,6 @@ function stepperProgress(status: string): { activeIndex: number; completedCount:
 
 interface LeadDetailsStepperProps {
   currentStatus?: string;
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // hasQuote?: boolean;
 }
 
 export function LeadDetailsStepper({ currentStatus = 'New' }: LeadDetailsStepperProps) {

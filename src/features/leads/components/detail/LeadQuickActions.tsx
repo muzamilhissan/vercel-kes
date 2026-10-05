@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Edit, Loader2, Phone, RotateCcw, Send, Trash2, UserPlus, XOctagon, Zap } from 'lucide-react';
+import { Check, Edit, FileSpreadsheet, Loader2, Phone, RotateCcw, Send, Trash2, UserPlus, XOctagon, Zap } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { DetailCard } from './DetailCard';
 import type { Lead } from '../../types';
@@ -7,8 +7,7 @@ import type { Lead } from '../../types';
 /** Statuses past the point where a lead can still be contacted for the first time. */
 const CONTACTED_OR_LATER = ['Proposed', 'Qualified', 'Disqualified', 'Converted'];
 const CLOSED = ['Qualified', 'Disqualified', 'Converted'];
-// PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-// const QUOTE_READY = ['Qualified', 'Converted'];
+const QUOTE_READY = ['Converted'];
 
 /** The one status a lead can advance to from where it is now. */
 const NEXT_STATUS: Record<string, string | undefined> = {
@@ -30,9 +29,7 @@ interface LeadQuickActionsProps {
   onContactClick: () => void;
   onSendProposalClick: () => void;
   onReproposeClick: () => void;
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // onCreateQuoteClick: () => void;
-  // hasPurchaseOrder: boolean;
+  onCreateQuoteClick: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
   onAssignClick?: () => void;
@@ -45,9 +42,7 @@ export function LeadQuickActions({
   onContactClick,
   onSendProposalClick,
   onReproposeClick,
-  // PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
-  // onCreateQuoteClick,
-  // hasPurchaseOrder,
+  onCreateQuoteClick,
   onEditClick,
   onDeleteClick,
   onAssignClick,
@@ -76,14 +71,11 @@ export function LeadQuickActions({
   return (
     <DetailCard icon={Zap} title="Quick Actions">
       <div className="flex flex-col gap-3">
-        {/* PO-PENDING-BACKEND: uncomment when the purchase-order endpoints exist.
         {QUOTE_READY.includes(status) ? (
           <button type="button" className={cn(BASE, PRIMARY)} onClick={onCreateQuoteClick}>
-            <FileSpreadsheet size={16} /> {hasPurchaseOrder ? 'Create Another PO' : 'Create Quote'}
+            <FileSpreadsheet size={16} /> Create Quote
           </button>
-        ) : status === 'Proposed' ? ( ... )}
-        */}
-        {status === 'Proposed' ? (
+        ) : status === 'Proposed' ? (
           <button type="button" className={cn(BASE, PRIMARY)} onClick={onReproposeClick}>
             <RotateCcw size={16} /> Re-propose
           </button>

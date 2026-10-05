@@ -2,23 +2,35 @@ import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Combobox, Field, Input, Modal, ModalGrid, Textarea } from '@/shared/ui';
-import { DELIVERY_REQUIRES_ADDRESS, PO_DELIVERY_OPTIONS } from '../../constants';
+import { DELIVERY_OPTION_MANUAL, PO_DELIVERY_OPTIONS, PO_OWNERS } from '../../constants';
 import type { CreatePurchaseOrderInput } from '../../types';
 import { ClientField } from './ClientField';
 import { TermsConditionsTable } from './TermsConditionsTable';
 import { EMPTY_PO_FORM, createPOSchema, type CreatePOOutput, type CreatePOValues } from './schema';
 
-const DELIVERY_OPTIONS = PO_DELIVERY_OPTIONS.map((option) => ({ value: option, label: option }));
+const OWNER_OPTIONS = PO_OWNERS.map((owner) => ({ value: owner, label: owner }));
+const DELIVERY_OPTIONS = PO_DELIVERY_OPTIONS.map((option) => ({
+  value: String(option.id),
+  label: option.label,
+}));
 
 interface CreatePOModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clientName: string;
   clientCompany?: string;
+  clientId?: number | string | null;
   onSubmit: (input: CreatePurchaseOrderInput) => Promise<unknown>;
 }
 
-export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, onSubmit }: CreatePOModalProps) {
+export function CreatePOModal({
+  open,
+  onOpenChange,
+  clientName,
+  clientCompany,
+  clientId,
+  onSubmit,
+}: CreatePOModalProps) {
   const {
     register,
     control,
@@ -35,13 +47,14 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
     if (open) reset(EMPTY_PO_FORM);
   }, [open, reset]);
 
-  const addressRequired = watch('delivery_option') === DELIVERY_REQUIRES_ADDRESS;
+  const addressRequired = Number(watch('delivery_option')) === DELIVERY_OPTION_MANUAL;
 
   const submit = handleSubmit(async (values) => {
     try {
-      await onSubmit({ ...values, client_name: clientName, client_company: clientCompany });
+      await onSubmit({ ...values, client_id: clientId ?? undefined });
       onOpenChange(false);
     } catch {
+      // The mutation reports the failure; keep the form open so nothing typed is lost.
     }
   });
 
@@ -69,29 +82,41 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
           <ClientField name={clientName} company={clientCompany} />
           <Field label="PO Owner" required error={errors.po_owner?.message}>
             {(field) => (
-              <Input {...field} {...register('po_owner')} placeholder="Who owns this PO" disabled={isSubmitting} />
+              <Controller
+                control={control}
+                name="po_owner"
+                render={({ field: control }) => (
+                  <Combobox
+                    {...field}
+                    options={OWNER_OPTIONS}
+                    value={control.value}
+                    onChange={control.onChange}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
             )}
           </Field>
         </ModalGrid>
 
         <ModalGrid>
-          <Field label="PO Number" required error={errors.po_number?.message}>
+          <Field label="PO Number" error={errors.po_no?.message}>
             {(field) => (
-              <Input {...field} {...register('po_number')} placeholder="e.g. PO-2026-0142" disabled={isSubmitting} />
+              <Input {...field} {...register('po_no')} placeholder="e.g. PO-W-9001" disabled={isSubmitting} />
             )}
           </Field>
-          <Field label="Invoice Number" error={errors.invoice_number?.message}>
+          <Field label="Invoice Number" error={errors.invoice_no?.message}>
             {(field) => (
-              <Input {...field} {...register('invoice_number')} placeholder="e.g. INV-00871" disabled={isSubmitting} />
+              <Input {...field} {...register('invoice_no')} placeholder="e.g. POW-9001" disabled={isSubmitting} />
             )}
           </Field>
         </ModalGrid>
 
         <ModalGrid>
-          <Field label="Site" required error={errors.site?.message}>
-            {(field) => <Input {...field} {...register('site')} placeholder="Enter site" disabled={isSubmitting} />}
+          <Field label="Site" hint="Awaiting the sites list endpoint from the backend.">
+            {(field) => <Input {...field} placeholder="Not available yet" disabled />}
           </Field>
-          <Field label="Delivery Option" error={errors.delivery_option?.message}>
+          <Field label="Delivery Option" required error={errors.delivery_option?.message}>
             {(field) => (
               <Controller
                 control={control}
@@ -100,8 +125,8 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
                   <Combobox
                     {...field}
                     options={DELIVERY_OPTIONS}
-                    value={control.value}
-                    onChange={control.onChange}
+                    value={String(control.value ?? '')}
+                    onChange={(next) => control.onChange(Number(next))}
                     disabled={isSubmitting}
                   />
                 )}
@@ -114,7 +139,7 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
           label="Delivery Address"
           required={addressRequired}
           error={errors.delivery_address?.message}
-          hint={addressRequired ? undefined : 'Not needed for collection from site.'}
+          hint={addressRequired ? undefined : 'Only captured when the delivery option is "Input manually".'}
         >
           {(field) => (
             <Textarea
@@ -127,7 +152,7 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
           )}
         </Field>
 
-        <Field label="Project Description" error={errors.project_description?.message}>
+        <Field label="Project Description" required error={errors.project_description?.message}>
           {(field) => (
             <Textarea
               {...field}
@@ -141,7 +166,7 @@ export function CreatePOModal({ open, onOpenChange, clientName, clientCompany, o
 
         <TermsConditionsTable
           control={control}
-          errors={errors.terms_conditions}
+          errors={errors.conditions}
           register={register}
           disabled={isSubmitting}
         />

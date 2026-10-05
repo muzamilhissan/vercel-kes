@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createCrudQueries } from '@/shared/api/createCrudQueries';
 import { unwrapList } from '@/shared/api/unwrap';
 import { toast } from '@/shared/toast';
@@ -27,6 +27,14 @@ export const {
  */
 export function useAllLeads(search?: string) {
   return useLeadList({ page: 1, perPage: ALL_LEADS_PER_PAGE, search });
+}
+
+export function useConvertedLeads({ page = 1, perPage }: { page?: number; perPage?: number } = {}) {
+  return useQuery({
+    queryKey: ['leads', 'converted', page, perPage],
+    queryFn: () => leadApi.convertedList({ page, perPage }),
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useAssignableUsers() {

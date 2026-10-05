@@ -1,39 +1,32 @@
-import type { PODeliveryOption, POStatus } from './constants';
-
-export interface POTermCondition {
-  id?: string | number;
-  title: string;
+export interface POCondition {
+  label: string;
   description: string;
+}
+
+export interface CreatePurchaseOrderInput {
+  po_no?: string;
+  invoice_no?: string;
+  po_owner: string;
+  client_id?: number | string;
+  site_id?: number | string;
+  delivery_option: number;
+  delivery_address?: string;
+  project_description: string;
+  conditions: POCondition[];
 }
 
 export interface PurchaseOrder {
   id: string | number;
-  lead_id: string | number;
-  po_number: string;
-  invoice_number?: string;
-  po_owner: string;
-  site: string;
-  delivery_option: PODeliveryOption;
+  lead_id?: string | number;
+  po_no?: string;
+  invoice_no?: string;
+  po_owner?: string;
+  client_id?: number | string | null;
+  site_id?: number | string | null;
+  delivery_option?: number;
   delivery_address?: string;
   project_description?: string;
-  client_name: string;
-  client_company?: string;
-  contact_id?: string | number | null;
-  status?: POStatus | string;
-  terms_conditions?: POTermCondition[];
+  conditions?: POCondition[];
+  status?: string;
   created_at?: string;
-  updated_at?: string;
-}
-
-export interface CreatePurchaseOrderInput {
-  po_number: string;
-  invoice_number?: string;
-  po_owner: string;
-  site: string;
-  delivery_option: PODeliveryOption;
-  delivery_address?: string;
-  project_description?: string;
-  client_name: string;
-  client_company?: string;
-  terms_conditions: POTermCondition[];
 }

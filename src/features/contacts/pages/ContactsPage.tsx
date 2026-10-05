@@ -8,6 +8,11 @@ import { usePagination } from '@/shared/hooks/usePagination';
 import { isSameDay } from '@/shared/lib/format';
 import { Button, ConfirmDialog, DateFilter, ErrorState, PageHeader, Pagination } from '@/shared/ui';
 import { useAccountOptions } from '@/features/accounts/hooks/useAccountOptions';
+import { useConvertedLeads } from '@/features/leads/hooks/useLeadQueries';
+import type { Lead } from '@/features/leads/types';
+import { ContactsViewTabs, type ContactView } from '../components/ContactsViewTabs';
+import { ConvertedLeadDetailsModal } from '../components/ConvertedLeadDetailsModal';
+import { ConvertedLeadTable } from '../components/ConvertedLeadTable';
 import { ContactDetailsModal } from '../components/ContactDetailsModal';
 import { ContactFormModal } from '../components/ContactFormModal';
 import { ContactTable } from '../components/ContactTable';
@@ -25,6 +30,22 @@ export default function ContactsPage() {
   const [dialog, setDialog] = useState<OpenDialog>(null);
   const [selected, setSelected] = useState<Contact | null>(null);
   const [filterDate, setFilterDate] = useState('');
+  const [view, setView] = useState<ContactView>('converted');
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+
+  const convertedQuery = useConvertedLeads({ page });
+
+  const convertedLeads = useMemo(() => {
+    const items = convertedQuery.data?.items ?? [];
+    const needle = search.trim().toLowerCase();
+    const matched = needle
+      ? items.filter((lead) =>
+          [lead.name, lead.company, lead.email, lead.industry]
+            .some((value) => (value ?? '').toLowerCase().includes(needle)),
+        )
+      : items;
+    return filterDate ? matched.filter((lead) => isSameDay(lead.converted_at, filterDate)) : matched;
+  }, [convertedQuery.data?.items, search, filterDate]);
 
   const { data, isPending, isError, error, refetch } = useContactList({ page, search });
   const { accounts } = useAccountOptions();
@@ -63,19 +84,51 @@ export default function ContactsPage() {
     <>
       <PageHeader
         title="Contacts"
-        subtitle="People you work with across your accounts."
+        subtitle="Converted clients and the people you work with across your accounts."
         actions={
           <>
             <DateFilter value={filterDate} onChange={setFilterDate} />
-            <Button onClick={() => openDialog('form', null)}>
-              <Plus size={16} />
-              Add Contact
-            </Button>
+            {view === 'contacts' && (
+              <Button onClick={() => openDialog('form', null)}>
+                <Plus size={16} />
+                Add Contact
+              </Button>
+            )}
           </>
         }
       />
 
-      {isError ? (
+      <ContactsViewTabs
+        active={view}
+        onChange={(next) => {
+          setView(next);
+          setPage(1);
+        }}
+      />
+
+      {view === 'converted' ? (
+        convertedQuery.isError ? (
+          <ErrorState
+            message={convertedQuery.error.message || 'Failed to fetch converted leads.'}
+            onRetry={() => convertedQuery.refetch()}
+          />
+        ) : (
+          <>
+            <ConvertedLeadTable
+              leads={convertedLeads}
+              isLoading={convertedQuery.isPending}
+              onView={setSelectedLead}
+            />
+            <Pagination
+              page={page}
+              totalPages={convertedQuery.data?.totalPages ?? 1}
+              totalItems={convertedQuery.data?.totalItems ?? 0}
+              perPage={convertedQuery.data?.perPage ?? DEFAULT_PER_PAGE}
+              onPageChange={setPage}
+            />
+          </>
+        )
+      ) : isError ? (
         <ErrorState message={error.message || 'Failed to fetch contacts.'} onRetry={() => refetch()} />
       ) : (
         <>
@@ -97,6 +150,12 @@ export default function ContactsPage() {
           />
         </>
       )}
+
+      <ConvertedLeadDetailsModal
+        open={Boolean(selectedLead)}
+        onOpenChange={(open) => !open && setSelectedLead(null)}
+        lead={selectedLead}
+      />
 
       <ContactFormModal
         open={dialog === 'form'}

@@ -6,13 +6,13 @@ import { EMPTY_CONDITION, type CreatePOValues } from './schema';
 
 interface TermsConditionsTableProps {
   control: Control<CreatePOValues>;
-  errors: FieldErrors<CreatePOValues>['terms_conditions'];
-  register: (name: `terms_conditions.${number}.${'title' | 'description'}`) => Record<string, unknown>;
+  errors: FieldErrors<CreatePOValues>['conditions'];
+  register: (name: `conditions.${number}.${'label' | 'description'}`) => Record<string, unknown>;
   disabled?: boolean;
 }
 
 export function TermsConditionsTable({ control, errors, register, disabled }: TermsConditionsTableProps) {
-  const { fields, append, remove } = useFieldArray({ control, name: 'terms_conditions' });
+  const { fields, append, remove } = useFieldArray({ control, name: 'conditions' });
 
   return (
     <section className="flex flex-col gap-2">
@@ -39,7 +39,7 @@ export function TermsConditionsTable({ control, errors, register, disabled }: Te
                 #
               </th>
               <th scope="col" className="px-3 py-2 text-xs font-semibold text-ink-muted sm:w-1/3">
-                Title
+                Label
               </th>
               <th scope="col" className="px-3 py-2 text-xs font-semibold text-ink-muted">
                 Description
@@ -64,22 +64,22 @@ export function TermsConditionsTable({ control, errors, register, disabled }: Te
                     <td className="px-3 py-2 text-xs font-semibold text-ink-muted">{index + 1}</td>
                     <td className="px-3 py-2">
                       <input
-                        {...register(`terms_conditions.${index}.title`)}
-                        aria-label={`Condition ${index + 1} title`}
-                        aria-invalid={Boolean(rowErrors?.title)}
-                        placeholder="e.g. Payment terms"
+                        {...register(`conditions.${index}.label`)}
+                        aria-label={`Condition ${index + 1} label`}
+                        aria-invalid={Boolean(rowErrors?.label)}
+                        placeholder="e.g. Warranty"
                         disabled={disabled}
-                        className={cn(CONTROL_BASE, 'py-1.5', rowErrors?.title && CONTROL_INVALID)}
+                        className={cn(CONTROL_BASE, 'py-1.5', rowErrors?.label && CONTROL_INVALID)}
                       />
-                      {rowErrors?.title && <p className="mt-1 text-xs text-red-600">{rowErrors.title.message}</p>}
+                      {rowErrors?.label && <p className="mt-1 text-xs text-red-600">{rowErrors.label.message}</p>}
                     </td>
                     <td className="px-3 py-2">
                       <textarea
-                        {...register(`terms_conditions.${index}.description`)}
+                        {...register(`conditions.${index}.description`)}
                         aria-label={`Condition ${index + 1} description`}
                         aria-invalid={Boolean(rowErrors?.description)}
                         rows={2}
-                        placeholder="e.g. 30 days from invoice date"
+                        placeholder="e.g. 12 months"
                         disabled={disabled}
                         className={cn(CONTROL_BASE, 'resize-y py-1.5', rowErrors?.description && CONTROL_INVALID)}
                       />

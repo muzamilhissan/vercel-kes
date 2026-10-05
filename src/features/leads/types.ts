@@ -26,6 +26,9 @@ export interface Lead {
   expected_revenue?: number;
   probability?: number;
   notes?: string;
+  contact_id?: number | string | null;
+  client_id?: number | string | null;
+  converted_at?: string | null;
   assigned_to?: (number | string)[] | string | null;
   assignee?: LeadAssignee | null;
   assigned_users?: LeadAssignee[];

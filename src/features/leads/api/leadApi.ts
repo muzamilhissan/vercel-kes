@@ -1,5 +1,5 @@
 import { api } from '@/shared/api/client';
-import { createCrudApi, type CrudApi } from '@/shared/api/crud';
+import { DEFAULT_PER_PAGE, createCrudApi, type CrudApi } from '@/shared/api/crud';
 import type { ApiResponse, User } from '@/shared/types/api';
 import type {
   ConvertLeadInput,
@@ -9,6 +9,11 @@ import type {
   UpdateLeadInput,
 } from '../types';
 import { mapApiLead } from './mapLead';
+
+interface ConvertedLeadsResponse {
+  converted_leads?: Lead[];
+  pagination?: { current_page?: number; last_page?: number; per_page?: number; total?: number };
+}
 
 const crud = createCrudApi<Lead, CreateLeadInput, UpdateLeadInput>('leads');
 
@@ -33,6 +38,20 @@ export const leadApi = {
 
   convert: (id: string | number, input: ConvertLeadInput) =>
     api.post<ApiResponse<ConvertLeadResponse>>(`/leads/convert/${id}`, input),
+
+  convertedList: async ({ page = 1, perPage = DEFAULT_PER_PAGE } = {}) => {
+    const response = await api.get<ConvertedLeadsResponse>('/leads/converted-leads', {
+      params: { page, per_page: perPage },
+    });
+    const meta = response.pagination;
+    return {
+      items: (response.converted_leads ?? []).map(mapApiLead),
+      currentPage: meta?.current_page ?? page,
+      totalPages: meta?.last_page ?? 1,
+      totalItems: meta?.total ?? response.converted_leads?.length ?? 0,
+      perPage: meta?.per_page ?? perPage,
+    };
+  },
 
   getAssignableUsers: () => api.get<ApiResponse<User[]>>('/leads/assignable-users'),
 
