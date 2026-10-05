@@ -110,7 +110,7 @@ export function ProposalAttachments({
             <AttachmentRow
               key={`library-${doc.id}`}
               icon={<FileText size={14} className="shrink-0 text-brand" />}
-              name={`${doc.file_name} (Library)`}
+              name={`${doc.original_filename} (Library)`}
               size={doc.file_size ? formatFileSize(doc.file_size) : undefined}
               disabled={disabled}
               onRemove={() => onRemoveLibraryDoc(doc.id)}

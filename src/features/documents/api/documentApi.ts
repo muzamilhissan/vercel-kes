@@ -2,13 +2,24 @@ import { api } from '@/shared/api/client';
 import type { ApiResponse } from '@/shared/types/api';
 import type { CompanyDocument } from '../types';
 
-export const DOCUMENTS_API_READY = false;
-
-export const DOCUMENTS_API_PENDING_MESSAGE =
-  'The document library is not connected to the backend yet.';
+export interface DocumentListParams {
+  page?: number;
+  perPage?: number;
+  documentTypeId?: number | string;
+}
 
 export const documentApi = {
-  list: () => api.get<ApiResponse<CompanyDocument[]>>('/company-documents'),
-  upload: (body: FormData) => api.post<ApiResponse<CompanyDocument>>('/company-documents', body),
-  remove: (id: string | number) => api.delete<ApiResponse<null>>(`/company-documents/${id}`),
+  list: ({ page, perPage, documentTypeId }: DocumentListParams = {}) =>
+    api.get<ApiResponse<unknown>>('/documents/list', {
+      params: { page, per_page: perPage, document_type_id: documentTypeId },
+    }),
+
+  show: (id: string | number) => api.get<ApiResponse<CompanyDocument>>(`/documents/show/${id}`),
+
+  upload: (body: FormData) => api.post<ApiResponse<CompanyDocument>>('/documents/upload', body),
+
+  update: (id: string | number, body: FormData) =>
+    api.post<ApiResponse<CompanyDocument>>(`/documents/update/${id}`, body),
+
+  remove: (id: string | number) => api.delete<ApiResponse<void>>(`/documents/delete/${id}`),
 };

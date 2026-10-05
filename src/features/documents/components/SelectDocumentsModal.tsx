@@ -21,7 +21,7 @@ export function SelectDocumentsModal({
   onSelect,
   maxSelections = 5,
 }: SelectDocumentsModalProps) {
-  const { query, isLoading } = useDocuments(open);
+  const { isLoading, documents } = useDocuments({ perPage: 100 }, open);
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
 
@@ -32,10 +32,11 @@ export function SelectDocumentsModal({
     }
   }, [open]);
 
-  const documents = query.data ?? [];
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return needle ? documents.filter((doc) => doc.file_name.toLowerCase().includes(needle)) : documents;
+    return needle
+      ? documents.filter((doc) => doc.original_filename.toLowerCase().includes(needle))
+      : documents;
   }, [documents, search]);
 
   const toggle = (id: string | number) =>
@@ -112,8 +113,8 @@ export function SelectDocumentsModal({
                     <FileText size={24} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-ink" title={doc.file_name}>
-                      {doc.file_name}
+                    <span className="block truncate text-sm font-bold text-ink" title={doc.original_filename}>
+                      {doc.original_filename}
                     </span>
                     <span className="block text-xs text-ink-muted">{formatFileSize(doc.file_size)}</span>
                   </span>

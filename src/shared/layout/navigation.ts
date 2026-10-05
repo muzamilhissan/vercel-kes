@@ -1,4 +1,4 @@
-import { Briefcase, Building, Contact, Settings, Users, type LucideIcon } from 'lucide-react';
+import { Briefcase, Building, Contact, FolderOpen, Settings, Users, type LucideIcon } from 'lucide-react';
 
 export interface NavLinkItem {
   to: string;
@@ -13,5 +13,6 @@ export const NAV_ITEMS: NavLinkItem[] = [
   { to: '/deals', label: 'Deals', icon: Briefcase },
   { to: '/contacts', label: 'Contacts', icon: Contact },
   { to: '/accounts', label: 'Accounts', icon: Building },
+  { to: '/documents', label: 'Document Management', icon: FolderOpen },
   { to: '/admin-configurations', label: 'Admin Configurations', icon: Settings, adminOnly: true },
 ];
