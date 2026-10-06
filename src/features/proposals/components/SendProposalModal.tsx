@@ -21,10 +21,11 @@ const EMPTY_DRAFT: ProposalDraft = { subject: '', content: '', files: [], librar
 
 function buildFormData({ subject, content, files, libraryDocs }: ProposalDraft): FormData {
   const body = new FormData();
-  body.append('subject', subject);
-  body.append('content', content);
-  files.forEach((file) => body.append('attachments[]', file));
-  libraryDocs.forEach((doc) => body.append('company_document_ids[]', String(doc.id)));
+  body.append('email_content', JSON.stringify({ subject, body: content }));
+  files.forEach((file, index) => body.append(`additional_attachments[${index}]`, file));
+  libraryDocs.forEach((doc, index) =>
+    body.append(`company_document_ids[${index}]`, String(doc.id)),
+  );
   return body;
 }
 
@@ -49,6 +50,7 @@ export function SendProposalModal({
   const [questionnaire, setQuestionnaire] = useState(EMPTY_QUESTIONNAIRE);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [generatedPdfUrl, setGeneratedPdfUrl] = useState<string | null>(null);
+  const [proposalId, setProposalId] = useState<string | number | null>(null);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   const options = useProposalOptions();
@@ -62,6 +64,7 @@ export function SendProposalModal({
     setStep(1);
     setDraft(EMPTY_DRAFT);
     setGeneratedPdfUrl(null);
+    setProposalId(null);
   }, [open]);
 
   const canGenerate =
@@ -87,6 +90,7 @@ export function SendProposalModal({
       content: generated.email_body || '',
     }));
     setGeneratedPdfUrl(generated.proposal_download_url || null);
+    setProposalId(generated.id);
     setStep(2);
   };
 
@@ -94,10 +98,13 @@ export function SendProposalModal({
     if (!draft.subject.trim()) return toast.error('Subject is required');
     if (!draft.content.trim()) return toast.error('Proposal Content is required');
 
-    await send.mutateAsync(buildFormData(draft));
+    if (!proposalId) return toast.error('Generate the proposal before sending it.');
+
+    await send.mutateAsync({ id: proposalId, body: buildFormData(draft) });
     toast.success(`${label} sent successfully!`);
     setDraft(EMPTY_DRAFT);
     setGeneratedPdfUrl(null);
+    setProposalId(null);
     onSuccess();
   };
 
@@ -162,7 +169,7 @@ export function SendProposalModal({
         ) : step === 1 ? (
           <ProposalQuestionnaireStep
             options={options.data}
-            isLoading={options.isFetching}
+            isLoading={options.isPending}
             isError={options.isError}
             onRetry={() => options.refetch()}
             value={questionnaire}

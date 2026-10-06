@@ -27,7 +27,7 @@ export interface ProposalOptionItem {
 }
 
 export interface ProposalOptionsData {
-  ppc_operations: ProposalOptionItem[];
+  ppc_operations?: ProposalOptionItem[];
   services: ProposalOptionItem[];
   main_purposes: ProposalOptionItem[];
   commercial_approaches: ProposalOptionItem[];
@@ -36,7 +36,7 @@ export interface ProposalOptionsData {
 export interface ProposalOptionsResponse {
   success: boolean;
   message?: string;
-  options: ProposalOptionsData;
+  data: ProposalOptionsData;
 }
 
 export interface CreateProposalRequestInput {
@@ -74,10 +74,19 @@ export interface ProposalRequestItem {
   created_at?: string;
 }
 
+export interface GeneratedProposal extends GeneratedContent {
+  id: number | string;
+  lead_id: number | string;
+  services?: ProposalOptionItem[];
+  main_purpose?: ProposalOptionItem;
+  commercial_approach?: ProposalOptionItem;
+  attachments?: ProposalAttachment[];
+}
+
 export interface StoreProposalRequestResponse {
   success: boolean;
   message?: string;
-  proposal_request: ProposalRequestItem;
+  proposal: GeneratedProposal;
 }
 
 export interface ProposalRequestContentResponse {

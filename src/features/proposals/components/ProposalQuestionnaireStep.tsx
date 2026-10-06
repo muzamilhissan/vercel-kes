@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Button, Loader } from '@/shared/ui';
 import { cn } from '@/shared/lib/cn';
@@ -14,16 +15,48 @@ function QuestionColumn({ heading, hint, action, children }: {
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  const syncOverflow = useCallback(() => {
+    const node = listRef.current;
+    if (!node) return;
+    setHasMoreBelow(node.scrollHeight - node.scrollTop - node.clientHeight > 4);
+  }, []);
+
+  useEffect(() => {
+    syncOverflow();
+    const node = listRef.current;
+    if (!node || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(syncOverflow);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [syncOverflow, children]);
+
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <h4 className="text-sm font-bold text-ink">
-          {heading}
-          {hint && <span className="ml-1 font-normal text-ink-muted">{hint}</span>}
-        </h4>
-        {action}
+      <div className="flex min-h-[2.5rem] flex-col gap-0.5">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="min-w-0 text-sm font-bold text-ink">{heading}</h4>
+          {action}
+        </div>
+        {hint && <p className="text-xs font-normal text-ink-muted">{hint}</p>}
       </div>
-      <div className="scrollbar-thin flex max-h-[20rem] flex-col gap-2 overflow-y-auto pr-1">{children}</div>
+      <div className="relative min-h-0">
+        <div
+          ref={listRef}
+          onScroll={syncOverflow}
+          className="scrollbar-thin flex max-h-[20rem] flex-col gap-2 overflow-y-auto pr-1"
+        >
+          {children}
+        </div>
+        {hasMoreBelow && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-surface to-transparent"
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -92,7 +125,7 @@ export function ProposalQuestionnaireStep({
     <div className="grid gap-6 md:grid-cols-3">
       <QuestionColumn
         heading="1. Which services?"
-        hint="Select all that apply"
+        hint={`Select all that apply · ${value.serviceIds.length} of ${options.services.length} selected`}
         action={
           <button
             type="button"
@@ -119,11 +152,11 @@ export function ProposalQuestionnaireStep({
         ))}
       </QuestionColumn>
 
-      <QuestionColumn heading="2. What is the main purpose?">
+      <QuestionColumn heading="2. What is the main purpose?" hint="Choose one">
         {radioColumn(options.main_purposes, 'mainPurposeId', value.mainPurposeId)}
       </QuestionColumn>
 
-      <QuestionColumn heading="3. Which commercial approach?">
+      <QuestionColumn heading="3. Which commercial approach?" hint="Choose one">
         {radioColumn(options.commercial_approaches, 'commercialApproachId', value.commercialApproachId)}
       </QuestionColumn>
     </div>

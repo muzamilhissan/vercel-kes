@@ -1,12 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/shared/toast';
 import { unwrapList } from '@/shared/api/unwrap';
-import {
-  PROPOSAL_REQUESTS_API_PENDING_MESSAGE,
-  PROPOSAL_REQUESTS_API_READY,
-  proposalApi,
-  proposalRequestApi,
-} from '../api/proposalApi';
+import { proposalApi, proposalRequestApi } from '../api/proposalApi';
 import type { CreateProposalRequestInput, Proposal } from '../types';
 
 const proposalsKey = (leadId: string | number) => ['leads', String(leadId), 'proposals'] as const;
@@ -15,14 +10,12 @@ const proposalsKey = (leadId: string | number) => ['leads', String(leadId), 'pro
 export function useProposalOptions() {
   return useQuery({
     queryKey: ['proposal-options'],
-    enabled: PROPOSAL_REQUESTS_API_READY,
     queryFn: async () => {
-      if (!PROPOSAL_REQUESTS_API_READY) throw new Error(PROPOSAL_REQUESTS_API_PENDING_MESSAGE);
       const response = await proposalRequestApi.options();
-      if (!response.success || !response.options) {
+      if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to load proposal options');
       }
-      return response.options;
+      return response.data;
     },
     staleTime: Infinity,
   });
@@ -39,7 +32,10 @@ export function useProposals(leadId: string | number) {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: proposalsKey(leadId) });
 
   const send = useMutation({
-    mutationFn: (body: FormData) => proposalApi.create(leadId, body),
+    mutationFn: async ({ id, body }: { id: string | number; body: FormData }) => {
+      await proposalApi.update(leadId, id, body);
+      return proposalApi.send(leadId, id);
+    },
     onSuccess: invalidate,
     onError: (error: Error) => toast.error(error.message || 'An error occurred while sending the proposal.'),
   });
@@ -69,13 +65,11 @@ export function useProposals(leadId: string | number) {
 export function useGenerateProposal(leadId: string | number) {
   return useMutation({
     mutationFn: async (input: CreateProposalRequestInput) => {
-      if (!PROPOSAL_REQUESTS_API_READY) throw new Error(PROPOSAL_REQUESTS_API_PENDING_MESSAGE);
       const response = await proposalRequestApi.create(leadId, input);
-      const generated = response.proposal_request?.generated_content;
-      if (!response.success || !generated) {
+      if (!response.success || !response.proposal) {
         throw new Error(response.message || 'Failed to generate proposal content');
       }
-      return generated;
+      return response.proposal;
     },
     onSuccess: () => toast.success('Proposal generated successfully!'),
     onError: (error: Error) => toast.error(error.message || 'An error occurred while generating proposal content'),
