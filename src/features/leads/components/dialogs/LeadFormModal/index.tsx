@@ -100,7 +100,7 @@ export function LeadFormModal({
       open={open}
       onOpenChange={onOpenChange}
       title={lead ? 'Edit Lead' : 'New Lead'}
-      size="lg"
+      size="xl"
       dismissible={!isSubmitting}
       footer={
         <>
@@ -114,7 +114,7 @@ export function LeadFormModal({
       }
     >
       <form id="lead-form" onSubmit={submit} className="flex flex-col gap-4 sm:gap-5" noValidate>
-        <ModalGrid>
+        <ModalGrid columns={3}>
           <Field label="Lead Name" required error={errors.name?.message}>
             {(field) => <Input {...field} {...register('name')} placeholder="Enter name" disabled={isSubmitting} />}
           </Field>
@@ -123,9 +123,6 @@ export function LeadFormModal({
               <Input {...field} {...register('company')} placeholder="Enter company name" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Status" error={errors.status?.message}>
             {(field) => (
               <Controller
@@ -159,9 +156,6 @@ export function LeadFormModal({
               />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Phone" required error={errors.phone?.message}>
             {(field) => (
               <Controller
@@ -186,18 +180,12 @@ export function LeadFormModal({
               <Input {...field} {...register('email')} type="email" placeholder="Enter email address" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Industry" required error={errors.industry?.message}>
             {(field) => <Input {...field} {...register('industry')} placeholder="Enter industry" disabled={isSubmitting} />}
           </Field>
           <Field label="Province" required error={errors.province?.message}>
             {(field) => <Input {...field} {...register('province')} placeholder="Enter province" disabled={isSubmitting} />}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Website" error={errors.website?.message}>
             {(field) => (
               <Controller
@@ -222,9 +210,6 @@ export function LeadFormModal({
               <Input {...field} {...register('source')} placeholder="e.g. Referral, Website" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Expected Revenue" error={errors.expected_revenue?.message}>
             {(field) => (
               <Input {...field} {...register('expected_revenue')} type="number" min={0} placeholder="Enter expected revenue" disabled={isSubmitting} />
@@ -235,9 +220,6 @@ export function LeadFormModal({
               <Input {...field} {...register('probability')} type="number" min={0} max={100} step="any" placeholder="Enter probability" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="VAT Number" error={errors.vat_number?.message}>
             {(field) => (
               <Input {...field} {...register('vat_number')} placeholder="Enter VAT number" disabled={isSubmitting} />
@@ -248,9 +230,6 @@ export function LeadFormModal({
               <Input {...field} {...register('vendor_number')} placeholder="Enter vendor number" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Registration No." error={errors.registration_no?.message}>
             {(field) => (
               <Input {...field} {...register('registration_no')} placeholder="Enter registration number" disabled={isSubmitting} />
@@ -261,9 +240,6 @@ export function LeadFormModal({
               <Input {...field} {...register('enduser_name')} placeholder="Enter enduser name" disabled={isSubmitting} />
             )}
           </Field>
-        </ModalGrid>
-
-        <ModalGrid>
           <Field label="Finance Email Address" required error={errors.finance_email?.message}>
             {(field) => (
               <Input {...field} {...register('finance_email')} type="email" placeholder="Enter finance email address" disabled={isSubmitting} />

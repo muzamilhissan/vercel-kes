@@ -3,8 +3,6 @@ import { Button, Modal } from '@/shared/ui';
 import type { Lead } from '../../types';
 
 const CLOSED_STATUSES = ['Qualified', 'Disqualified', 'Converted'];
-const COMPANY_NAME = 'Kudon Engineering Services';
-
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 text-sm">
@@ -58,7 +56,7 @@ export function ContactLeadModal({ open, onOpenChange, lead, isPending, onMarkCo
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl bg-surface-muted p-5">
-        <Row label="Client Name:">{COMPANY_NAME}</Row>
+        <Row label="Client Name:">{lead.company || 'N/A'}</Row>
         <Row label="Contact Person:">{lead.name}</Row>
         {lead.representative_position && <Row label="Position:">{lead.representative_position}</Row>}
         <Row label="Email:">

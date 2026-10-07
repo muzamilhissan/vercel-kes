@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Field, Input, Modal, ModalGrid, Textarea } from '@/shared/ui';
-import { capitalize, toAbsoluteUrl } from '@/shared/lib/text';
+import { WEBSITE_ERROR, capitalize, isValidWebsite, toAbsoluteUrl } from '@/shared/lib/text';
 import type { Account, CreateAccountInput } from '../types';
 
 const DESCRIPTION_LIMIT = 1000;
@@ -15,7 +15,7 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, 'Website is required.')
-    .regex(/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/, 'Enter a valid website URL (e.g. example.com).'),
+    .refine(isValidWebsite, WEBSITE_ERROR),
   description: z.string().max(DESCRIPTION_LIMIT).optional(),
 });
 

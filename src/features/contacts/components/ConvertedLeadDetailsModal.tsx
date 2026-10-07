@@ -28,8 +28,8 @@ export function ConvertedLeadDetailsModal({ open, onOpenChange, lead }: Converte
         <DetailList
           columns={2}
           items={[
-            { label: 'Client Name', value: capitalize(lead.name) },
-            { label: 'Company', value: lead.company ? capitalize(lead.company) : 'N/A' },
+            { label: 'Client Name', value: lead.company ? capitalize(lead.company) : 'N/A' },
+            { label: 'Contact Person', value: capitalize(lead.name) },
             { label: 'Position', value: lead.representative_position || 'N/A' },
             { label: 'Email', value: lead.email || 'N/A', breakAll: true },
             { label: 'Phone', value: lead.phone || 'N/A' },

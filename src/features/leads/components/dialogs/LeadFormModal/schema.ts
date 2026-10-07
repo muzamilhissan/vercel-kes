@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidPhoneNumber } from '@/shared/ui';
+import { WEBSITE_ERROR, isValidWebsite } from '@/shared/lib/text';
 import { LEAD_STATUSES } from '../../../constants';
 
 /** Positions offered in the dropdown; anything else is entered as a custom value. */
@@ -41,10 +42,7 @@ export const leadFormSchema = z.object({
     .string()
     .optional()
     .transform((value) => stripScheme(value ?? ''))
-    .refine(
-      (value) => value === '' || z.string().url().safeParse(WEBSITE_PREFIX + value).success,
-      'Enter a valid website (e.g. example.com).',
-    )
+    .refine((value) => value === '' || isValidWebsite(value), WEBSITE_ERROR)
     .transform((value) => (value ? WEBSITE_PREFIX + value : '')),
   source: z.string().trim().optional(),
   vat_number: z.string().trim().max(50).optional(),

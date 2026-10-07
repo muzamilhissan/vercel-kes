@@ -25,13 +25,13 @@ export function ConvertedLeadTable({ leads, isLoading, onView }: ConvertedLeadTa
   const columns: Column<Lead>[] = [
     {
       id: 'name',
-      header: 'Client Name',
+      header: 'Contact Person',
       sortable: true,
       cell: (lead) => <span className="font-semibold">{capitalize(lead.name)}</span>,
     },
     {
       id: 'company',
-      header: 'Company',
+      header: 'Client Name',
       sortable: true,
       className: 'text-ink-muted',
       cell: (lead) => (lead.company ? capitalize(lead.company) : 'N/A'),

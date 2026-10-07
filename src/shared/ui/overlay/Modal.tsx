@@ -115,7 +115,20 @@ export function Modal({
   );
 }
 
-/** Two-column form grid that stacks on small screens. */
-export function ModalGrid({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('grid gap-4 sm:grid-cols-2 sm:gap-5', className)}>{children}</div>;
+const GRID_COLUMNS = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
+} as const;
+
+/** Form grid that stacks on small screens. */
+export function ModalGrid({
+  children,
+  className,
+  columns = 2,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  columns?: keyof typeof GRID_COLUMNS;
+}) {
+  return <div className={cn('grid gap-4 sm:gap-5', GRID_COLUMNS[columns], className)}>{children}</div>;
 }

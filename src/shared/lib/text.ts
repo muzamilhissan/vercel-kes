@@ -19,3 +19,13 @@ export function toAbsoluteUrl(url: string): string {
   if (!trimmed) return '';
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
+
+const WEBSITE_PATTERN =
+  /^(https?:\/\/)?(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,}(:\d{1,5})?([/?#]\S*)?$/;
+
+export const WEBSITE_ERROR = 'Enter a valid website (e.g. example.com).';
+
+/** Shared rule for every Website field: an optional scheme, a dotted domain and a real TLD. */
+export function isValidWebsite(value: string | undefined | null): boolean {
+  return WEBSITE_PATTERN.test((value ?? '').trim());
+}
