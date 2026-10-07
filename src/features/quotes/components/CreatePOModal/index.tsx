@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Combobox, Field, Input, Modal, ModalGrid, Textarea } from '@/shared/ui';
 import { DELIVERY_OPTION_MANUAL, PO_DELIVERY_OPTIONS, PO_OWNERS } from '../../constants';
 import type { CreatePurchaseOrderInput } from '../../types';
+import { useSites } from '../../hooks/useSites';
 import { ClientField } from './ClientField';
 import { TermsConditionsTable } from './TermsConditionsTable';
 import { EMPTY_PO_FORM, createPOSchema, type CreatePOOutput, type CreatePOValues } from './schema';
@@ -49,9 +50,19 @@ export function CreatePOModal({
 
   const addressRequired = Number(watch('delivery_option')) === DELIVERY_OPTION_MANUAL;
 
+  const { sites, isLoading: isLoadingSites } = useSites(clientId, open);
+  const siteOptions = useMemo(
+    () => sites.map((site) => ({ value: String(site.id), label: site.name })),
+    [sites],
+  );
+
   const submit = handleSubmit(async (values) => {
     try {
-      await onSubmit({ ...values, client_id: clientId ?? undefined });
+      await onSubmit({
+        ...values,
+        client_id: clientId ?? undefined,
+        site_id: values.site_id ? Number(values.site_id) : undefined,
+      });
       onOpenChange(false);
     } catch {
       // The mutation reports the failure; keep the form open so nothing typed is lost.
@@ -113,8 +124,34 @@ export function CreatePOModal({
         </ModalGrid>
 
         <ModalGrid>
-          <Field label="Site" hint="Awaiting the sites list endpoint from the backend.">
-            {(field) => <Input {...field} placeholder="Not available yet" disabled />}
+          <Field
+            label="Site"
+            error={errors.site_id?.message}
+            hint={
+              !clientId
+                ? 'Available once the lead is linked to a client.'
+                : !isLoadingSites && siteOptions.length === 0
+                  ? 'No sites recorded for this client.'
+                  : undefined
+            }
+          >
+            {(field) => (
+              <Controller
+                control={control}
+                name="site_id"
+                render={({ field: control }) => (
+                  <Combobox
+                    {...field}
+                    options={siteOptions}
+                    value={control.value ?? ''}
+                    onChange={control.onChange}
+                    clearable
+                    placeholder={isLoadingSites ? 'Loading sites...' : 'Select site'}
+                    disabled={isSubmitting || isLoadingSites || siteOptions.length === 0}
+                  />
+                )}
+              />
+            )}
           </Field>
           <Field label="Delivery Option" required error={errors.delivery_option?.message}>
             {(field) => (

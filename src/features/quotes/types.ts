@@ -1,3 +1,10 @@
+export interface Site {
+  id: number | string;
+  name: string;
+  address?: string | null;
+  client_id?: number | string | null;
+}
+
 export interface POCondition {
   label: string;
   description: string;
