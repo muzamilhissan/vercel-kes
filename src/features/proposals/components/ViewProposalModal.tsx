@@ -1,4 +1,4 @@
-import { Calendar, Download, Eye, Paperclip, RotateCcw } from 'lucide-react';
+import { Calendar, Download, ExternalLink, Eye, FileText, Paperclip, RotateCcw } from 'lucide-react';
 import { Button, IconButton, Modal } from '@/shared/ui';
 import { formatFileSize } from '@/shared/lib/file';
 import { formatDate } from '@/shared/lib/format';
@@ -34,7 +34,7 @@ export function ViewProposalModal({ open, onOpenChange, proposal, onRepropose }:
       }
     >
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-field pb-4">
-        <h3 className="text-lg font-bold text-ink">{proposal.subject}</h3>
+        <h3 className="text-lg font-bold text-ink">{proposal.email_subject || 'Untitled proposal'}</h3>
         <span className="flex items-center gap-1.5 text-label text-ink-muted">
           <Calendar size={14} />
           {formatDate(proposal.created_at)}
@@ -42,10 +42,32 @@ export function ViewProposalModal({ open, onOpenChange, proposal, onRepropose }:
       </header>
 
       <div className="flex flex-col gap-3 text-sm leading-relaxed text-slate-700">
-        {proposal.content.split('\n').map((paragraph, index) => (
+        {(proposal.email_body ?? '').split('\n').map((paragraph, index) => (
           <p key={index}>{paragraph}</p>
         ))}
       </div>
+
+      {proposal.proposal_download_url && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-muted p-4">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand">
+              <FileText size={20} />
+            </span>
+            <div>
+              <p className="text-sm font-bold text-ink">Generated Proposal Document (PDF)</p>
+              <p className="text-xs text-ink-muted">Automated proposal synthesized from requirements</p>
+            </div>
+          </div>
+          <a
+            href={proposal.proposal_download_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
+          >
+            <ExternalLink size={14} /> View / Download PDF
+          </a>
+        </div>
+      )}
 
       {attachments.length > 0 && (
         <section className="border-t border-field pt-4">

@@ -128,7 +128,7 @@ export function LeadProposalsList({ leadId, onRepropose, onSendProposal }: LeadP
         message={
           <>
             Are you sure you want to delete the proposal{' '}
-            <strong className="text-ink">&ldquo;{selected?.subject}&rdquo;</strong>?
+            <strong className="text-ink">&ldquo;{selected?.email_subject}&rdquo;</strong>?
           </>
         }
       />
