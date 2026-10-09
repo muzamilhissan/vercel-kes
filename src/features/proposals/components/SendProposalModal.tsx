@@ -78,20 +78,24 @@ export function SendProposalModal({
       return;
     }
 
-    const generated = await generate.mutateAsync({
-      service_ids: questionnaire.serviceIds,
-      main_purpose_id: questionnaire.mainPurposeId!,
-      commercial_approach_id: questionnaire.commercialApproachId!,
-    });
+    try {
+      const generated = await generate.mutateAsync({
+        service_ids: questionnaire.serviceIds,
+        main_purpose_id: questionnaire.mainPurposeId!,
+        commercial_approach_id: questionnaire.commercialApproachId!,
+      });
 
-    setDraft((current) => ({
-      ...current,
-      subject: generated.email_subject || '',
-      content: generated.email_body || '',
-    }));
-    setGeneratedPdfUrl(generated.proposal_download_url || null);
-    setProposalId(generated.id);
-    setStep(2);
+      setDraft((current) => ({
+        ...current,
+        subject: generated.email_subject || '',
+        content: generated.email_body || '',
+      }));
+      setGeneratedPdfUrl(generated.proposal_download_url || null);
+      setProposalId(generated.id);
+      setStep(2);
+    } catch {
+      return;
+    }
   };
 
   const handleSend = async () => {
@@ -100,7 +104,12 @@ export function SendProposalModal({
 
     if (!proposalId) return toast.error('Generate the proposal before sending it.');
 
-    await send.mutateAsync({ id: proposalId, body: buildFormData(draft) });
+    try {
+      await send.mutateAsync({ id: proposalId, body: buildFormData(draft) });
+    } catch {
+      return;
+    }
+
     toast.success(`${label} sent successfully!`);
     setDraft(EMPTY_DRAFT);
     setGeneratedPdfUrl(null);

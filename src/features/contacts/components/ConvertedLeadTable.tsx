@@ -1,4 +1,4 @@
-import { Eye } from 'lucide-react';
+import { Eye, FileSpreadsheet } from 'lucide-react';
 import { DataTable, IconButton, useSortable, type Column } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/text';
 import { formatDate } from '@/shared/lib/format';
@@ -17,9 +17,10 @@ interface ConvertedLeadTableProps {
   leads: Lead[];
   isLoading: boolean;
   onView: (lead: Lead) => void;
+  onCreateQuote: (lead: Lead) => void;
 }
 
-export function ConvertedLeadTable({ leads, isLoading, onView }: ConvertedLeadTableProps) {
+export function ConvertedLeadTable({ leads, isLoading, onView, onCreateQuote }: ConvertedLeadTableProps) {
   const { sorted, sort, toggle } = useSortable<Lead, SortKey>(leads, ACCESSORS);
 
   const columns: Column<Lead>[] = [
@@ -60,6 +61,13 @@ export function ConvertedLeadTable({ leads, isLoading, onView }: ConvertedLeadTa
         <div className="flex justify-center gap-2" onClick={(event) => event.stopPropagation()}>
           <IconButton label={`View ${lead.name}`} onClick={() => onView(lead)}>
             <Eye size={16} />
+          </IconButton>
+          <IconButton
+            label={`Create quote for ${lead.company || lead.name}`}
+            className="text-brand"
+            onClick={() => onCreateQuote(lead)}
+          >
+            <FileSpreadsheet size={16} />
           </IconButton>
         </div>
       ),
