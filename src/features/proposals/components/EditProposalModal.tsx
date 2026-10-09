@@ -30,8 +30,8 @@ export function EditProposalModal({ open, onOpenChange, proposal, leadId, onSucc
 
   useEffect(() => {
     if (!open || !proposal) return;
-    setSubject(proposal.subject);
-    setContent(proposal.content);
+    setSubject(proposal.email_subject ?? '');
+    setContent(proposal.email_body ?? '');
     setKeptAttachments(proposal.attachments ?? []);
     setRemovedIds([]);
     setFiles([]);
@@ -50,12 +50,11 @@ export function EditProposalModal({ open, onOpenChange, proposal, leadId, onSucc
     if (!content.trim()) return toast.error('Proposal Content is required');
 
     const body = new FormData();
-    body.append('subject', subject);
-    body.append('content', content);
+    body.append('email_content', JSON.stringify({ subject, body: content }));
     body.append('existing_attachments', keptAttachments.map((attachment) => attachment.id).join(','));
     body.append('deleted_attachments', removedIds.join(','));
-    files.forEach((file) => body.append('attachments[]', file));
-    libraryDocs.forEach((doc) => body.append('company_document_ids[]', String(doc.id)));
+    files.forEach((file, index) => body.append(`additional_attachments[${index}]`, file));
+    libraryDocs.forEach((doc, index) => body.append(`company_document_ids[${index}]`, String(doc.id)));
 
     await update.mutateAsync({ id: proposal.id, body });
     onSuccess();

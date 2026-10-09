@@ -2,6 +2,15 @@ import type { LeadAssignee } from './lib/assignees';
 
 export type { LeadAssignee };
 
+export interface LeadStatusChange {
+  id: number | string;
+  lead_id: number | string;
+  status: string;
+  user_id?: number | string | null;
+  user?: { id: number | string; name: string; email?: string } | null;
+  created_at?: string;
+}
+
 export interface Lead {
   id: string | number;
   name: string;
@@ -27,6 +36,7 @@ export interface Lead {
   probability?: number;
   notes?: string;
   contact_id?: number | string | null;
+  history?: LeadStatusChange[];
   client_id?: number | string | null;
   converted_at?: string | null;
   assigned_to?: (number | string)[] | string | null;

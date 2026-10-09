@@ -14,8 +14,9 @@ export interface ProposalAttachment {
 export interface Proposal {
   id: string | number;
   lead_id: string | number;
-  subject: string;
-  content: string;
+  email_subject?: string;
+  email_body?: string;
+  proposal_download_url?: string | null;
   created_at?: string;
   updated_at?: string;
   attachments?: ProposalAttachment[];

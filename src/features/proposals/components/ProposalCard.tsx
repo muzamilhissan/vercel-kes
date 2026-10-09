@@ -15,9 +15,9 @@ interface ProposalCardProps {
 
 export function ProposalCard({ proposal, onView, onEdit, onDelete }: ProposalCardProps) {
   const preview =
-    proposal.content && proposal.content.length > PREVIEW_LENGTH
-      ? `${proposal.content.slice(0, PREVIEW_LENGTH)}...`
-      : proposal.content || '';
+    proposal.email_body && proposal.email_body.length > PREVIEW_LENGTH
+      ? `${proposal.email_body.slice(0, PREVIEW_LENGTH)}...`
+      : proposal.email_body || '';
 
   return (
     <article className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 transition-shadow hover:shadow-panel">
@@ -33,7 +33,7 @@ export function ProposalCard({ proposal, onView, onEdit, onDelete }: ProposalCar
               </span>
             )}
           </div>
-          <h4 className="truncate text-base font-bold text-ink">{proposal.subject}</h4>
+          <h4 className="truncate text-base font-bold text-ink">{proposal.email_subject || 'Untitled proposal'}</h4>
         </div>
 
         <div className="flex shrink-0 gap-2">

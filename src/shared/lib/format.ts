@@ -6,6 +6,20 @@ const CURRENCY = new Intl.NumberFormat('en-US', {
 
 const DATE = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
+const DATE_TIME = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
+export function formatDateTime(value: string | Date | undefined | null): string {
+  if (!value) return '-';
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? '-' : DATE_TIME.format(date);
+}
+
 export function formatCurrency(value: number | undefined | null): string {
   return CURRENCY.format(value ?? 0);
 }
