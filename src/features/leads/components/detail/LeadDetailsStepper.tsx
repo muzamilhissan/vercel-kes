@@ -7,7 +7,7 @@ const QUALIFIED_STATUSES = ['Qualified', 'Converted'];
 function stepsFor(status: string): string[] {
   const head = ['New', 'Contacted', 'Proposed'];
   if (status === 'Disqualified') return [...head, 'Disqualified'];
-  return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified', 'Create Quote'];
+  return [...head, QUALIFIED_STATUSES.includes(status) ? status : 'Qualified'];
 }
 
 function stepperProgress(status: string): { activeIndex: number; completedCount: number } {

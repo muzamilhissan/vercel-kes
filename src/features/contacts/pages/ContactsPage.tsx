@@ -13,6 +13,8 @@ import type { Lead } from '@/features/leads/types';
 import { ContactsViewTabs, type ContactView } from '../components/ContactsViewTabs';
 import { ConvertedLeadDetailsModal } from '../components/ConvertedLeadDetailsModal';
 import { ConvertedLeadTable } from '../components/ConvertedLeadTable';
+import { CreatePOModal } from '@/features/quotes/components/CreatePOModal';
+import { useCreatePurchaseOrder } from '@/features/quotes/hooks/useLeadPurchaseOrders';
 import { ContactDetailsModal } from '../components/ContactDetailsModal';
 import { ContactFormModal } from '../components/ContactFormModal';
 import { ContactTable } from '../components/ContactTable';
@@ -32,6 +34,9 @@ export default function ContactsPage() {
   const [filterDate, setFilterDate] = useState('');
   const [view, setView] = useState<ContactView>('converted');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [quoteLead, setQuoteLead] = useState<Lead | null>(null);
+
+  const createQuote = useCreatePurchaseOrder(quoteLead?.id ?? '');
 
   const convertedQuery = useConvertedLeads({ page });
 
@@ -118,6 +123,7 @@ export default function ContactsPage() {
               leads={convertedLeads}
               isLoading={convertedQuery.isPending}
               onView={setSelectedLead}
+              onCreateQuote={setQuoteLead}
             />
             <Pagination
               page={page}
@@ -150,6 +156,15 @@ export default function ContactsPage() {
           />
         </>
       )}
+
+      <CreatePOModal
+        open={Boolean(quoteLead)}
+        onOpenChange={(open) => !open && setQuoteLead(null)}
+        clientName={quoteLead?.name ?? ''}
+        clientCompany={quoteLead?.company}
+        clientId={quoteLead?.client_id}
+        onSubmit={(input) => createQuote.mutateAsync(input)}
+      />
 
       <ConvertedLeadDetailsModal
         open={Boolean(selectedLead)}

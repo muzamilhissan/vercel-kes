@@ -10,6 +10,12 @@ export interface POCondition {
   description: string;
 }
 
+export interface CreatePurchaseOrderResponse {
+  success: boolean;
+  message?: string;
+  po_workshop?: PurchaseOrder;
+}
+
 export interface CreatePurchaseOrderInput {
   po_no?: string;
   invoice_no?: string;
